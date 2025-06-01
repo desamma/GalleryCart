@@ -13,9 +13,9 @@ namespace GalleryCart.Models.Models
         [DisplayFormat(DataFormatString = "{0:dd/MM/yyyy}")]
         public DateTime? CommentDate { get; set; } = DateTime.Now;
 
-        [Required]
-        [Range(0, 5, ErrorMessage = "Rating must be between 0 and 5")]
-        public float Rating { get; set; } = 0.0f;
+        //[Required]
+        //[Range(0, 5, ErrorMessage = "Rating must be between 0 and 5")]
+        //public float Rating { get; set; } = 0.0f;
 
         public Guid? UserId { get; set; }
         [ValidateNever]

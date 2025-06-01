@@ -23,6 +23,8 @@ namespace GalleryCart.Models.Models
 
         public int LikeCount { get; set; } = 0;
 
+        public int DislikeCount { get; set; } = 0;
+
         public int SaleCount { get; set; } = 0;
 
         public bool IsPorfolio { get; set; } // true: show in portfolio

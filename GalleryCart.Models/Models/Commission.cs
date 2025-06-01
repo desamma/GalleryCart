@@ -14,7 +14,7 @@ namespace GalleryCart.Models.Models
         [Required(ErrorMessage = "You need to provide a due date for the commission.")]
         [DataType(DataType.DateTime)]
         [DisplayFormat(DataFormatString = "{0:dd/MM/yyyy}")]
-        public DateTime DueDate { get; set; }
+        public DateTime DueDate { get; set; } // Commisioner sets the due date for the commission
 
         [Required]
         public string Description { get; set; } = string.Empty;
@@ -25,7 +25,7 @@ namespace GalleryCart.Models.Models
 
         [Required(ErrorMessage = "You need to provide a status for the commission.")]
         //[MaxLength(50, ErrorMessage = "The status must be at most 50 characters.")]
-        public string Status { get; set; } = "Pending"; // Default status is "Pending"
+        public string Status { get; set; } = "Pending"; // Default status is "Pending", "Rejected", "In Progress", "Completed"
 
         public Guid CommissionerId { get; set; }
         [ValidateNever]
