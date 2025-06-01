@@ -1,4 +1,4 @@
-﻿using GalleryCart.DataAccess;
+using GalleryCart.DataAccess;
 using GalleryCart.Models.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
