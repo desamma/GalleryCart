@@ -2,8 +2,9 @@ using System.Diagnostics;
 using GalleryCart.Models;
 using Microsoft.AspNetCore.Mvc;
 
-namespace GalleryCart.Controllers
+namespace GalleryCart.Areas.Guest.Controllers
 {
+    [Area("Guest")]
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
