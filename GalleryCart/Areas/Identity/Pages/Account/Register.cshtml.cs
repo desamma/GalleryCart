@@ -2,40 +2,40 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 #nullable disable
 
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Text.Encodings.Web;
-using System.Threading;
-using System.Threading.Tasks;
+using GalleryCart.DataAccess.Repository.IRepository;
+using GalleryCart.Models.Models;
+using GalleryCart.Utilities.Constants;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
-using Microsoft.Extensions.Logging;
+using System.ComponentModel.DataAnnotations;
+using System.Text;
+using System.Text.Encodings.Web;
 
 namespace GalleryCart.Areas.Identity.Pages.Account
 {
     public class RegisterModel : PageModel
     {
-        private readonly SignInManager<IdentityUser> _signInManager;
-        private readonly UserManager<IdentityUser> _userManager;
-        private readonly IUserStore<IdentityUser> _userStore;
-        private readonly IUserEmailStore<IdentityUser> _emailStore;
+        private readonly SignInManager<User> _signInManager;
+        private readonly UserManager<User> _userManager;
+        private readonly RoleManager<IdentityRole<Guid>> _roleManager;
+        private readonly IUserStore<User> _userStore;
+        private readonly IUserEmailStore<User> _emailStore;
         private readonly ILogger<RegisterModel> _logger;
         private readonly IEmailSender _emailSender;
+        private readonly IUserRepository _userRepository;
 
         public RegisterModel(
-            UserManager<IdentityUser> userManager,
-            IUserStore<IdentityUser> userStore,
-            SignInManager<IdentityUser> signInManager,
+            UserManager<User> userManager,
+            IUserStore<User> userStore,
+            SignInManager<User> signInManager,
             ILogger<RegisterModel> logger,
-            IEmailSender emailSender)
+            IEmailSender emailSender,
+            RoleManager<IdentityRole<Guid>> roleManager,
+            IUserRepository userRepository)
         {
             _userManager = userManager;
             _userStore = userStore;
@@ -43,6 +43,8 @@ namespace GalleryCart.Areas.Identity.Pages.Account
             _signInManager = signInManager;
             _logger = logger;
             _emailSender = emailSender;
+            _roleManager = roleManager;
+            _userRepository = userRepository;
         }
 
         /// <summary>
@@ -70,6 +72,10 @@ namespace GalleryCart.Areas.Identity.Pages.Account
         /// </summary>
         public class InputModel
         {
+            [Required]
+            [RegularExpression(@"^[a-zA-Z0-9\-._@+àáảãạâầấẩẫậăằắẳẵặèéẻẽẹêềếểễệìíỉĩịòóỏõọôồốổỗộơờớởỡợùúủũụưừứửữựỳýỷỹỵđ() ]+$",
+                ErrorMessage = "Username must only contain numbers, letters, or the following special characters: \"-._@+()\"")]
+            public string UserName { get; set; }
             /// <summary>
             ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
             ///     directly from your code. This API may change or be removed in future releases.
@@ -97,6 +103,27 @@ namespace GalleryCart.Areas.Identity.Pages.Account
             [Display(Name = "Confirm password")]
             [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
             public string ConfirmPassword { get; set; }
+
+            [Display(Name = "Is Artist")]
+            public bool IsArtits { get; set; }  // Note: fix typo if needed to IsArtist
+
+            [Display(Name = "Profession Summary")]
+            public string ProfessionSummary { get; set; } = string.Empty;
+
+            [Display(Name = "Skills")]
+            public string Skills { get; set; } = string.Empty;
+
+            [Display(Name = "Software")]
+            public string Software { get; set; } = string.Empty;
+
+            [Display(Name = "Contact Info")]
+            public string ContactInfo { get; set; } = string.Empty;
+
+            [Display(Name = "Is Jobless")]
+            public bool IsJobLess { get; set; } = false;
+
+            [Display(Name = "Accept Commission? (You can change it whenever you want)")]
+            public bool CommissionStatus { get; set; } = false;
         }
 
 
@@ -109,19 +136,40 @@ namespace GalleryCart.Areas.Identity.Pages.Account
         public async Task<IActionResult> OnPostAsync(string returnUrl = null)
         {
             returnUrl ??= Url.Content("~/");
+
+            // Check existing user
+            var existingUserName = await _userRepository.GetAsync(u => u.UserName.Equals(Input.UserName));
+            var existingEmail = await _userRepository.GetAsync(u => u.Email.Equals(Input.Email));
+            
+            if (existingEmail != null || existingUserName != null)
+            {
+                ModelState.AddModelError("", "Username or email is already taken.");
+                return Page();
+            }
+
+
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
             if (ModelState.IsValid)
             {
                 var user = CreateUser();
 
-                await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
-                await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
+                /*await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
+                await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);*/
                 var result = await _userManager.CreateAsync(user, Input.Password);
 
                 if (result.Succeeded)
                 {
+                    if (Input.IsArtits)
+                    {
+                        await _userManager.AddToRoleAsync(user, RoleConstants.Artist);
+                    }
+                    else
+                    {
+                        await _userManager.AddToRoleAsync(user, RoleConstants.User);
+                    }
                     _logger.LogInformation("User created a new account with password.");
 
+                    // Where the email sending begins
                     var userId = await _userManager.GetUserIdAsync(user);
                     var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
                     code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
@@ -154,27 +202,29 @@ namespace GalleryCart.Areas.Identity.Pages.Account
             return Page();
         }
 
-        private IdentityUser CreateUser()
+        private User CreateUser()
         {
-            try
-            {
-                return Activator.CreateInstance<IdentityUser>();
-            }
-            catch
-            {
-                throw new InvalidOperationException($"Can't create an instance of '{nameof(IdentityUser)}'. " +
-                    $"Ensure that '{nameof(IdentityUser)}' is not an abstract class and has a parameterless constructor, or alternatively " +
-                    $"override the register page in /Areas/Identity/Pages/Account/Register.cshtml");
-            }
+            var registerUser = new User();
+            registerUser.Email = Input.Email;
+            registerUser.UserName = Input.UserName;
+            registerUser.UserAvatar = GeneralConstants.DefaultAvatar;
+            registerUser.IsArtits = Input.IsArtits;
+            registerUser.ProfessionSummary = Input.ProfessionSummary;
+            registerUser.Skills = Input.Skills;
+            registerUser.Software = Input.Software;
+            registerUser.ContactInfo = Input.ContactInfo;
+            registerUser.IsJobLess = Input.IsJobLess;
+            registerUser.CommissionStatus = Input.CommissionStatus;
+            return registerUser;
         }
 
-        private IUserEmailStore<IdentityUser> GetEmailStore()
+        private IUserEmailStore<User> GetEmailStore()
         {
             if (!_userManager.SupportsUserEmail)
             {
                 throw new NotSupportedException("The default UI requires a user store with email support.");
             }
-            return (IUserEmailStore<IdentityUser>)_userStore;
+            return (IUserEmailStore<User>)_userStore;
         }
     }
 }

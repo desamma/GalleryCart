@@ -2,8 +2,12 @@ using GalleryCart.DataAccess;
 using GalleryCart.DataAccess.Repository;
 using GalleryCart.DataAccess.Repository.IRepository;
 using GalleryCart.Models.Models;
+using GalleryCart.Utilities.Utils;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
+
+DotNetEnv.Env.Load();
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -30,9 +34,14 @@ builder.Services
         options.Password.RequireUppercase = false;
         options.Password.RequiredLength = 6;
     })
-    .AddRoleManager<RoleManager<IdentityRole<Guid>>>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
+
+//Configure .env config binding
+builder.Configuration["EmailSettings:FromEmail"] = Environment.GetEnvironmentVariable("EMAILSETTINGS__FROMEMAIL");
+builder.Configuration["EmailSettings:FromPassword"] = Environment.GetEnvironmentVariable("EMAILSETTINGS__FROMPASSWORD");
+Console.WriteLine("EMAIL: " + builder.Configuration["EmailSettings:FromEmail"]);
+builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
 
 
 // Configure Repositories
@@ -44,6 +53,8 @@ builder.Services.AddScoped<IHistoryRepository, HistoryRepository>();
 builder.Services.AddScoped<IPostRepository, PostRepository>();
 builder.Services.AddScoped<ITagRepository, TagRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+
+builder.Services.AddTransient<IEmailSender, EmailSender>();
 
 
 // Configure default routes (This should be after configured the Identity)
@@ -64,6 +75,22 @@ builder.Services.AddSession(options =>
 
 var app = builder.Build();
 
+// Seed data for roles and admin user
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    try
+    {
+        // Initialize the database and seed data
+        await SeedData.InitializeAsync(services);
+    }
+    catch (Exception ex)
+    {
+        // Log the error (uncomment ex variable name and write a log)
+        Console.WriteLine($"An error occurred while seeding role in the database: {ex.Message}");
+    }
+}
+
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
@@ -71,6 +98,9 @@ if (!app.Environment.IsDevelopment())
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
+
+
+app.MapRazorPages();
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
