@@ -1,67 +1,146 @@
 ﻿@page
 @model RegisterModel
+
 @{
     ViewData["Title"] = "Register";
+    Layout = null;
 }
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>@ViewData["Title"] - GalleryCart</title>
+    <link rel="stylesheet" href="~/css/styles.css" asp-append-version="true" />
+</head>
+<body>
+    <section class="relative min-h-screen h-screen w-full overflow-hidden">
+        <!-- Background Image -->
+        <img src="@Url.Content("~/images/loginimage.jpg")"
+             alt="Background image"
+             class="absolute inset-0 w-full h-full object-cover brightness-50 -z-10" />
 
-<h1>@ViewData["Title"]</h1>
+        <form id="registerForm" novalidate method="post">
+            <div class="relative z-10 flex flex-wrap md:flex-nowrap items-start justify-center gap-10 p-8 overflow-auto h-full">
+                <!-- Artist Fields Panel (initially hidden) -->
+                <div id="artistFields" class="hidden w-full md:w-[500px] bg-gray-800 bg-opacity-90 rounded-lg shadow-lg p-6 space-y-4 overflow-y-auto max-h-[90vh]">
+                    <h3 class="text-xl font-semibold text-white border-b border-gray-600 pb-2">Artist Details</h3>
 
-<div class="row">
-    <div class="col-md-4">
-        <form id="registerForm" asp-route-returnUrl="@Model.ReturnUrl" method="post">
-            <h2>Create a new account.</h2>
-            <hr />
-            <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
-            <div class="form-floating mb-3">
-                <input asp-for="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com" />
-                <label asp-for="Input.Email">Email</label>
-                <span asp-validation-for="Input.Email" class="text-danger"></span>
-            </div>
-            <div class="form-floating mb-3">
-                <input asp-for="Input.Password" class="form-control" autocomplete="new-password" aria-required="true" placeholder="password" />
-                <label asp-for="Input.Password">Password</label>
-                <span asp-validation-for="Input.Password" class="text-danger"></span>
-            </div>
-            <div class="form-floating mb-3">
-                <input asp-for="Input.ConfirmPassword" class="form-control" autocomplete="new-password" aria-required="true" placeholder="password" />
-                <label asp-for="Input.ConfirmPassword">Confirm Password</label>
-                <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
-            </div>
-            <button id="registerSubmit" type="submit" class="w-100 btn btn-lg btn-primary">Register</button>
-        </form>
-    </div>
-    <div class="col-md-6 col-md-offset-2">
-        <section>
-            <h3>Use another service to register.</h3>
-            <hr />
-            @{
-                if ((Model.ExternalLogins?.Count ?? 0) == 0)
-                {
                     <div>
-                        <p>
-                            There are no external authentication services configured. See this <a href="https://go.microsoft.com/fwlink/?LinkID=532715">article
-                            about setting up this ASP.NET application to support logging in via external services</a>.
-                        </p>
+                        <label asp-for="Input.ProfessionSummary" class="label-text text-white block mb-1">Profession Summary</label>
+                        <textarea asp-for="Input.ProfessionSummary" rows="3" class="textarea textarea-bordered w-full text-black bg-white"></textarea>
+                        <span asp-validation-for="Input.ProfessionSummary" class="text-error text-sm"></span>
                     </div>
-                }
-                else
-                {
-                    <form id="external-account" asp-page="./ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" method="post" class="form-horizontal">
-                        <div>
-                            <p>
-                                @foreach (var provider in Model.ExternalLogins!)
-                                {
-                                    <button type="submit" class="btn btn-primary" name="provider" value="@provider.Name" title="Log in using your @provider.DisplayName account">@provider.DisplayName</button>
-                                }
-                            </p>
-                        </div>
-                    </form>
-                }
-            }
-        </section>
-    </div>
-</div>
 
-@section Scripts {
+                    <div>
+                        <label asp-for="Input.Skills" class="label-text text-white block mb-1">Skills</label>
+                        <textarea asp-for="Input.Skills" rows="3" class="textarea textarea-bordered w-full text-black bg-white"></textarea>
+                        <span asp-validation-for="Input.Skills" class="text-error text-sm"></span>
+                    </div>
+
+                    <div>
+                        <label asp-for="Input.Software" class="label-text text-white block mb-1">Software</label>
+                        <textarea asp-for="Input.Software" rows="3" class="textarea textarea-bordered w-full text-black bg-white"></textarea>
+                        <span asp-validation-for="Input.Software" class="text-error text-sm"></span>
+                    </div>
+
+                    <div>
+                        <label asp-for="Input.ContactInfo" class="label-text text-white block mb-1">Contact Info</label>
+                        <textarea asp-for="Input.ContactInfo" rows="3" class="textarea textarea-bordered w-full text-black bg-white"></textarea>
+                        <span asp-validation-for="Input.ContactInfo" class="text-error text-sm"></span>
+                    </div>
+
+                    <div class="form-control">
+                        <label class="label cursor-pointer justify-start gap-3 text-white">
+                            <input asp-for="Input.IsJobLess" type="checkbox" class="checkbox checkbox-primary" />
+                            <span class="label-text">Is Jobless</span>
+                        </label>
+                        <span asp-validation-for="Input.IsJobLess" class="text-error text-sm"></span>
+                    </div>
+
+                    <div class="form-control">
+                        <label class="label cursor-pointer justify-start gap-3 text-white">
+                            <input asp-for="Input.CommissionStatus" type="checkbox" class="checkbox checkbox-primary" />
+                            <span class="label-text">Commission Status</span>
+                        </label>
+                        <span asp-validation-for="Input.CommissionStatus" class="text-error text-sm"></span>
+                    </div>
+                </div>
+
+                <!-- Register Form Panel -->
+                <div nova class="w-full md:w-[500px] bg-gray-900 bg-opacity-90 rounded-lg shadow-lg p-6 overflow-y-auto h-full space-y-5">
+                    <h1 class="text-3xl font-bold mb-4 text-center text-primary">GalleryCart</h1>
+                    <h2 class="text-xl font-semibold mb-6 text-center text-white">Register</h2>
+                    <div>
+                        <label asp-for="Input.UserName" class="label-text text-white block mb-1">Username</label>
+                        <input asp-for="Input.UserName" type="text" class="input input-bordered w-full text-black bg-white" />
+                        <span asp-validation-for="Input.UserName" class="text-error text-sm"></span>
+                    </div>
+
+                    <div>
+                        <label asp-for="Input.Email" class="label-text text-white block mb-1">Email</label>
+                        <input asp-for="Input.Email" type="email" class="input input-bordered w-full text-black bg-white" />
+                        <span asp-validation-for="Input.Email" class="text-error text-sm"></span>
+                    </div>
+
+                    <div>
+                        <label asp-for="Input.Password" class="label-text text-white block mb-1">Password</label>
+                        <input asp-for="Input.Password" type="password" class="input input-bordered w-full text-black bg-white" />
+                        <span asp-validation-for="Input.Password" class="text-error text-sm"></span>
+                    </div>
+
+                    <div>
+                        <label asp-for="Input.ConfirmPassword" class="label-text text-white block mb-1">Confirm Password</label>
+                        <input asp-for="Input.ConfirmPassword" type="password" class="input input-bordered w-full text-black bg-white" />
+                        <span asp-validation-for="Input.ConfirmPassword" class="text-error text-sm"></span>
+                    </div>
+
+                    <!-- Is Artist Toggle -->
+                    <div class="form-control">
+                        <label class="label cursor-pointer justify-start gap-3 text-white">
+                            <input asp-for="Input.IsArtits" id="Input_IsArtits" type="checkbox" class="checkbox checkbox-primary" />
+                            <span class="label-text">Is Artist</span>
+                        </label>
+                        <span asp-validation-for="Input.IsArtits" class="text-error text-sm"></span>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-full">Register</button>
+
+                    <p class="text-center text-white mt-4">
+                        Already have an account?
+                        <a asp-page="./Login" class="link link-primary">Log in here</a>
+                    </p>
+                
+                </div>
+            </div>
+        </form>
+
+        <!-- JavaScript to toggle artist panel -->
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                const artistCheckbox = document.getElementById("Input_IsArtits");
+                const artistFields = document.getElementById("artistFields");
+
+                function toggleArtistFields() {
+                    if (artistCheckbox.checked) {
+                        artistFields.classList.remove("hidden");
+                        artistFields.classList.add("block");
+                    } else {
+                        artistFields.classList.remove("block");
+                        artistFields.classList.add("hidden");
+                    }
+                }
+
+                // Initial check
+                toggleArtistFields();
+
+                // Listen for change
+                artistCheckbox.addEventListener("change", toggleArtistFields);
+            });
+        </script>
+    </section>
+
+
+    @await Html.PartialAsync("CustomComponent/_LoadingModal", "registerForm")
     <partial name="_ValidationScriptsPartial" />
-}
+</body>
+</html>

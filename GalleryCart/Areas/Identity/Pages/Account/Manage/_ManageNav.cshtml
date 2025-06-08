@@ -1,4 +1,6 @@
-﻿@inject SignInManager<IdentityUser> SignInManager
+﻿@using GalleryCart.Models.Models
+
+@inject SignInManager<User> SignInManager
 @{
     var hasExternalLogins = (await SignInManager.GetExternalAuthenticationSchemesAsync()).Any();
 }
