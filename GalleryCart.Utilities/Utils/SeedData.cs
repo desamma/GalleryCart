@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using GalleryCart.Models.Models;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace GalleryCart.Utilities.Utils
@@ -7,29 +8,28 @@ namespace GalleryCart.Utilities.Utils
     {
         public static async Task InitializeAsync(IServiceProvider serviceProvider)
         {
-            var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-            var userManager = serviceProvider.GetRequiredService<UserManager<IdentityUser>>();
+            var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole<Guid>>>();
+            var userManager = serviceProvider.GetRequiredService<UserManager<User>>();
 
-            string[] roleNames = { "Admin", "User", "Artist" };
+            string[] roleNames = { "admin", "user", "artist", "banned" };
 
-            // Create roles if they do not exist
             foreach (var roleName in roleNames)
             {
                 if (!await roleManager.RoleExistsAsync(roleName))
                 {
-                    var role = new IdentityRole(roleName);
+                    var role = new IdentityRole<Guid> { Name = roleName };
                     await roleManager.CreateAsync(role);
                 }
             }
 
-            // Create default admin user if it does not exist
+            // default admin user
             var adminEmail = "admin@gmail.com";
             var adminPassword = "123456";
 
             var adminUser = await userManager.FindByEmailAsync(adminEmail);
             if (adminUser == null)
             {
-                adminUser = new IdentityUser
+                adminUser = new User
                 {
                     UserName = "Admin",
                     Email = adminEmail,
@@ -39,9 +39,10 @@ namespace GalleryCart.Utilities.Utils
 
                 if (result.Succeeded)
                 {
-                    await userManager.AddToRoleAsync(adminUser, "Admin");
+                    await userManager.AddToRoleAsync(adminUser, "admin");
                 }
             }
         }
+
     }
 }
