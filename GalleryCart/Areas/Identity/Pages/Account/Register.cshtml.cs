@@ -19,19 +19,19 @@ namespace GalleryCart.Areas.Identity.Pages.Account
 {
     public class RegisterModel : PageModel
     {
-        private readonly SignInManager<User> _signInManager;
-        private readonly UserManager<User> _userManager;
+        private readonly SignInManager<Models.Models.User> _signInManager;
+        private readonly UserManager<Models.Models.User> _userManager;
         private readonly RoleManager<IdentityRole<Guid>> _roleManager;
-        private readonly IUserStore<User> _userStore;
-        private readonly IUserEmailStore<User> _emailStore;
+        private readonly IUserStore<Models.Models.User> _userStore;
+        private readonly IUserEmailStore<Models.Models.User> _emailStore;
         private readonly ILogger<RegisterModel> _logger;
         private readonly IEmailSender _emailSender;
         private readonly IUserRepository _userRepository;
 
         public RegisterModel(
-            UserManager<User> userManager,
-            IUserStore<User> userStore,
-            SignInManager<User> signInManager,
+            UserManager<Models.Models.User> userManager,
+            IUserStore<Models.Models.User> userStore,
+            SignInManager<Models.Models.User> signInManager,
             ILogger<RegisterModel> logger,
             IEmailSender emailSender,
             RoleManager<IdentityRole<Guid>> roleManager,
@@ -202,9 +202,9 @@ namespace GalleryCart.Areas.Identity.Pages.Account
             return Page();
         }
 
-        private User CreateUser()
+        private Models.Models.User CreateUser()
         {
-            var registerUser = new User();
+            var registerUser = new Models.Models.User();
             registerUser.Email = Input.Email;
             registerUser.UserName = Input.UserName;
             registerUser.UserAvatar = GeneralConstants.DefaultAvatar;
@@ -218,13 +218,13 @@ namespace GalleryCart.Areas.Identity.Pages.Account
             return registerUser;
         }
 
-        private IUserEmailStore<User> GetEmailStore()
+        private IUserEmailStore<Models.Models.User> GetEmailStore()
         {
             if (!_userManager.SupportsUserEmail)
             {
                 throw new NotSupportedException("The default UI requires a user store with email support.");
             }
-            return (IUserEmailStore<User>)_userStore;
+            return (IUserEmailStore<Models.Models.User>)_userStore;
         }
     }
 }

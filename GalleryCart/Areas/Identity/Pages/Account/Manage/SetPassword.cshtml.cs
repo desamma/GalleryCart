@@ -14,12 +14,12 @@ namespace GalleryCart.Areas.Identity.Pages.Account.Manage
 {
     public class SetPasswordModel : PageModel
     {
-        private readonly UserManager<User> _userManager;
-        private readonly SignInManager<User> _signInManager;
+        private readonly UserManager<Models.Models.User> _userManager;
+        private readonly SignInManager<Models.Models.User> _signInManager;
 
         public SetPasswordModel(
-            UserManager<User> userManager,
-            SignInManager<User> signInManager)
+            UserManager<Models.Models.User> userManager,
+            SignInManager<Models.Models.User> signInManager)
         {
             _userManager = userManager;
             _signInManager = signInManager;

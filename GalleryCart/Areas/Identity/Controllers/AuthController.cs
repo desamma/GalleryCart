@@ -1,23 +1,21 @@
 ﻿using GalleryCart.DataAccess.Repository.IRepository;
-using GalleryCart.Models.Models;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
 using System.Text;
-
 namespace GalleryCart.Areas.Identity.Controllers
 {
     [Area("Identity")]
     public class AuthController : Controller
     {
-        private readonly SignInManager<User> _signInManager;
-        private readonly UserManager<User> _userManager;
+        private readonly SignInManager<Models.Models.User> _signInManager;
+        private readonly UserManager<Models.Models.User> _userManager;
         private readonly IUserRepository _userRepository;
         private readonly IEmailSender _emailSender;
 
-        public AuthController(SignInManager<User> signInManager, UserManager<User> userManager, IUserRepository userRepository, IEmailSender emailSender)
+        public AuthController(SignInManager<Models.Models.User> signInManager, UserManager<Models.Models.User> userManager, IUserRepository userRepository, IEmailSender emailSender)
         {
             _signInManager = signInManager;
             _userManager = userManager;

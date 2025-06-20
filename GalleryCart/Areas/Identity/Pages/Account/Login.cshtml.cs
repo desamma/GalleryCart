@@ -16,12 +16,12 @@ namespace GalleryCart.Areas.Identity.Pages.Account
 {
     public class LoginModel : PageModel
     {
-        private readonly SignInManager<User> _signInManager;
+        private readonly SignInManager<Models.Models.User> _signInManager;
         private readonly ILogger<LoginModel> _logger;
-        private readonly UserManager<User> _userManager;
+        private readonly UserManager<Models.Models.User> _userManager;
         private readonly IUserRepository _userRepository;
 
-        public LoginModel(SignInManager<User> signInManager, ILogger<LoginModel> logger, UserManager<User> userManager, IUserRepository userRepository)
+        public LoginModel(SignInManager<Models.Models.User> signInManager, ILogger<LoginModel> logger, UserManager<Models.Models.User> userManager, IUserRepository userRepository)
         {
             _signInManager = signInManager;
             _logger = logger;
