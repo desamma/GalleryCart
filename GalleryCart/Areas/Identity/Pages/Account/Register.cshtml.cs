@@ -85,6 +85,11 @@ namespace GalleryCart.Areas.Identity.Pages.Account
             [Display(Name = "Email")]
             public string Email { get; set; }
 
+            [Required]
+            [DataType(DataType.Date)]
+            [Display(Name = "Date of Birth")]
+            [DisplayFormat(DataFormatString = "{0:dd/MM/yyyy}", ApplyFormatInEditMode = true)]
+            public DateOnly? UserDOB { get; set; } = null;
             /// <summary>
             ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
             ///     directly from your code. This API may change or be removed in future releases.
@@ -120,7 +125,7 @@ namespace GalleryCart.Areas.Identity.Pages.Account
             public string ContactInfo { get; set; } = string.Empty;
 
             [Display(Name = "Is Jobless")]
-            public bool IsJobLess { get; set; } = false;
+            public bool IsJobLess { get; set; } = true;
 
             [Display(Name = "Accept Commission? (You can change it whenever you want)")]
             public bool CommissionStatus { get; set; } = false;
@@ -209,12 +214,16 @@ namespace GalleryCart.Areas.Identity.Pages.Account
             registerUser.UserName = Input.UserName;
             registerUser.UserAvatar = GeneralConstants.DefaultAvatar;
             registerUser.IsArtits = Input.IsArtits;
-            registerUser.ProfessionSummary = Input.ProfessionSummary;
-            registerUser.Skills = Input.Skills;
-            registerUser.Software = Input.Software;
-            registerUser.ContactInfo = Input.ContactInfo;
-            registerUser.IsJobLess = Input.IsJobLess;
-            registerUser.CommissionStatus = Input.CommissionStatus;
+            registerUser.UserDOB = Input.UserDOB;
+            if (Input.IsArtits)
+            {
+                registerUser.ProfessionSummary = Input.ProfessionSummary;
+                registerUser.Skills = Input.Skills;
+                registerUser.Software = Input.Software;
+                registerUser.ContactInfo = Input.ContactInfo;
+                registerUser.IsJobLess = Input.IsJobLess;
+                registerUser.CommissionStatus = Input.CommissionStatus;
+            }
             return registerUser;
         }
 

@@ -82,6 +82,19 @@
                         <span asp-validation-for="Input.Email" class="text-error text-sm"></span>
                     </div>
 
+                    @{
+                        var maxDate = DateTime.Today.AddDays(-1).ToString("yyyy-MM-dd");
+                    }
+                    <div>
+                        <label asp-for="Input.UserDOB" class="label-text text-white block mb-1">Date of Birth</label>
+                        <input asp-for="Input.UserDOB"
+                               type="date"
+                               max="@maxDate"
+                               class="input input-bordered w-full text-black bg-white" />
+                        <span asp-validation-for="Input.UserDOB" class="text-error text-sm"></span>
+                    </div>
+
+
                     <div>
                         <label asp-for="Input.Password" class="label-text text-white block mb-1">Password</label>
                         <input asp-for="Input.Password" type="password" class="input input-bordered w-full text-black bg-white" />
