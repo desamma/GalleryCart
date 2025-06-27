@@ -64,6 +64,7 @@ namespace GalleryCart.Areas.Customer.Controllers
                 Status = "Pending",
                 DueDate = model.CreatedDate.AddDays(model.DueDateDays)
             };
+
             await commissionRepository.AddAsync(commission);
             return RedirectToAction("Index");
         }

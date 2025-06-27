@@ -11,6 +11,7 @@ namespace GalleryCart.Areas.Customer.Models
         public DateTime CreatedDate { get; set; } = DateTime.Now;
 
         [Required(ErrorMessage = "You need to provide a due date for the commission.")]
+        [Range(1, 365, ErrorMessage = "Due date must be between 1 and 365 days")]
         public int DueDateDays { get; set; } // Commissioner sets the due date for the commission in days from the creation date
 
         [Required]

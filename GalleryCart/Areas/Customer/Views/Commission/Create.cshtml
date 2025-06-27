@@ -89,51 +89,78 @@
             </div>
         }
 
+        <!-- Display Validation Errors -->
+        @if (!ViewData.ModelState.IsValid)
+        {
+            <div class="alert alert-error mb-6">
+                <div>
+                    <span>Please correct the following errors:</span>
+                    <ul class="list-disc list-inside mt-2">
+                        @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                        {
+                            <li>@error.ErrorMessage</li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        }
+
         <form asp-action="Create" method="post" asp-controller="Commission" asp-area="Customer">
             @Html.AntiForgeryToken()
 
             <!-- Description Field -->
             <div class="mb-6">
-                <label class="block text-sm font-medium mb-2 text-white">Description</label>
+                <label class="block text-sm font-medium mb-2 text-white" for="Description">Description</label>
                 <div class="relative">
                     <textarea class="w-full p-3 bg-gray-800 border border-gray-500 rounded-md text-white text-sm placeholder-gray-400 min-h-[120px] resize-y focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition-colors duration-200"
-                              placeholder="How do you describe your needed?..."
-                              asp-for="@Model.Description"
+                              placeholder="How do you describe your need?..."
+                              name="Description"
+                              id="Description"
                               maxlength="512"
-                              oninput="updateCharCount(this)"></textarea>
+                              oninput="updateCharCount(this)"
+                              required>@Model.Description</textarea>
                     <span class="absolute bottom-2 right-3 text-xs text-gray-400 bg-gray-800 px-1 rounded" id="charCounter">0/512</span>
                 </div>
+                <span asp-validation-for="Description" class="text-red-400 text-sm"></span>
             </div>
 
             <!-- Price Field -->
-                <div class="mb-6">
-                    <label class="block text-sm font-medium mb-2 text-white">Price</label>
-                    <input asp-for="@Model.Price"
-                           type="number"
-                           min="0"
-                           class="w-24 p-3 bg-gray-800 border border-gray-500 rounded-md text-white text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition-colors duration-200"
-                           placeholder="0..." />
-                </div>
+            <div class="mb-6">
+                <label class="block text-sm font-medium mb-2 text-white" for="Price">Price ($)</label>
+                <input name="Price"
+                       id="Price"
+                       type="number"
+                       min="0"
+                       value="@Model.Price"
+                       class="w-32 p-3 bg-gray-800 border border-gray-500 rounded-md text-white text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition-colors duration-200"
+                       placeholder="0.00"
+                       required />
+                <span asp-validation-for="Price" class="text-red-400 text-sm block mt-1"></span>
+            </div>
 
             <!-- Deadline Field -->
-                <div class="mb-6">
-                    <label class="block text-sm font-medium mb-2 text-white">Deadline</label>
-                    <div class="flex items-center gap-3">
-                        <input asp-for="@Model.DueDateDays"
-                               type="number"
-                               min="1"
-                               class="w-20 p-3 bg-gray-800 border border-gray-500 rounded-md text-white text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition-colors duration-200"
-                               placeholder="30..." />
-                        <span class="text-white text-sm">Days</span>
-                    </div>
+            <div class="mb-6">
+                <label class="block text-sm font-medium mb-2 text-white" for="DueDateDays">Deadline</label>
+                <div class="flex items-center gap-3">
+                    <input name="DueDateDays"
+                           id="DueDateDays"
+                           type="number"
+                           min="1"
+                           max="365"
+                           value="@Model.DueDateDays"
+                           class="w-20 p-3 bg-gray-800 border border-gray-500 rounded-md text-white text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition-colors duration-200"
+                           placeholder="30"
+                           required />
+                    <span class="text-white text-sm">Days</span>
                 </div>
-
-@*             <input type="hidden" asp-for="ArtistId" value="@ViewBag.ArtistId" /> *@
+                <span asp-validation-for="DueDateDays" class="text-red-400 text-sm block mt-1"></span>
+            </div>
 
             <!-- Submit Button -->
             <div class="flex justify-end">
                 <button type="submit"
-                        class="btn btn-primary">
+                        class="btn btn-primary px-6 py-2"
+                        onclick="debugForm(event)">
                     Send Commission Request
                 </button>
             </div>
@@ -142,6 +169,14 @@
 </div>
 
 <script>
+    // Initialize character counter on page load
+    document.addEventListener('DOMContentLoaded', function () {
+        const textarea = document.querySelector('textarea[asp-for="Description"]');
+        if (textarea) {
+            updateCharCount(textarea);
+        }
+    });
+
     function updateCharCount(textarea) {
         const counter = document.getElementById('charCounter');
         const current = textarea.value.length;
