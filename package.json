@@ -1,0 +1,26 @@
+{
+  "name": "gallerycart",
+  "version": "1.0.0",
+  "description": "- Tải nodejs\r - Mở cmd ở thư mục project\r - Chạy lệnh npm install\r ## Lưu ý khi tạo Controller\r Controller ở area nào thì phải thêm [Area(\"tên-area\")] vào phía trên class",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/desamma/GalleryCart.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/desamma/GalleryCart/issues"
+  },
+  "homepage": "https://github.com/desamma/GalleryCart#readme",
+  "devDependencies": {
+    "autoprefixer": "^10.4.21",
+    "daisyui": "^5.0.43",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^4.1.10"
+  }
+}
