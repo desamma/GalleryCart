@@ -81,7 +81,7 @@
                                                     case "Completed":
                                                         <div class="badge badge-success badge-sm">@commission.Status</div>
                                                         break;
-                                                    case "Cancelled":
+                                                    case "Rejected":
                                                         <div class="badge badge-error badge-sm">@commission.Status</div>
                                                         break;
                                                     default:
@@ -128,8 +128,8 @@
                                             Edit
                                         </div>
                                         <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
-                                            <li><a href="#">Edit Commission</a></li>
-                                            <li><a href="#">View Details</a></li>
+                                            <li><a href="@Url.Action("Edit", "Commission", new {commissionId = commission.CommissionId})">Edit Commission</a></li>
+                                            <li><a href="@Url.Action("Details", "Commission", new {commission = commission.CommissionId})">View Details</a></li>
                                             <li><a class="text-error">Cancel Commission</a></li>
                                         </ul>
                                     </div>

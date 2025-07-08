@@ -54,8 +54,25 @@ namespace GalleryCart.Areas.Customer.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateAsync(CreateCommssionViewModel model)
         {
+            if (!ModelState.IsValid)
+            {
+                // Reload artist data if validation fails
+                if (model.ArtistId != null)
+                {
+                    model.Artist = await userManager.FindByIdAsync(model.ArtistId.ToString());
+                }
+                return View(model);
+            }
+
+            // Set CreatedDate if not already set
+            if (model.CreatedDate == default)
+            {
+                model.CreatedDate = DateTime.Now;
+            }
+
             var commission = new Commission
             {
+
                 Description = model.Description,
                 ArtistId = model.ArtistId,
                 CommissionerId = model.CommissionerId,
@@ -91,46 +108,101 @@ namespace GalleryCart.Areas.Customer.Controllers
             {
                 CommissionKvp = new Dictionary<User, List<Commission>>()
             };
-
-            // Fetch all commissions for the current user
-            var commissions = commissionRepository.GetAllQueryable(c => c.CommissionerId.ToString() == userId, true).ToList();
-
-            var artistIds = commissions.Select(c => c.ArtistId).ToList();
-            var artists = await userManager.Users
-                .Where(u => artistIds.Contains(u.Id))
-                .ToListAsync();
-
-            // Map each commission to its corresponding artist
-            foreach (var commission in commissions)
+            try
             {
-                var artist = artists.FirstOrDefault(a => a.Id == commission.ArtistId);
-                if (artist != null)
+                // Fetch all commissions for the current user
+                var commissions = commissionRepository.GetAllQueryable(c => c.CommissionerId.ToString() == userId, true).ToList();
+
+                var artistIds = commissions.Select(c => c.ArtistId).ToList();
+                var artists = await userManager.Users
+                    .Where(u => artistIds.Contains(u.Id))
+                    .ToListAsync();
+
+                // Map each commission to its corresponding artist
+                foreach (var commission in commissions)
                 {
-                    if (!model.CommissionKvp.TryGetValue(artist, out List<Commission>? value))
+                    var artist = artists.FirstOrDefault(a => a.Id == commission.ArtistId);
+                    if (artist != null)
                     {
-                        value = new List<Commission>();
-                        model.CommissionKvp[artist] = value;
+                        if (!model.CommissionKvp.TryGetValue(artist, out List<Commission>? value))
+                        {
+                            value = new List<Commission>();
+                            model.CommissionKvp[artist] = value;
+                        }
+
+                        value.Add(commission);
                     }
-
-                    value.Add(commission);
                 }
-            }
 
-            return View(model);
+                return View(model);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"An error occurred while retrieving commissions: {ex.Message}");
+            }
         }
 
 
         [HttpGet]
         public async Task<IActionResult> EditAsync(string commissionId)
         {
-            var entity = await commissionRepository.GetAsync(c => c.CommissionerId.Equals(commissionId));
-            return View(entity);
-        }
-        /*
-                [HttpPost("Edit")]
-                public IActionResult Edit(Commission model)
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null)
+            {
+                return NotFound("User not found.");
+            }
+            try
+            {
+                var entity = await commissionRepository.GetAsync(c => c.CommissionId.ToString().Equals(commissionId));
+                if (userId != entity.CommissionerId.ToString())
                 {
+                    return Unauthorized("You do not have permission to edit this commission.");
+                }
+                if (entity.Artist == null)
+                {
+                    entity.Artist = await userManager.FindByIdAsync(entity.ArtistId.ToString());
+                }
+                return View(entity);
+            }
+            catch (Exception ex)
+            {
+                return NotFound($"An error occurred while retrieving the commission: {ex.Message}");
+            }
+        }
 
-                }*/
+        //[HttpPost]
+        //public async Task<IActionResult> EditAsync(Commission model)
+        //{
+        //    if (!ModelState.IsValid)
+        //    {
+        //        // Reload artist data if validation fails
+        //        if (model.ArtistId != null)
+        //        {
+        //            model.Artist = await userManager.FindByIdAsync(model.ArtistId.ToString());
+        //        }
+        //        return View(model);
+        //    }
+
+        //    // Set CreatedDate if not already set
+        //    if (model.CreatedDate == default)
+        //    {
+        //        model.CreatedDate = DateTime.Now;
+        //    }
+
+        //    var commission = new Commission
+        //    {
+
+        //        Description = model.Description,
+        //        ArtistId = model.ArtistId,
+        //        CommissionerId = model.CommissionerId,
+        //        CreatedDate = model.CreatedDate,
+        //        Price = model.Price,
+        //        Status = "Pending",
+        //        DueDate = model.CreatedDate.AddDays(model.DueDateDays)
+        //    };
+
+        //    await commissionRepository.AddAsync(commission);
+        //    return RedirectToAction("Index");
+        //}
     }
 }

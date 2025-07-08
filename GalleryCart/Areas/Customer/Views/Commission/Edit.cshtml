@@ -1,12 +1,12 @@
 ﻿@{
-    ViewData["Title"] = "Commission Form";
+    ViewData["Title"] = "Edit Commission";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
-@model GalleryCart.Areas.Customer.Models.CreateCommssionViewModel
+@model GalleryCart.Models.Models.Commission
 
 <div class="min-h-screen bg-gray-800 text-white font-sans p-5">
     <div class="max-w-2xl mx-auto bg-gray-700 rounded-lg p-8 shadow-2xl">
-        <h1 class="text-2xl font-semibold mb-8 text-white">Commission Form</h1>
+        <h1 class="text-2xl font-semibold mb-8 text-white">Edit Commission</h1>
 
         <!-- Artist Information Card -->
         @if (Model.Artist != null)
@@ -69,13 +69,13 @@
             </div>
         }
 
-        <form asp-action="Create" method="post" asp-controller="Commission" asp-area="Customer">
+        <form asp-action="Edit" method="post" asp-controller="Commission" asp-area="Customer">
             @Html.AntiForgeryToken()
 
             <!-- Hidden Fields for Required Properties -->
+            <input type="hidden" name="Id" value="@Model.CommissionId" />
             <input type="hidden" name="ArtistId" value="@Model.ArtistId" />
             <input type="hidden" name="CommissionerId" value="@Model.CommissionerId" />
-            <input type="hidden" name="CreatedDate" value="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss")" />
 
             <!-- Description Field -->
             <div class="mb-6">
@@ -107,30 +107,42 @@
                 <span asp-validation-for="Price" class="text-red-400 text-sm block mt-1"></span>
             </div>
 
-            <!-- Deadline Field -->
+            <!-- Created Date Field (Read-only) -->
             <div class="mb-6">
-                <label class="block text-sm font-medium mb-2 text-white" for="DueDateDays">Deadline</label>
-                <div class="flex items-center gap-3">
-                    <input name="DueDateDays"
-                           id="DueDateDays"
-                           type="number"
-                           min="1"
-                           max="365"
-                           value="@Model.DueDateDays"
-                           class="w-20 p-3 bg-gray-800 border border-gray-500 rounded-md text-white text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition-colors duration-200"
-                           placeholder="30"
-                           required />
-                    <span class="text-white text-sm">Days</span>
-                </div>
-                <span asp-validation-for="DueDateDays" class="text-red-400 text-sm block mt-1"></span>
+                <label class="block text-sm font-medium mb-2 text-white" for="CreatedDate">Created Date</label>
+                <input name="CreatedDate"
+                       id="CreatedDate"
+                       type="datetime-local"
+                       value="@Model.CreatedDate.ToString("yyyy-MM-ddTHH:mm")"
+                       class="w-64 p-3 bg-gray-600 border border-gray-500 rounded-md text-gray-300 text-sm cursor-not-allowed focus:outline-none"
+                       readonly />
+                <span class="text-xs text-gray-400 block mt-1">This field cannot be modified</span>
             </div>
 
-            <!-- Submit Button -->
-            <div class="flex justify-end">
+            <!-- End Date Field -->
+            <div class="mb-6">
+                <label class="block text-sm font-medium mb-2 text-white" for="EndDate">End Date</label>
+                <input name="EndDate"
+                       id="EndDate"
+                       type="datetime-local"
+                       value="@Model.DueDate.ToString("yyyy-MM-ddTHH:mm")"
+                       min="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")"
+                       class="w-64 p-3 bg-gray-800 border border-gray-500 rounded-md text-white text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition-colors duration-200"
+                       required />
+                <span asp-validation-for="EndDate" class="text-red-400 text-sm block mt-1"></span>
+                <span class="text-xs text-gray-400 block mt-1">Select the deadline for this commission</span>
+            </div>
+
+            <!-- Submit and Cancel Buttons -->
+            <div class="flex justify-end gap-3">
+                <a href="@Url.Action("Index", "Commission", new { area = "Customer" })"
+                   class="btn btn-outline px-6 py-2">
+                    Cancel
+                </a>
                 <button type="submit"
                         class="btn btn-primary px-6 py-2"
                         onclick="debugForm(event)">
-                    Send Commission Request
+                    Update Commission
                 </button>
             </div>
         </form>
@@ -151,22 +163,34 @@
         // Check if required fields have values
         const description = formData.get('Description');
         const price = formData.get('Price');
-        const dueDateDays = formData.get('DueDateDays');
+        const endDate = formData.get('EndDate');
 
-        if (!description || !price || !dueDateDays) {
+        if (!description || !price || !endDate) {
             alert('Missing required fields:\n' +
                 (!description ? '- Description\n' : '') +
                 (!price ? '- Price\n' : '') +
-                (!dueDateDays ? '- Due Date Days\n' : ''));
+                (!endDate ? '- End Date\n' : ''));
             event.preventDefault();
             return false;
         }
 
+        // Validate that end date is in the future
+        if (endDate) {
+            const selectedDate = new Date(endDate);
+            const now = new Date();
+            if (selectedDate <= now) {
+                alert('End date must be in the future');
+                event.preventDefault();
+                return false;
+            }
+        }
+
         return true;
     }
+
     // Initialize character counter on page load
     document.addEventListener('DOMContentLoaded', function () {
-        const textarea = document.querySelector('textarea[asp-for="Description"]');
+        const textarea = document.querySelector('textarea[name="Description"]');
         if (textarea) {
             updateCharCount(textarea);
         }
