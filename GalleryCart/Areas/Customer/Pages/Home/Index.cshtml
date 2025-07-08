@@ -1,0 +1,20 @@
+﻿@page
+@model GalleryCart.Areas.Customer.Pages.Home.IndexModel
+@{
+    ViewData["Title"] = "Customer Home";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Welcome to Razor Page: Customer/Home/Index</h2>
+
+<h2>Welcome, @Model.CurrentUser?.Email</h2>
+
+<a href="@Url.Action("Create", "Commission", new { area = "Customer", artistId = Model.Artist.Id })"
+   class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded inline-block text-decoration-none">
+    Create Commission
+</a>
+<a href="@Url.Action("CommissionManagement", "Commission", new { area = "Customer"})"
+   class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded inline-block text-decoration-none">
+    View Your Commissions
+</a>
+

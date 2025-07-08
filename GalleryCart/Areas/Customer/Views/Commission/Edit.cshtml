@@ -1,0 +1,212 @@
+﻿@{
+    ViewData["Title"] = "Edit Commission";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@model GalleryCart.Models.Models.Commission
+
+<div class="min-h-screen bg-gray-800 text-white font-sans p-5">
+    <div class="max-w-2xl mx-auto bg-gray-700 rounded-lg p-8 shadow-2xl">
+        <h1 class="text-2xl font-semibold mb-8 text-white">Edit Commission</h1>
+
+        <!-- Artist Information Card -->
+        @if (Model.Artist != null)
+        {
+            <div class="card bg-base-200 shadow-xl mb-8 border border-gray-600">
+                <div class="card-body p-6">
+                    <div class="flex items-start gap-4">
+                        <!-- Artist Avatar/Image -->
+                        <div class="avatar">
+                            <div class="w-16 h-16 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
+                                @if (!string.IsNullOrEmpty(Model.Artist.UserAvatar))
+                                {
+                                    <img src="@Model.Artist.UserAvatar" alt="@Model.Artist.UserName" class="w-full h-full object-cover rounded-full" />
+                                }
+                                else
+                                {
+                                    <div class="w-full h-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-primary-content font-bold text-xl">
+                                        @Model.Artist.UserName?.Substring(0, 1).ToUpper()
+                                    </div>
+                                }
+                            </div>
+                        </div>
+
+                        <!-- Artist Details -->
+                        <div class="flex-1">
+                            <h2 class="card-title text-lg mb-2 text-white">
+                                @Model.Artist.UserName
+                            </h2>
+
+                            @if (!string.IsNullOrEmpty(Model.Artist.ProfessionSummary))
+                            {
+                                <p class="text-sm text-gray-300 mb-3 line-clamp-2">@Model.Artist.ProfessionSummary</p>
+                            }
+
+                            <div class="flex flex-wrap gap-2 mb-3">
+                                @if (!string.IsNullOrEmpty(Model.Artist.Skills))
+                                {
+                                    <div class="badge badge-outline badge-sm">@Model.Artist.Skills</div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+
+        <!-- Display Validation Errors -->
+        @if (!ViewData.ModelState.IsValid)
+        {
+            <div class="alert alert-error mb-6">
+                <div>
+                    <span>Please correct the following errors:</span>
+                    <ul class="list-disc list-inside mt-2">
+                        @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                        {
+                            <li>@error.ErrorMessage</li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        }
+
+        <form asp-action="Edit" method="post" asp-controller="Commission" asp-area="Customer">
+            @Html.AntiForgeryToken()
+
+            <!-- Hidden Fields for Required Properties -->
+            <input type="hidden" name="Id" value="@Model.CommissionId" />
+            <input type="hidden" name="ArtistId" value="@Model.ArtistId" />
+            <input type="hidden" name="CommissionerId" value="@Model.CommissionerId" />
+
+            <!-- Description Field -->
+            <div class="mb-6">
+                <label class="block text-sm font-medium mb-2 text-white" for="Description">Description</label>
+                <div class="relative">
+                    <textarea class="w-full p-3 bg-gray-800 border border-gray-500 rounded-md text-white text-sm placeholder-gray-400 min-h-[120px] resize-y focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition-colors duration-200"
+                              placeholder="How do you describe your need?..."
+                              name="Description"
+                              id="Description"
+                              maxlength="512"
+                              oninput="updateCharCount(this)"
+                              required>@Model.Description</textarea>
+                    <span class="absolute bottom-2 right-3 text-xs text-gray-400 bg-gray-800 px-1 rounded" id="charCounter">0/512</span>
+                </div>
+                <span asp-validation-for="Description" class="text-red-400 text-sm"></span>
+            </div>
+
+            <!-- Price Field -->
+            <div class="mb-6">
+                <label class="block text-sm font-medium mb-2 text-white" for="Price">Price ($)</label>
+                <input name="Price"
+                       id="Price"
+                       type="number"
+                       min="0"
+                       value="@Model.Price"
+                       class="w-32 p-3 bg-gray-800 border border-gray-500 rounded-md text-white text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition-colors duration-200"
+                       placeholder="0"
+                       required />
+                <span asp-validation-for="Price" class="text-red-400 text-sm block mt-1"></span>
+            </div>
+
+            <!-- Created Date Field (Read-only) -->
+            <div class="mb-6">
+                <label class="block text-sm font-medium mb-2 text-white" for="CreatedDate">Created Date</label>
+                <input name="CreatedDate"
+                       id="CreatedDate"
+                       type="datetime-local"
+                       value="@Model.CreatedDate.ToString("yyyy-MM-ddTHH:mm")"
+                       class="w-64 p-3 bg-gray-600 border border-gray-500 rounded-md text-gray-300 text-sm cursor-not-allowed focus:outline-none"
+                       readonly />
+                <span class="text-xs text-gray-400 block mt-1">This field cannot be modified</span>
+            </div>
+
+            <!-- End Date Field -->
+            <div class="mb-6">
+                <label class="block text-sm font-medium mb-2 text-white" for="EndDate">End Date</label>
+                <input name="EndDate"
+                       id="EndDate"
+                       type="datetime-local"
+                       value="@Model.DueDate.ToString("yyyy-MM-ddTHH:mm")"
+                       min="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")"
+                       class="w-64 p-3 bg-gray-800 border border-gray-500 rounded-md text-white text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition-colors duration-200"
+                       required />
+                <span asp-validation-for="EndDate" class="text-red-400 text-sm block mt-1"></span>
+                <span class="text-xs text-gray-400 block mt-1">Select the deadline for this commission</span>
+            </div>
+
+            <!-- Submit and Cancel Buttons -->
+            <div class="flex justify-end gap-3">
+                <a href="@Url.Action("Index", "Commission", new { area = "Customer" })"
+                   class="btn btn-outline px-6 py-2">
+                    Cancel
+                </a>
+                <button type="submit"
+                        class="btn btn-primary px-6 py-2"
+                        onclick="debugForm(event)">
+                    Update Commission
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Debug function to check form data before submission
+    function debugForm(event) {
+        const form = event.target.closest('form');
+        const formData = new FormData(form);
+
+        console.log('Form Data:');
+        for (let [key, value] of formData.entries()) {
+            console.log(key + ': ' + value);
+        }
+
+        // Check if required fields have values
+        const description = formData.get('Description');
+        const price = formData.get('Price');
+        const endDate = formData.get('EndDate');
+
+        if (!description || !price || !endDate) {
+            alert('Missing required fields:\n' +
+                (!description ? '- Description\n' : '') +
+                (!price ? '- Price\n' : '') +
+                (!endDate ? '- End Date\n' : ''));
+            event.preventDefault();
+            return false;
+        }
+
+        // Validate that end date is in the future
+        if (endDate) {
+            const selectedDate = new Date(endDate);
+            const now = new Date();
+            if (selectedDate <= now) {
+                alert('End date must be in the future');
+                event.preventDefault();
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    // Initialize character counter on page load
+    document.addEventListener('DOMContentLoaded', function () {
+        const textarea = document.querySelector('textarea[name="Description"]');
+        if (textarea) {
+            updateCharCount(textarea);
+        }
+    });
+
+    function updateCharCount(textarea) {
+        const counter = document.getElementById('charCounter');
+        const current = textarea.value.length;
+        const max = textarea.maxLength;
+        counter.textContent = current + '/' + max;
+        if (current > max * 0.9) {
+            counter.classList.remove('text-gray-400');
+            counter.classList.add('text-red-400');
+        } else {
+            counter.classList.remove('text-red-400');
+            counter.classList.add('text-gray-400');
+        }
+    }
+</script>

@@ -182,6 +182,22 @@ namespace GalleryCart.Areas.Identity.Pages.Account
                 {
                     // Log the user login event
                     _logger.LogInformation("User {Email} logged in at {Time}.", Input.Email, DateTime.UtcNow);
+
+                    // Redirect based on user role
+                    if (await _userManager.IsInRoleAsync(user, RoleConstants.Admin))
+                    {
+                        returnUrl = Url.Action("Index", "Dashboard", new { area = "Admin" });
+                    }
+                    else if (await _userManager.IsInRoleAsync(user, RoleConstants.User))
+                    {
+                        returnUrl = Url.Page("/Home/Index", new { area = "Customer" });
+
+                    }
+                    else
+                    {
+                        returnUrl = Url.Action("Index", "Home", new { area = "" }); // Default area (no area)
+                    }              
+
                     return LocalRedirect(returnUrl);
                 }
             }

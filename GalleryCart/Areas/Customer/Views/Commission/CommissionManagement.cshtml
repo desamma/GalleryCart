@@ -1,0 +1,199 @@
+﻿@using GalleryCart.Areas.Customer.Models
+@model CommissionManagementViewModel
+
+@{
+    ViewData["Title"] = "All Your Commissions";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="min-h-screen bg-base-200 p-4">
+    <div class="max-w-4xl mx-auto">
+        <!-- Header -->
+        <div class="flex justify-between items-center mb-8">
+            <div>
+                <h1 class="text-4xl font-bold text-base-content mb-2">All Your Commissions</h1>
+                <div class="text-sm breadcrumbs">
+                    <ul>
+                        <li><a href="/" class="link link-hover">Dashboard</a></li>
+                        <li class="text-base-content/60">Commissions</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="stats shadow bg-base-100">
+                <div class="stat place-items-center">
+                    <div class="stat-title">Total</div>
+                    <div class="stat-value text-2xl">@Model.CommissionKvp.SelectMany(kvp => kvp.Value).Count()</div>
+                </div>
+                <div class="stat place-items-center">
+                    <div class="stat-title">Pending</div>
+                    <div class="stat-value text-2xl text-warning">@Model.CommissionKvp.SelectMany(kvp => kvp.Value).Count(c => c.Status == "Pending")</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Grouped by Artist -->
+        @foreach (var kvp in Model.CommissionKvp.OrderBy(k => k.Key.UserName))
+        {
+            var artist = kvp.Key;
+            var commissions = kvp.Value;
+
+            <!-- Artist Header -->
+            <div class="flex items-center gap-4 mb-6 mt-10">
+                <div class="avatar">
+                    <div class="w-16 h-16 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
+                        <img src="@artist.UserAvatar" alt="@artist.UserName" />
+                    </div>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold text-base-content">@artist.UserName</h2>
+                    <p class="text-sm text-base-content/60">@artist.Email</p>
+                </div>
+            </div>
+
+            <!-- Commissions for this Artist -->
+            <div class="space-y-4">
+                @foreach (var commission in commissions)
+                {
+                    <div class="card bg-base-100 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1">
+                        <div class="card-body p-6">
+                            <div class="flex flex-col lg:flex-row gap-6">
+                                <!-- Commission Details -->
+                                <div class="flex-1 lg:w-full">
+                                    <div class="mb-4">
+                                        <h4 class="font-semibold text-base-content mb-2">Description</h4>
+                                        <p class="text-base-content/80 text-sm leading-relaxed line-clamp-3">
+                                            @commission.Description
+                                        </p>
+                                    </div>
+
+                                    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
+                                        <div>
+                                            <span class="text-base-content/60">Status</span>
+                                            <div class="mt-1">
+                                                @switch (commission.Status)
+                                                {
+                                                    case "Pending":
+                                                        <div class="badge badge-warning badge-sm">@commission.Status</div>
+                                                        break;
+                                                    case "In Progress":
+                                                        <div class="badge badge-info badge-sm">@commission.Status</div>
+                                                        break;
+                                                    case "Completed":
+                                                        <div class="badge badge-success badge-sm">@commission.Status</div>
+                                                        break;
+                                                    case "Rejected":
+                                                        <div class="badge badge-error badge-sm">@commission.Status</div>
+                                                        break;
+                                                    default:
+                                                        <div class="badge badge-ghost badge-sm">@commission.Status</div>
+                                                        break;
+                                                }
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <span class="text-base-content/60">Price</span>
+                                            <div class="font-bold text-success mt-1">$@commission.Price</div>
+                                        </div>
+                                        <div>
+                                            <span class="text-base-content/60">Created</span>
+                                            <div class="mt-1">@commission.CreatedDate.ToString("MMM dd, yyyy")</div>
+                                        </div>
+                                        <div>
+                                            <span class="text-base-content/60">Due Date</span>
+                                            <div class="mt-1 @(commission.DueDate < DateTime.Now && commission.Status != "Completed" ? "text-error font-semibold" : "")">
+                                                @commission.DueDate.ToString("MMM dd, yyyy")
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                   @*  @if (commission.Status == "In Progress")
+                                    {
+                                        <div class="mt-4">
+                                            <div class="flex justify-between text-xs mb-1">
+                                                <span class="text-base-content/60">Progress</span>
+                                                <span class="font-semibold">@commission.Progress%</span>
+                                            </div>
+                                            <progress class="progress progress-primary w-full" value="@commission.Progress" max="100"></progress>
+                                        </div>
+                                    } *@
+                                </div>
+
+                                <!-- Actions -->
+                                <div class="flex flex-col gap-2 lg:w-1/4 lg:items-end">
+                                    <div class="dropdown dropdown-end">
+                                        <div tabindex="0" role="button" class="btn btn-ghost btn-sm">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="inline-block w-4 h-4 stroke-current">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4"></path>
+                                            </svg>
+                                            Edit
+                                        </div>
+                                        <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
+                                            <li><a href="@Url.Action("Edit", "Commission", new {commissionId = commission.CommissionId})">Edit Commission</a></li>
+                                            <li><a href="@Url.Action("Details", "Commission", new {commission = commission.CommissionId})">View Details</a></li>
+                                            <li><a class="text-error">Cancel Commission</a></li>
+                                        </ul>
+                                    </div>
+
+                                    <button class="btn btn-primary btn-sm" onclick="openMessageModal('@commission.CommissionId', '@artist.UserName')">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="inline-block w-4 h-4 stroke-current">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                                        </svg>
+                                        Message
+                                    </button>
+
+                                    @if (commission.Status == "Completed")
+                                    {
+                                        <button class="btn btn-success btn-sm">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="inline-block w-4 h-4 stroke-current">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                            </svg>
+                                            Download
+                                        </button>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</div>
+
+<!-- Message Modal -->
+<dialog id="messageModal" class="modal">
+    <div class="modal-box">
+        <form method="dialog">
+            <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
+        </form>
+        <h3 class="font-bold text-lg mb-4">Send Message</h3>
+        <div class="form-control">
+            <label class="label">
+                <span class="label-text">To: <span id="modalArtistName" class="font-semibold"></span></span>
+            </label>
+            <textarea class="textarea textarea-bordered h-32" placeholder="Type your message here..."></textarea>
+        </div>
+        <div class="modal-action">
+            <button class="btn btn-primary">Send Message</button>
+            <form method="dialog">
+                <button class="btn">Cancel</button>
+            </form>
+        </div>
+    </div>
+</dialog>
+
+<script>
+    function openMessageModal(commissionId, artistName) {
+        document.getElementById('modalArtistName').textContent = artistName;
+        document.getElementById('messageModal').showModal();
+    }
+</script>
+
+<style>
+    .line-clamp-3 {
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+</style>
