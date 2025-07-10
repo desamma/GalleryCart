@@ -15,6 +15,18 @@
 </a>
 <a href="@Url.Action("CommissionManagement", "Commission", new { area = "Customer"})"
    class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded inline-block text-decoration-none">
-    View Your Commissions
+   View Your Commissions
 </a>
-
+<div class="grid grid-cols-2 md:grid-cols-4 gap-4 p-4">
+   @foreach (var post in Model.Posts)
+   {
+      <a href="@Url.Page("/Post/Details", new { area = "Customer", id = post.PostId })" class="group">
+         <div class="relative overflow-hidden rounded-lg shadow-lg hover:scale-105 transition-transform">
+            <img loading="lazy" src="@post.Path" alt="@post.Title" class="w-full h-48 object-cover">
+            <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent text-white p-2 opacity-0 group-hover:opacity-100 transition-opacity">
+               @post.Title
+            </div>
+         </div>
+      </a>
+   }
+</div>
