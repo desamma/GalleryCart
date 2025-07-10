@@ -9,17 +9,19 @@
 
 @{
     var userString = Accessor.HttpContext.Session.GetString("CurrentUser");
-	User currentUser = null;
+    User currentUser = null;
     if (userString != null)
     {
         currentUser = System.Text.Json.JsonSerializer.Deserialize<User>(userString);
-	}
+    }
 
-	bool isAdmin = false;
+    bool isAdmin = false;
+    bool isArtist = false;
     if (currentUser != null)
     {
         isAdmin = await UserManager.IsInRoleAsync(currentUser, RoleConstants.Admin);
-	}
+        isArtist = await UserManager.IsInRoleAsync(currentUser, RoleConstants.Artist);
+    }
 }
 
 @{
@@ -57,15 +59,49 @@
                         </div>
                         <div class="hidden sm:ml-6 sm:block">
                             <div class="flex space-x-4">
-                                <!-- Current: "bg-gray-900 text-white", Default: "text-gray-300 hover:bg-gray-700 hover:text-white" -->
-                                <a href="#" class="rounded-md bg-gray-900 px-3 py-2 text-sm font-medium text-white" aria-current="page">Dashboard</a>
-                                <a href="#" class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">Team</a>
-                                <a href="#" class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">Projects</a>
-                                <a href="#" class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">Calendar</a>
+                                @if (isArtist)
+                                {
+                                    <!-- Artist Navigation -->
+                                    <a href="#" class="rounded-md bg-gray-900 px-3 py-2 text-sm font-medium text-white" aria-current="page">Artist Dashboard</a>
+                                    <a href="#" class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">My Artworks</a>
+                                    <a href="#" class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">Upload Art</a>
+                                    <a href="#" class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">Sales</a>
+                                    <a href="#" class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">Gallery</a>
+                                }
+                                else
+                                {
+                                    <!-- Regular User Navigation -->
+                                    <a href="#" class="rounded-md bg-gray-900 px-3 py-2 text-sm font-medium text-white" aria-current="page">Browse Gallery</a>
+                                    <a href="#" class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">My Cart</a>
+                                    <a href="#" class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">My Orders</a>
+                                    <a href="#" class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">Favorites</a>
+                                    <a href="@Url.Page("/Artists/AllArtist", new { area = "Customer" })" class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">Artists</a>
+                                }
+
+                                @if (isAdmin)
+                                {
+                                    <!-- Admin Navigation (shown in addition to user/artist nav) -->
+                                    <a href="#" class="rounded-md px-3 py-2 text-sm font-medium text-orange-300 hover:bg-orange-700 hover:text-white border border-orange-500">Admin Panel</a>
+                                }
                             </div>
                         </div>
                     </div>
                     <div class="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">
+                        @if (!isArtist)
+                        {
+                            <!-- Shopping Cart Icon (only for regular users) -->
+                            <button type="button" class="relative rounded-full bg-gray-800 p-1 text-gray-400 hover:text-white focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800 focus:outline-hidden mr-3">
+                                <span class="absolute -inset-1.5"></span>
+                                <span class="sr-only">View cart</span>
+                                <svg class="size-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25 5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z" />
+                                </svg>
+                                <!-- Cart item count badge -->
+                                <span class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">3</span>
+                            </button>
+                        }
+
+                        <!-- Notifications -->
                         <button type="button" class="relative rounded-full bg-gray-800 p-1 text-gray-400 hover:text-white focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800 focus:outline-hidden">
                             <span class="absolute -inset-1.5"></span>
                             <span class="sr-only">View notifications</span>
@@ -78,12 +114,33 @@
                         <div class="dropdown dropdown-end">
                             <div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar">
                                 <div class="w-10 rounded-full">
-                                    <img src="@(currentUser?.UserAvatar ?? GeneralConstants.DefaultAvatar)" alt="@currentUser?.UserName"/>
+                                    <img src="@(currentUser?.UserAvatar ?? GeneralConstants.DefaultAvatar)" alt="@currentUser?.UserName" />
                                 </div>
                             </div>
                             <ul tabindex="0" class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52">
+                                <li class="menu-title">
+                                    <span>@currentUser?.UserName</span>
+                                    @if (isArtist)
+                                    {
+                                        <span class="badge badge-primary badge-sm">Artist</span>
+                                    }
+                                    @if (isAdmin)
+                                    {
+                                        <span class="badge badge-warning badge-sm">Admin</span>
+                                    }
+                                </li>
                                 <li><a>Your Profile</a></li>
                                 <li><a>Settings</a></li>
+                                @if (isArtist)
+                                {
+                                    <li><a>Artist Profile</a></li>
+                                    <li><a>Commission Settings</a></li>
+                                }
+                                else
+                                {
+                                    <li><a>Purchase History</a></li>
+                                    <li><a>Wishlist</a></li>
+                                }
                                 <li><a asp-area="Identity" asp-action="Logout" asp-controller="Auth">Sign out</a></li>
                             </ul>
                         </div>
@@ -94,14 +151,23 @@
 
             <!-- Mobile menu, show/hide based on menu state. -->
             @*<div class="sm:hidden" id="mobile-menu">
-                <div class="space-y-1 px-2 pt-2 pb-3">
-                    <!-- Current: "bg-gray-900 text-white", Default: "text-gray-300 hover:bg-gray-700 hover:text-white" -->
-                    <a href="#" class="block rounded-md bg-gray-900 px-3 py-2 text-base font-medium text-white" aria-current="page">Dashboard</a>
-                    <a href="#" class="block rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white">Team</a>
-                    <a href="#" class="block rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white">Projects</a>
-                    <a href="#" class="block rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white">Calendar</a>
-                </div>
-            </div>*@
+    <div class="space-y-1 px-2 pt-2 pb-3">
+    @if (isArtist)
+    {
+    <a href="#" class="block rounded-md bg-gray-900 px-3 py-2 text-base font-medium text-white" aria-current="page">Artist Dashboard</a>
+    <a href="#" class="block rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white">My Artworks</a>
+    <a href="#" class="block rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white">Upload Art</a>
+    <a href="#" class="block rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white">Sales</a>
+    }
+    else
+    {
+    <a href="#" class="block rounded-md bg-gray-900 px-3 py-2 text-base font-medium text-white" aria-current="page">Browse Gallery</a>
+    <a href="#" class="block rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white">My Cart</a>
+    <a href="#" class="block rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white">My Orders</a>
+    <a href="#" class="block rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white">Favorites</a>
+    }
+    </div>
+    </div>*@
         </nav>
     }
     else
@@ -118,11 +184,11 @@
                         </div>
                         <div class="hidden sm:ml-6 sm:block">
                             <div class="flex space-x-4">
-                                <!-- Current: "bg-gray-900 text-white", Default: "text-gray-300 hover:bg-gray-700 hover:text-white" -->
-                                <a href="#" class="rounded-md bg-gray-900 px-3 py-2 text-sm font-medium text-white" aria-current="page">Dashboard</a>
-                                <a href="#" class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">Team</a>
-                                <a href="#" class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">Projects</a>
-                                <a href="#" class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">Calendar</a>
+                                <!-- Guest Navigation -->
+                                <a href="#" class="rounded-md bg-gray-900 px-3 py-2 text-sm font-medium text-white" aria-current="page">Browse Gallery</a>
+                                <a href="#" class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">Featured Artists</a>
+                                <a href="#" class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">Categories</a>
+                                <a href="#" class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">About</a>
                             </div>
                         </div>
                     </div>
@@ -145,4 +211,4 @@
             </div>
         </nav>
     }
-}
+} 
