@@ -3,6 +3,8 @@ using GalleryCart.DataAccess.Repository;
 using GalleryCart.DataAccess.Repository.IRepository;
 using GalleryCart.Models.Models;
 using GalleryCart.Utilities.Utils;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
@@ -68,10 +70,28 @@ builder.Services.ConfigureApplicationCookie(options =>
 // Enable razor page
 builder.Services.AddRazorPages();
 
+// Session
+builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
 {
     options.IdleTimeout = TimeSpan.FromMinutes(60); // Set session timeout
 });
+
+builder.Services.AddAuthentication(options =>
+    {
+        options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = GoogleDefaults.AuthenticationScheme;
+    })
+    .AddCookie(options =>
+    {
+        options.LoginPath = "/Identity/Account/Login";
+        options.AccessDeniedPath = "/Identity/Account/AccessDenied";
+    })
+    .AddGoogle(GoogleDefaults.AuthenticationScheme, option =>
+    {
+        option.ClientId = Environment.GetEnvironmentVariable("GOOGLESETTINGS__CLIENTID");
+        option.ClientSecret = Environment.GetEnvironmentVariable("GOOGLESETTINGS__CLIENTSECRET");
+    });
 
 var app = builder.Build();
 
@@ -100,24 +120,29 @@ if (!app.Environment.IsDevelopment())
 }
 
 
-app.MapRazorPages();
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-
-app.UseSession();
 app.UseRouting();
 
-app.UseAuthentication();
-app.UseAuthorization();
+app.UseSession();              
+app.UseAuthentication();        
+app.UseAuthorization();        
+
+app.MapRazorPages();
 
 
 app.MapControllerRoute(
     name: "areas",
     pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}");
 
-app.MapControllerRoute(
+/*app.MapControllerRoute(
     name: "default",
-    pattern: "{area=Guest}/{controller=Home}/{action=Index}/{id?}");
+    pattern: "{area=Guest}/{controller=Home}/{action=Index}/{id?}");*/
+app.MapGet("/", context =>
+{
+    context.Response.Redirect("/Guest/Home/Index");
+    return Task.CompletedTask;
+});
 
 app.Run();

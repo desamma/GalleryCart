@@ -9,6 +9,7 @@ using System.Text;
 using System.Text.Encodings.Web;
 using System.Threading;
 using System.Threading.Tasks;
+using GalleryCart.DataAccess.Repository.IRepository;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Options;
 using Microsoft.AspNetCore.Identity;
@@ -18,6 +19,8 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
 using GalleryCart.Models.Models;
+using GalleryCart.Utilities.Constants;
+using Newtonsoft.Json;
 
 namespace GalleryCart.Areas.Identity.Pages.Account
 {
@@ -30,13 +33,15 @@ namespace GalleryCart.Areas.Identity.Pages.Account
         private readonly IUserEmailStore<User> _emailStore;
         private readonly IEmailSender _emailSender;
         private readonly ILogger<ExternalLoginModel> _logger;
+        private readonly IUserRepository  _userRepository;
 
         public ExternalLoginModel(
             SignInManager<User> signInManager,
             UserManager<User> userManager,
             IUserStore<User> userStore,
             ILogger<ExternalLoginModel> logger,
-            IEmailSender emailSender)
+            IEmailSender emailSender, 
+            IUserRepository userRepository)
         {
             _signInManager = signInManager;
             _userManager = userManager;
@@ -44,6 +49,7 @@ namespace GalleryCart.Areas.Identity.Pages.Account
             _emailStore = GetEmailStore();
             _logger = logger;
             _emailSender = emailSender;
+            _userRepository = userRepository;
         }
 
         /// <summary>
@@ -85,6 +91,38 @@ namespace GalleryCart.Areas.Identity.Pages.Account
             [Required]
             [EmailAddress]
             public string Email { get; set; }
+            
+            [Required]
+            [RegularExpression(@"^[a-zA-Z0-9\-._@+àáảãạâầấẩẫậăằắẳẵặèéẻẽẹêềếểễệìíỉĩịòóỏõọôồốổỗộơờớởỡợùúủũụưừứửữựỳýỷỹỵđ() ]+$",
+                ErrorMessage = "Username must only contain numbers, letters, or the following special characters: \"-._@+()\"")]
+            public string UserName { get; set; }
+            
+            [Required]
+            [DataType(DataType.Date)]
+            [Display(Name = "Date of Birth")]
+            [DisplayFormat(DataFormatString = "{0:dd/MM/yyyy}", ApplyFormatInEditMode = true)]
+            public DateOnly? UserDOB { get; set; } = null;
+            
+            [Display(Name = "Is Artist")]
+            public bool IsArtist { get; set; }  // Note: fix typo if needed to IsArtist
+
+            [Display(Name = "Profession Summary")]
+            public string ProfessionSummary { get; set; } = string.Empty;
+
+            [Display(Name = "Skills")]
+            public string Skills { get; set; } = string.Empty;
+
+            [Display(Name = "Software")]
+            public string Software { get; set; } = string.Empty;
+
+            [Display(Name = "Contact Info")]
+            public string ContactInfo { get; set; } = string.Empty;
+
+            [Display(Name = "Is Jobless")]
+            public bool IsJobLess { get; set; } = true;
+
+            [Display(Name = "Accept Commission? (You can change it whenever you want)")]
+            public bool CommissionStatus { get; set; } = false;
         }
         
         public IActionResult OnGet() => RedirectToPage("./Login");
@@ -117,6 +155,23 @@ namespace GalleryCart.Areas.Identity.Pages.Account
             if (result.Succeeded)
             {
                 _logger.LogInformation("{Name} logged in with {LoginProvider} provider.", info.Principal.Identity.Name, info.LoginProvider);
+                var user = await _userManager.FindByLoginAsync(info.LoginProvider, info.ProviderKey);
+                HttpContext.Session.SetString("CurrentUser", JsonConvert.SerializeObject(user));
+                // Redirect based on user role
+                if (await _userManager.IsInRoleAsync(user, RoleConstants.Admin))
+                {
+                    returnUrl = Url.Action("Index", "Dashboard", new { area = "Admin" });
+                }
+                else if (await _userManager.IsInRoleAsync(user, RoleConstants.User))
+                {
+                    returnUrl = Url.Page("/Home/Index", new { area = "Customer" });
+
+                }
+                else
+                {
+                    returnUrl = Url.Page("/Home/Index", new { area = "Artist" });
+                }   
+                
                 return LocalRedirect(returnUrl);
             }
             if (result.IsLockedOut)
@@ -125,14 +180,54 @@ namespace GalleryCart.Areas.Identity.Pages.Account
             }
             else
             {
+                var userEmail = info.Principal.FindFirstValue(ClaimTypes.Email);
+                var existingUser = await _userRepository.GetAsync(u => u.Email == userEmail);
+                if (existingUser != null)
+                {
+                    if (existingUser.IsBanned)
+                    {
+                        ModelState.AddModelError("", "User account is banned!");
+                        return RedirectToPage("./Login", new { ReturnUrl = returnUrl });
+                    }
+                    var isEmailConfirmed = await _userManager.IsEmailConfirmedAsync(existingUser);
+
+                    // Make the account confirmed if not confirmed before:
+                    if (!isEmailConfirmed)
+                    {
+                        var token = await _userManager.GenerateEmailConfirmationTokenAsync(existingUser);
+                        await _userManager.ConfirmEmailAsync(existingUser, token);
+                    }
+                    HttpContext.Session.SetString("CurrentUser", JsonConvert.SerializeObject(existingUser));
+                    _logger.LogInformation("{Name} logged in with {LoginProvider} provider.", info.Principal.Identity.Name,
+                        info.LoginProvider);
+                    await _signInManager.SignInAsync(existingUser, isPersistent: false, authenticationMethod: null);
+                    // Redirect based on user role
+                    if (await _userManager.IsInRoleAsync(existingUser, RoleConstants.Admin))
+                    {
+                        returnUrl = Url.Action("Index", "Dashboard", new { area = "Admin" });
+                    }
+                    else if (await _userManager.IsInRoleAsync(existingUser, RoleConstants.User))
+                    {
+                        returnUrl = Url.Page("/Home/Index", new { area = "Customer" });
+
+                    }
+                    else
+                    {
+                        returnUrl = Url.Page("/Home/Index", new { area = "Artist" });
+                    }   
+                    return Redirect(returnUrl);
+                }
                 // If the user does not have an account, then ask the user to create an account.
                 ReturnUrl = returnUrl;
                 ProviderDisplayName = info.ProviderDisplayName;
                 if (info.Principal.HasClaim(c => c.Type == ClaimTypes.Email))
                 {
+                    var email = info.Principal.FindFirstValue(ClaimTypes.Email);
+                    var userName  = info.Principal.FindFirstValue(ClaimTypes.Name);
                     Input = new InputModel
                     {
-                        Email = info.Principal.FindFirstValue(ClaimTypes.Email)
+                        Email = info.Principal.FindFirstValue(ClaimTypes.Email),
+                        UserName = info.Principal.FindFirstValue(ClaimTypes.Name),
                     };
                 }
                 return Page();
@@ -154,7 +249,7 @@ namespace GalleryCart.Areas.Identity.Pages.Account
             {
                 var user = CreateUser();
 
-                await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
+                await _userStore.SetUserNameAsync(user, Input.UserName, CancellationToken.None);
                 await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
 
                 var result = await _userManager.CreateAsync(user);
@@ -184,6 +279,24 @@ namespace GalleryCart.Areas.Identity.Pages.Account
                         }
 
                         await _signInManager.SignInAsync(user, isPersistent: false, info.LoginProvider);
+                        // Log the user login event
+                        _logger.LogInformation("User {Email} logged in at {Time}.", Input.Email, DateTime.UtcNow);
+
+                        // Redirect based on user role
+                        if (await _userManager.IsInRoleAsync(user, RoleConstants.Admin))
+                        {
+                            returnUrl = Url.Action("Index", "Dashboard", new { area = "Admin" });
+                        }
+                        else if (await _userManager.IsInRoleAsync(user, RoleConstants.User))
+                        {
+                            returnUrl = Url.Page("/Home/Index", new { area = "Customer" });
+
+                        }
+                        else
+                        {
+                            returnUrl = Url.Page("/Home/Index", new { area = "Artist" });
+                        }              
+                        
                         return LocalRedirect(returnUrl);
                     }
                 }
@@ -200,16 +313,20 @@ namespace GalleryCart.Areas.Identity.Pages.Account
 
         private User CreateUser()
         {
-            try
+            var registerUser = new User();
+            registerUser.UserDOB = Input.UserDOB;
+            registerUser.UserAvatar = GeneralConstants.DefaultAvatar;
+            registerUser.IsArtits = Input.IsArtist;
+            if (Input.IsArtist)
             {
-                return Activator.CreateInstance<User>();
+                registerUser.ProfessionSummary = Input.ProfessionSummary;
+                registerUser.Skills = Input.Skills;
+                registerUser.Software = Input.Software;
+                registerUser.ContactInfo = Input.ContactInfo;
+                registerUser.IsJobLess = Input.IsJobLess;
+                registerUser.CommissionStatus = Input.CommissionStatus;
             }
-            catch
-            {
-                throw new InvalidOperationException($"Can't create an instance of '{nameof(User)}'. " +
-                    $"Ensure that '{nameof(User)}' is not an abstract class and has a parameterless constructor, or alternatively " +
-                    $"override the external login page in /Areas/Identity/Pages/Account/ExternalLogin.cshtml");
-            }
+            return registerUser;
         }
 
         private IUserEmailStore<User> GetEmailStore()

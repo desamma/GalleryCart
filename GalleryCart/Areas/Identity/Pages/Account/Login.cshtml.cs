@@ -199,7 +199,7 @@ namespace GalleryCart.Areas.Identity.Pages.Account
                     }
                     else
                     {
-                        returnUrl = Url.Action("Index", "Home", new { area = "" }); // Default area (no area)
+                        returnUrl = Url.Page("/Home/Index", new { area = "Artist" });
                     }              
 
                     return LocalRedirect(returnUrl);

@@ -1,33 +1,134 @@
 ﻿@page
 @model ExternalLoginModel
+
 @{
     ViewData["Title"] = "Register";
+    Layout = null;
 }
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>@ViewData["Title"] - GalleryCart</title>
+    <link rel="stylesheet" href="~/css/styles.css" asp-append-version="true" />
+</head>
+<body>
+<section class="relative min-h-screen h-screen w-full overflow-hidden">
+    <!-- Background Image -->
+    <img src="@Url.Content("~/images/loginimage.jpg")"
+         alt="Background image"
+         class="absolute inset-0 w-full h-full object-cover brightness-50 -z-10" />
 
-<h1>@ViewData["Title"]</h1>
-<h2 id="external-login-title">Associate your @Model.ProviderDisplayName account.</h2>
-<hr />
+    <form method="post" asp-page-handler="Confirmation" asp-route-returnUrl="@Model.ReturnUrl" novalidate>
+        <div class="relative z-10 flex flex-wrap md:flex-nowrap items-start justify-center gap-10 p-8 overflow-auto h-full">
+            <!-- Artist Fields Panel (initially hidden) -->
+            <div id="artistFields" class="hidden w-full md:w-[500px] bg-gray-800 bg-opacity-90 rounded-lg shadow-lg p-6 space-y-4 overflow-y-auto max-h-[90vh]">
+                <h3 class="text-xl font-semibold text-white border-b border-gray-600 pb-2">Artist Details</h3>
+                
+                <input hidden="hidden" asp-for="Input.Email"/>
+                <input hidden="hidden" asp-for="Input.UserName"/>
 
-<p id="external-login-description" class="text-info">
-    You've successfully authenticated with <strong>@Model.ProviderDisplayName</strong>.
-    Please enter an email address for this site below and click the Register button to finish
-    logging in.
-</p>
+                <div>
+                    <label asp-for="Input.ProfessionSummary" class="label-text text-white block mb-1">Profession Summary</label>
+                    <textarea asp-for="Input.ProfessionSummary" rows="3" class="textarea textarea-bordered w-full text-black bg-white"></textarea>
+                    <span asp-validation-for="Input.ProfessionSummary" class="text-error text-sm"></span>
+                </div>
 
-<div class="row">
-    <div class="col-md-4">
-        <form asp-page-handler="Confirmation" asp-route-returnUrl="@Model.ReturnUrl" method="post">
-            <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
-            <div class="form-floating mb-3">
-                <input asp-for="Input.Email" class="form-control" autocomplete="email" placeholder="Please enter your email."/>
-                <label asp-for="Input.Email" class="form-label"></label>
-                <span asp-validation-for="Input.Email" class="text-danger"></span>
+                <div>
+                    <label asp-for="Input.Skills" class="label-text text-white block mb-1">Skills</label>
+                    <textarea asp-for="Input.Skills" rows="3" class="textarea textarea-bordered w-full text-black bg-white"></textarea>
+                    <span asp-validation-for="Input.Skills" class="text-error text-sm"></span>
+                </div>
+
+                <div>
+                    <label asp-for="Input.Software" class="label-text text-white block mb-1">Software</label>
+                    <textarea asp-for="Input.Software" rows="3" class="textarea textarea-bordered w-full text-black bg-white"></textarea>
+                    <span asp-validation-for="Input.Software" class="text-error text-sm"></span>
+                </div>
+
+                <div>
+                    <label asp-for="Input.ContactInfo" class="label-text text-white block mb-1">Contact Info</label>
+                    <textarea asp-for="Input.ContactInfo" rows="3" class="textarea textarea-bordered w-full text-black bg-white"></textarea>
+                    <span asp-validation-for="Input.ContactInfo" class="text-error text-sm"></span>
+                </div>
+
+                <div class="form-control">
+                    <label class="label cursor-pointer justify-start gap-3 text-white">
+                        <input asp-for="Input.IsJobLess" type="checkbox" class="checkbox checkbox-primary" />
+                        <span class="label-text">Is Jobless</span>
+                    </label>
+                    <span asp-validation-for="Input.IsJobLess" class="text-error text-sm"></span>
+                </div>
+
+                <div class="form-control">
+                    <label class="label cursor-pointer justify-start gap-3 text-white">
+                        <input asp-for="Input.CommissionStatus" type="checkbox" class="checkbox checkbox-primary" />
+                        <span class="label-text">Accept Commission</span>
+                    </label>
+                    <span asp-validation-for="Input.CommissionStatus" class="text-error text-sm"></span>
+                </div>
             </div>
-            <button type="submit" class="w-100 btn btn-lg btn-primary">Register</button>
-        </form>
-    </div>
-</div>
 
-@section Scripts {
-    <partial name="_ValidationScriptsPartial" />
-}
+            <!-- External Login Confirmation Form -->
+            <div class="w-full md:w-[500px] bg-gray-900 bg-opacity-90 rounded-lg shadow-lg p-6 overflow-y-auto h-full space-y-5">
+                <h1 class="text-3xl font-bold mb-4 text-center text-primary">GalleryCart</h1>
+                <h2 class="text-xl font-semibold mb-6 text-center text-white">Complete Registration</h2>
+
+                <div class="text-info text-center text-white mb-6">
+                    You've successfully authenticated with <strong>@Model.ProviderDisplayName</strong>.
+                    Please complete your registration.
+                </div>
+
+                @{
+                    var maxDate = DateTime.Today.AddDays(-1).ToString("yyyy-MM-dd");
+                }
+                <div>
+                    <label asp-for="Input.UserDOB" class="label-text text-white block mb-1">Date of Birth</label>
+                    <input asp-for="Input.UserDOB"
+                           type="date"
+                           max="@maxDate"
+                           class="input input-bordered w-full text-black bg-white" />
+                    <span asp-validation-for="Input.UserDOB" class="text-error text-sm"></span>
+                </div>
+
+                <div class="form-control">
+                    <label class="label cursor-pointer justify-start gap-3 text-white">
+                        <input asp-for="Input.IsArtist" id="Input_IsArtist" type="checkbox" class="checkbox checkbox-primary" />
+                        <span class="label-text">Are you an artist?</span>
+                    </label>
+                    <span asp-validation-for="Input.IsArtist" class="text-error text-sm"></span>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-full">Register</button>
+            </div>
+        </div>
+    </form>
+
+    <!-- JavaScript to toggle artist fields -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const artistCheckbox = document.getElementById("Input_IsArtist");
+            const artistFields = document.getElementById("artistFields");
+
+            function toggleArtistFields() {
+                if (artistCheckbox.checked) {
+                    artistFields.classList.remove("hidden");
+                    artistFields.classList.add("block");
+                } else {
+                    artistFields.classList.remove("block");
+                    artistFields.classList.add("hidden");
+                }
+            }
+
+            // Initial check
+            toggleArtistFields();
+
+            // Listen for changes
+            artistCheckbox.addEventListener("change", toggleArtistFields);
+        });
+    </script>
+</section>
+
+<partial name="_ValidationScriptsPartial" />
+</body>
+</html>
