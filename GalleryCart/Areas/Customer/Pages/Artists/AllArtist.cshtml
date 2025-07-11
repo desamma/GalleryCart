@@ -13,7 +13,7 @@
                 <h1 class="text-4xl font-bold text-base-content mb-2">All Artists</h1>
                 <div class="text-sm breadcrumbs">
                     <ul>
-                        <li><a href="/" class="link link-hover">Dashboard</a></li>
+                        <li><a href="/Customer/Home/Index" class="link link-hover">Dashboard</a></li>
                         <li class="text-base-content/60">Artists</li>
                     </ul>
                 </div>
@@ -154,12 +154,12 @@
                             </button>
                             @if (artist.CommissionStatus)
                             {
-                                <button class="btn btn-primary btn-sm" onclick="requestCommission('@artist.Id', '@artist.UserName')">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="inline-block w-4 h-4 stroke-current">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                                    </svg>
-                                    Request Commission
-                                </button>
+                            <a href="@Url.Action("Create", "Commission", new { area = "Customer", artistId = artist.Id })" class="btn btn-primary btn-sm">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="inline-block w-4 h-4 stroke-current">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                                </svg>
+                                Request Commission
+                            </a>
                             }
                             <button class="btn btn-ghost btn-sm" onclick="sendMessage('@artist.Id', '@artist.UserName')">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="inline-block w-4 h-4 stroke-current">
@@ -184,45 +184,6 @@
         }
     </div>
 </div>
-
-<!-- Commission Request Modal -->
-<dialog id="commissionModal" class="modal">
-    <div class="modal-box">
-        <form method="dialog">
-            <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
-        </form>
-        <h3 class="font-bold text-lg mb-4">Request Commission</h3>
-        <div class="form-control mb-4">
-            <label class="label">
-                <span class="label-text">Artist: <span id="modalArtistName" class="font-semibold"></span></span>
-            </label>
-        </div>
-        <div class="form-control mb-4">
-            <label class="label">
-                <span class="label-text">Commission Description</span>
-            </label>
-            <textarea id="commissionDescription" class="textarea textarea-bordered h-32" placeholder="Describe your commission request..."></textarea>
-        </div>
-        <div class="form-control mb-4">
-            <label class="label">
-                <span class="label-text">Budget ($)</span>
-            </label>
-            <input type="number" id="commissionBudget" class="input input-bordered" placeholder="Enter your budget" />
-        </div>
-        <div class="form-control mb-4">
-            <label class="label">
-                <span class="label-text">Due Date</span>
-            </label>
-            <input type="date" id="commissionDueDate" class="input input-bordered" />
-        </div>
-        <div class="modal-action">
-            <button class="btn btn-primary" onclick="submitCommissionRequest()">Send Request</button>
-            <form method="dialog">
-                <button class="btn">Cancel</button>
-            </form>
-        </div>
-    </div>
-</dialog>
 
 <!-- Message Modal -->
 <dialog id="messageModal" class="modal">
@@ -285,37 +246,10 @@
         window.location.href = `/Artist/Profile/${artistId}`;
     }
 
-    function requestCommission(artistId, artistName) {
-        currentArtistId = artistId;
-        document.getElementById('modalArtistName').textContent = artistName;
-        document.getElementById('commissionModal').showModal();
-    }
-
     function sendMessage(artistId, artistName) {
         currentArtistId = artistId;
         document.getElementById('messageArtistName').textContent = artistName;
         document.getElementById('messageModal').showModal();
-    }
-
-    function submitCommissionRequest() {
-        const description = document.getElementById('commissionDescription').value;
-        const budget = document.getElementById('commissionBudget').value;
-        const dueDate = document.getElementById('commissionDueDate').value;
-        
-        if (!description || !budget || !dueDate) {
-            alert('Please fill in all fields');
-            return;
-        }
-        
-        // Here you would send the commission request to your backend
-        // For now, we'll just show a success message
-        alert('Commission request sent successfully!');
-        document.getElementById('commissionModal').close();
-        
-        // Reset form
-        document.getElementById('commissionDescription').value = '';
-        document.getElementById('commissionBudget').value = '';
-        document.getElementById('commissionDueDate').value = '';
     }
 
     function submitMessage() {

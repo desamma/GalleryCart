@@ -15,12 +15,11 @@ namespace GalleryCart.Areas.Customer.Controllers
     public class CommissionController : Controller
     {
         private readonly ICommissionRepository commissionRepository;
-        private readonly UserManager<User> userManager;
-
-        public CommissionController(ICommissionRepository commissionRepository, UserManager<User> userManager)
+        private readonly IUserRepository userRepository;
+        public CommissionController(ICommissionRepository commissionRepository, IUserRepository userRepository)
         {
             this.commissionRepository = commissionRepository;
-            this.userManager = userManager;
+            this.userRepository = userRepository;
         }
 
         public IActionResult Index()
@@ -32,7 +31,7 @@ namespace GalleryCart.Areas.Customer.Controllers
         public async Task<IActionResult> Create(string artistId)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var artist = await userManager.FindByIdAsync(artistId);
+            var artist = await userRepository.GetAsync(a => a.Id.ToString().Equals(artistId));
             if (artist == null)
             {
                 return NotFound("Artist not found.");
@@ -57,9 +56,9 @@ namespace GalleryCart.Areas.Customer.Controllers
             if (!ModelState.IsValid)
             {
                 // Reload artist data if validation fails
-                if (model.ArtistId != null)
+                if (model.ArtistId != Guid.Empty)
                 {
-                    model.Artist = await userManager.FindByIdAsync(model.ArtistId.ToString());
+                    model.Artist = await userRepository.GetAsync(a => a.Id.Equals(model.ArtistId));
                 }
                 return View(model);
             }
@@ -83,7 +82,7 @@ namespace GalleryCart.Areas.Customer.Controllers
             };
 
             await commissionRepository.AddAsync(commission);
-            return RedirectToAction("Index");
+            return RedirectToAction("CommissionManagement");
         }
 
         [HttpGet]
@@ -114,8 +113,7 @@ namespace GalleryCart.Areas.Customer.Controllers
                 var commissions = commissionRepository.GetAllQueryable(c => c.CommissionerId.ToString() == userId, true).ToList();
 
                 var artistIds = commissions.Select(c => c.ArtistId).ToList();
-                var artists = await userManager.Users
-                    .Where(u => artistIds.Contains(u.Id))
+                var artists = await userRepository.GetAllQueryable(u => artistIds.Contains(u.Id))
                     .ToListAsync();
 
                 // Map each commission to its corresponding artist
@@ -142,7 +140,6 @@ namespace GalleryCart.Areas.Customer.Controllers
             }
         }
 
-
         [HttpGet]
         public async Task<IActionResult> EditAsync(string commissionId)
         {
@@ -158,9 +155,9 @@ namespace GalleryCart.Areas.Customer.Controllers
                 {
                     return Unauthorized("You do not have permission to edit this commission.");
                 }
-                if (entity.Artist == null)
+                if (entity.Artist == null && entity.ArtistId != Guid.Empty)
                 {
-                    entity.Artist = await userManager.FindByIdAsync(entity.ArtistId.ToString());
+                    entity.Artist = await userRepository.GetAsync(a => a.Id.Equals(entity.ArtistId));
                 }
                 return View(entity);
             }
@@ -170,39 +167,38 @@ namespace GalleryCart.Areas.Customer.Controllers
             }
         }
 
-        //[HttpPost]
-        //public async Task<IActionResult> EditAsync(Commission model)
-        //{
-        //    if (!ModelState.IsValid)
-        //    {
-        //        // Reload artist data if validation fails
-        //        if (model.ArtistId != null)
-        //        {
-        //            model.Artist = await userManager.FindByIdAsync(model.ArtistId.ToString());
-        //        }
-        //        return View(model);
-        //    }
+        [HttpPost]
+        public async Task<IActionResult> EditAsync(Commission model)
+        {
+            if (!ModelState.IsValid)
+            {
+                // Reload artist if validation fails
+                if (model.ArtistId != Guid.Empty)
+                {
+                    model.Artist = await userRepository.GetAsync(a => a.Id.Equals(model.ArtistId));
+                }
+                return View(model);
+            }
 
-        //    // Set CreatedDate if not already set
-        //    if (model.CreatedDate == default)
-        //    {
-        //        model.CreatedDate = DateTime.Now;
-        //    }
+            var existingCommission = await commissionRepository.GetAsync(c => c.CommissionId == model.CommissionId);
+            if (existingCommission == null)
+            {
+                return NotFound("Commission not found.");
+            }
 
-        //    var commission = new Commission
-        //    {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId != existingCommission.CommissionerId.ToString())
+            {
+                return Unauthorized("You do not have permission to edit this commission.");
+            }
 
-        //        Description = model.Description,
-        //        ArtistId = model.ArtistId,
-        //        CommissionerId = model.CommissionerId,
-        //        CreatedDate = model.CreatedDate,
-        //        Price = model.Price,
-        //        Status = "Pending",
-        //        DueDate = model.CreatedDate.AddDays(model.DueDateDays)
-        //    };
+            // Update only editable fields
+            existingCommission.Description = model.Description;
+            existingCommission.Price = model.Price;
+            existingCommission.DueDate = model.DueDate;
 
-        //    await commissionRepository.AddAsync(commission);
-        //    return RedirectToAction("Index");
-        //}
+            await commissionRepository.UpdateAsync(existingCommission);
+            return RedirectToAction("CommissionManagement");
+        }
     }
 }
