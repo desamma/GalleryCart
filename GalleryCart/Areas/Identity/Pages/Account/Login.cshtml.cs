@@ -193,6 +193,10 @@ namespace GalleryCart.Areas.Identity.Pages.Account
                         returnUrl = Url.Page("/Home/Index", new { area = "Customer" });
 
                     }
+                    else if (await _userManager.IsInRoleAsync(user, RoleConstants.Artist))
+                    {
+                        returnUrl = Url.Page("/Home/Index", new { area = "Artists" });
+                    }
                     else
                     {
                         returnUrl = Url.Action("Index", "Home", new { area = "" }); // Default area (no area)

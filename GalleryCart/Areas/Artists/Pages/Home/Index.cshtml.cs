@@ -4,9 +4,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Newtonsoft.Json;
 
-namespace GalleryCart.Areas.Customer.Pages.Home
+namespace GalleryCart.Areas.Artists.Pages.Home
 {
-    //[Authorize(Roles = "Admin,user")]
     public class IndexModel : PageModel
     {
         private readonly UserManager<User> _userManager;
