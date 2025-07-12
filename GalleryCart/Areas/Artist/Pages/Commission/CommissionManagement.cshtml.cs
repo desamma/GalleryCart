@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 
-namespace GalleryCart.Areas.Artists.Pages.Commission
+namespace GalleryCart.Areas.Artist.Pages.Commission
 {
     public class CommissionManagementModel : PageModel
     {

@@ -195,11 +195,11 @@ namespace GalleryCart.Areas.Identity.Pages.Account
                     }
                     else if (await _userManager.IsInRoleAsync(user, RoleConstants.Artist))
                     {
-                        returnUrl = Url.Page("/Home/Index", new { area = "Artists" });
+                        returnUrl = Url.Page("/Home/Index", new { area = "Artist" });
                     }
                     else
                     {
-                        returnUrl = Url.Page("/Home/Index", new { area = "Artist" });
+                        returnUrl = Url.Page("/Home/Index");
                     }              
 
                     return LocalRedirect(returnUrl);
