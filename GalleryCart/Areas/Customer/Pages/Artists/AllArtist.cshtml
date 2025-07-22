@@ -161,12 +161,12 @@
                                 Request Commission
                             </a>
                             }
-                            <button class="btn btn-ghost btn-sm" onclick="sendMessage('@artist.Id', '@artist.UserName')">
+                            <a href="@Url.Page("/Chat/Chat", new { area = "Chat" , id = artist.Id})" class="btn btn-ghost btn-sm">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="inline-block w-4 h-4 stroke-current">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
                                 </svg>
                                 Message
-                            </button>
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -244,29 +244,6 @@
 
     function viewProfile(artistId) {
         window.location.href = `/Artist/Profile/${artistId}`;
-    }
-
-    function sendMessage(artistId, artistName) {
-        currentArtistId = artistId;
-        document.getElementById('messageArtistName').textContent = artistName;
-        document.getElementById('messageModal').showModal();
-    }
-
-    function submitMessage() {
-        const messageContent = document.getElementById('messageContent').value;
-        
-        if (!messageContent) {
-            alert('Please enter a message');
-            return;
-        }
-        
-        // Here you would send the message to your backend
-        // For now, we'll just show a success message
-        alert('Message sent successfully!');
-        document.getElementById('messageModal').close();
-        
-        // Reset form
-        document.getElementById('messageContent').value = '';
     }
 
     // Search on Enter key

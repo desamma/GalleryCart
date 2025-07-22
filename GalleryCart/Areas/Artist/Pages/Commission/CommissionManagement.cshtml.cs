@@ -125,7 +125,7 @@ namespace GalleryCart.Areas.Artist.Pages.Commission
                     {
                         commission.Status = "Rejected";
                         var rejectMessage = $"This commission (id: {commission.CommissionId} has been rejected.\nReason: {rejectionReason}";
-                        var chat = new Chat
+                        var chat = new Models.Models.Chat
                         {
                             ChatId = Guid.NewGuid(),
                             SenderId = CurrentUser.Id,
