@@ -1,0 +1,630 @@
+﻿@page
+@model GalleryCart.Areas.Chat.Pages.Chat.ChatModel
+@{
+    ViewData["Title"] = "Chat";
+    Layout = "_Layout";
+}
+
+<div class="container mx-auto p-4 h-screen flex flex-col">
+    <!-- Header -->
+    <div class="navbar bg-base-100 shadow-lg rounded-lg mb-4">
+        <div class="flex-1">
+            <h1 class="text-xl font-bold">Chat Application</h1>
+        </div>
+        <div class="flex-none">
+            <div class="dropdown dropdown-end">
+                <div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar">
+                    <div class="w-10 rounded-full">
+                        <img alt="User Avatar" src="@(Model.CurrentUser?.UserAvatar ?? "~/images/defaultAvatar.png")" />
+                    </div>
+                </div>
+                <ul tabindex="0" class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52">
+                    <li><span class="font-semibold">@Model.CurrentUser?.UserName</span></li>
+                    <li><a href="/Account/Logout">Logout</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="flex-1 flex gap-4 overflow-hidden">
+        <!-- Chat Users Sidebar -->
+        <div class="w-1/4 bg-base-100 rounded-lg shadow-lg p-4 flex flex-col">
+            <h2 class="text-lg font-semibold mb-4 flex items-center">
+                <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"></path>
+                    <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"></path>
+                </svg>
+                Previous Chats
+            </h2>
+            <div class="flex-1 overflow-y-auto">
+                <ul id="chatUsersList" class="space-y-2">
+                    @if (Model.ChatUsers.Any())
+                    {
+                        @foreach (var chatUser in Model.ChatUsers)
+                        {
+                            <li>
+                                <button class="flex items-center w-full p-3 rounded-lg hover:bg-base-200 transition-colors user-item @(Model.CurrentReceiver?.Id == chatUser.UserId ? "selected bg-base-200" : "")"
+                                        onclick="selectUser('@chatUser.UserId', '@chatUser.UserName', '@(chatUser.UserAvatar ?? "/images/defaultAvatar.png")')">
+                                    <div class="avatar mr-3 relative">
+                                        <div class="w-10 h-10 rounded-full">
+                                            <img src="@(chatUser.UserAvatar ?? "/images/defaultAvatar.png")" alt="@chatUser.UserName" />
+                                        </div>
+                                        @* Online indicator will be updated via SignalR *@
+                                        <div class="online-indicator absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white hidden" data-user-id="@chatUser.UserId"></div>
+                                    </div>
+                                    <div class="flex-1 text-left min-w-0">
+                                        <div class="flex items-center justify-between">
+                                            <div class="font-semibold truncate">@chatUser.UserName</div>
+                                            <div class="text-xs text-base-content/60">
+                                                @chatUser.LastMessageTime.ToString("MM/dd HH:mm")
+                                            </div>
+                                        </div>
+                                        <div class="text-sm text-base-content/70 truncate">@chatUser.LastMessage</div>
+                                        <div class="flex items-center justify-between mt-1">
+                                            @if (chatUser.IsArtist)
+                                            {
+                                                <div class="badge badge-primary badge-sm">Artist</div>
+                                            }
+                                            else
+                                            {
+                                                <div></div>
+                                            }
+                                            @if (chatUser.MessageCount > 0)
+                                            {
+                                                <div class="badge badge-neutral badge-sm">@chatUser.MessageCount</div>
+                                            }
+                                        </div>
+                                    </div>
+                                </button>
+                            </li>
+                        }
+                    }
+                    else
+                    {
+                        <li class="text-center text-base-content/60 py-4">No previous chats found</li>
+                    }
+                </ul>
+            </div>
+        </div>
+
+        <!-- Chat Area -->
+        <div class="flex-1 flex flex-col bg-base-100 rounded-lg shadow-lg">
+            <!-- Chat Header -->
+            <div id="chatHeader" class="p-4 border-b border-base-300">
+                <div class="flex items-center">
+                    <div class="avatar mr-3">
+                        <div class="w-8 h-8 rounded-full">
+                            <img id="receiverAvatar" src="@(Model.CurrentReceiver?.UserAvatar ?? "~/images/defaultAvatar.png")" alt="Receiver Avatar" />
+                        </div>
+                    </div>
+                    <span id="receiverName" class="font-semibold text-lg">
+                        @if (Model.CurrentReceiver != null)
+                        {
+                            @Model.CurrentReceiver.UserName
+                        }
+                        else
+                        {
+                            @:Select a chat to start messaging
+                        }
+                    </span>
+                </div>
+            </div>
+
+            <!-- Messages Area -->
+            <div class="flex-1 overflow-y-auto p-4 space-y-4" id="messagesContainer">
+                @if (Model.CurrentReceiver != null && Model.ChatHistory.Any())
+                {
+                    @foreach (var message in Model.ChatHistory)
+                    {
+                        var isReceived = message.SenderId != Model.CurrentUser.Id;
+                        var messageTime = message.Timestamp.ToString("HH:mm");
+                        <div class="chat @(isReceived ? "chat-start" : "chat-end")">
+                            <div class="chat-image avatar">
+                                <div class="w-8 h-8 rounded-full">
+                                    <img src="@(isReceived ? (Model.CurrentReceiver.UserAvatar ?? "/images/defaultAvatar.png") : (Model.CurrentUser.UserAvatar ?? "/images/defaultAvatar.png"))"
+                                         alt="@(isReceived ? Model.CurrentReceiver.UserName : Model.CurrentUser.UserName)" />
+                                </div>
+                            </div>
+                            <div class="chat-header">
+                                @(isReceived ? Model.CurrentReceiver.UserName : Model.CurrentUser.UserName)
+                                <time class="text-xs opacity-50 ml-2">@messageTime</time>
+                            </div>
+                            <div class="chat-bubble @(isReceived ? "chat-bubble-primary" : "chat-bubble-secondary")">
+                                @message.Message
+                            </div>
+                        </div>
+                    }
+                }
+                else if (Model.CurrentReceiver != null)
+                {
+                    <div class="text-center text-base-content/60">
+                        <div class="chat chat-start">
+                            <div class="chat-bubble chat-bubble-info">
+                                Start your conversation with @Model.CurrentReceiver.UserName
+                            </div>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center text-base-content/60">
+                        <div class="chat chat-start">
+                            <div class="chat-bubble chat-bubble-info">
+                                Welcome to the chat! Select a conversation from the sidebar to start messaging.
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <!-- Message Input -->
+            <div class="p-4 border-t border-base-300">
+    @Html.AntiForgeryToken()
+    <form id="messageForm" class="flex gap-2">
+        <input type="text" id="messageInput" placeholder="Type your message..."
+               class="input input-bordered flex-1" maxlength="500"
+               @(Model.CurrentReceiver == null ? "disabled" : "") />
+        <button type="submit" id="sendButton" class="btn btn-primary"
+                @(Model.CurrentReceiver == null ? "disabled" : "")>
+            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.429a1 1 0 001.17-1.409l-7-14z"></path>
+            </svg>
+        </button>
+    </form>
+</div>
+        </div>
+    </div>
+</div>
+
+<!-- Loading overlay -->
+<div id="loadingOverlay" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+    <div class="loading loading-spinner loading-lg text-primary"></div>
+</div>
+
+<!-- Toast notifications -->
+<div class="toast toast-top toast-end z-50" id="toastContainer"></div>
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.7/signalr.min.js"></script>
+    <script>
+        let connection;
+        let currentReceiverId = @Html.Raw(Model.CurrentReceiver?.Id != null ? $"'{Model.CurrentReceiver.Id}'" : "null");
+        let currentUserId = '@Html.Raw(Model.CurrentUser?.Id)';
+        let connectedUsers = [];
+
+        // Initialize SignalR connection
+        async function initializeConnection() {
+            try {
+                connection = new signalR.HubConnectionBuilder()
+                    .withUrl("/ChatHub")
+                    .withAutomaticReconnect([0, 2000, 10000, 30000])
+                    .build();
+
+                // Handle updated connected users
+                connection.on("UpdatedConnectedUsers", function (users) {
+                    console.log('Updated connected users:', users);
+                    connectedUsers = users;
+                    updateOnlineStatus(users);
+                });
+
+                // Handle received messages
+                connection.on("ReceiveMessage", function (senderId, senderName, message, timestamp) {
+                    console.log('Received message:', { senderId, senderName, message, timestamp });
+                    if (senderId === currentReceiverId || senderId === currentUserId) {
+                        displayMessage(senderId, senderName, message, timestamp, senderId !== currentUserId);
+                        scrollToBottom();
+                        updateSidebarLastMessage(senderId === currentUserId ? currentReceiverId : senderId, message, timestamp);
+                    }
+                });
+
+                // Handle message sent confirmation
+                connection.on("MessageSent", function (receiverId, message, timestamp) {
+                    console.log('Message sent confirmation:', { receiverId, message, timestamp });
+                });
+
+                // Handle errors
+                connection.on("Error", function (errorMessage) {
+                    console.error('SignalR Error:', errorMessage);
+                    showToast('Error: ' + errorMessage, "error");
+                });
+
+                // Handle typing indicators
+                connection.on("UserTyping", function (userId, userName, isTyping) {
+                    if (userId === currentReceiverId && isTyping) {
+                        showTypingIndicator(userName);
+                    } else {
+                        hideTypingIndicator();
+                    }
+                });
+
+                await connection.start();
+                console.log('SignalR connected successfully');
+                showToast("Connected to chat server", "success");
+
+                // Monitor connection state
+                monitorConnectionState();
+
+                if (currentReceiverId) {
+                    scrollToBottom();
+                }
+            } catch (err) {
+                console.error('SignalR connection error:', err);
+                showToast('Failed to connect to chat server: ' + err.message, "error");
+            }
+        }
+
+        // Monitor connection state
+        function monitorConnectionState() {
+            if (connection) {
+                connection.onclose((error) => {
+                    console.log('Connection closed:', error);
+                    showToast("Connection lost. Attempting to reconnect...", "warning");
+
+                    setTimeout(async () => {
+                        try {
+                            await connection.start();
+                            showToast("Reconnected to chat server", "success");
+                        } catch (err) {
+                            console.error('Reconnection failed:', err);
+                            showToast("Failed to reconnect. Please refresh the page.", "error");
+                        }
+                    }, 3000);
+                });
+
+                connection.onreconnecting((error) => {
+                    console.log('Reconnecting:', error);
+                    showToast("Reconnecting to chat server...", "info");
+                });
+
+                connection.onreconnected((connectionId) => {
+                    console.log('Reconnected:', connectionId);
+                    showToast("Reconnected to chat server", "success");
+                });
+            }
+        }
+
+        // Send message function - FIXED
+        async function sendMessage() {
+            console.log('sendMessage called, currentReceiverId:', currentReceiverId);
+            console.log('connection state:', connection ? connection.state : 'no connection');
+
+            const messageInput = document.getElementById('messageInput');
+            const message = messageInput.value.trim();
+
+            if (!message) {
+                console.log('No message to send');
+                return;
+            }
+
+            if (!currentReceiverId) {
+                console.log('No receiver selected');
+                showToast("Please select a user to chat with", "error");
+                return;
+            }
+
+            if (!connection) {
+                console.log('No SignalR connection');
+                showToast("Not connected to chat server", "error");
+                return;
+            }
+
+            if (connection.state !== signalR.HubConnectionState.Connected) {
+                console.log('SignalR not connected, state:', connection.state);
+                showToast("Connection lost. Trying to reconnect...", "warning");
+                try {
+                    await connection.start();
+                } catch (error) {
+                    console.error('Failed to reconnect:', error);
+                    showToast("Failed to reconnect to chat server", "error");
+                    return;
+                }
+            }
+
+            try {
+                console.log('Sending message via SignalR...', { receiverId: currentReceiverId, message });
+
+                // Clear input immediately to prevent double sending
+                messageInput.value = '';
+
+                // Send message via SignalR
+                await connection.invoke("SendMessage", currentReceiverId, message);
+                console.log('Message sent successfully');
+
+                // Display message locally immediately
+                displayMessage(currentUserId, '@Html.Raw(Model.CurrentUser?.UserName ?? "You")', message, new Date().toISOString(), false);
+                scrollToBottom();
+
+                // Update sidebar
+                updateSidebarLastMessage(currentReceiverId, message, new Date().toISOString());
+
+            } catch (error) {
+                console.error('Error sending message:', error);
+                showToast('Failed to send message: ' + (error.message || error), "error");
+
+                // Restore message in input if failed
+                messageInput.value = message;
+            }
+        }
+
+        // Update online status indicators
+        function updateOnlineStatus(users) {
+            document.querySelectorAll('.online-indicator').forEach(indicator => {
+                indicator.classList.add('hidden');
+            });
+
+            users.forEach(user => {
+                const indicator = document.querySelector('[data-user-id="' + user.userId + '"]');
+                if (indicator) {
+                    indicator.classList.remove('hidden');
+                }
+            });
+        }
+
+        // Update sidebar last message
+        function updateSidebarLastMessage(userId, message, timestamp) {
+            const userButton = document.querySelector('button[onclick*="' + userId + '"]');
+            if (userButton) {
+                const messageElement = userButton.querySelector('.text-sm.text-base-content\\/70');
+                const timeElement = userButton.querySelector('.text-xs.text-base-content\\/60');
+
+                if (messageElement) {
+                    messageElement.textContent = message.length > 30 ? message.substring(0, 30) + '...' : message;
+                }
+
+                if (timeElement) {
+                    const time = new Date(timestamp);
+                    timeElement.textContent = time.toLocaleString('en-US', {
+                        month: '2-digit',
+                        day: '2-digit',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        hour12: false
+                    }).replace(',', '');
+                }
+
+                const listItem = userButton.closest('li');
+                const list = document.getElementById('chatUsersList');
+                if (listItem && list) {
+                    list.insertBefore(listItem, list.firstChild);
+                }
+            }
+        }
+
+        // Highlight selected user
+        function highlightSelectedUser(userId) {
+            document.querySelectorAll('.user-item').forEach(item => {
+                item.classList.remove('selected', 'bg-base-200');
+            });
+
+            const selectedButton = document.querySelector('button[onclick*="' + userId + '"]');
+            if (selectedButton) {
+                selectedButton.classList.add('selected', 'bg-base-200');
+            }
+        }
+
+        // Select user to chat with
+        async function selectUser(userId, userName, userAvatar) {
+            const newUrl = '/Chat/Chat/' + userId;
+            window.history.pushState({}, '', newUrl);
+
+            currentReceiverId = userId;
+
+            document.getElementById('receiverName').textContent = userName;
+            document.getElementById('receiverAvatar').src = userAvatar || '/images/defaultAvatar.png';
+            document.getElementById('messageInput').disabled = false;
+            document.getElementById('sendButton').disabled = false;
+
+            highlightSelectedUser(userId);
+
+            const messagesContainer = document.getElementById('messagesContainer');
+            messagesContainer.innerHTML = '';
+
+            await loadChatHistoryAjax(userId);
+
+            document.getElementById('messageInput').focus();
+
+            showToast('Opened chat with ' + userName, "success");
+        }
+
+        // Load chat history via AJAX
+        async function loadChatHistoryAjax(receiverId) {
+            try {
+                const response = await fetch('/Chat/Chat?handler=ChatHistory&receiverId=' + receiverId, {
+                    method: 'GET',
+                    headers: {
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                    }
+                });
+
+                if (response.ok) {
+                    const chatHistory = await response.json();
+                    const messagesContainer = document.getElementById('messagesContainer');
+                    messagesContainer.innerHTML = '';
+
+                    chatHistory.forEach(message => {
+                        displayMessage(message.senderId, message.senderName, message.message, message.timestamp, message.senderId !== currentUserId);
+                    });
+
+                    scrollToBottom();
+                } else {
+                    console.error('Failed to load chat history');
+                    showToast("Failed to load chat history", "error");
+                }
+            } catch (error) {
+                console.error('Error loading chat history:', error);
+                showToast("Error loading chat history", "error");
+            }
+        }
+
+        // Display message in chat
+        function displayMessage(senderId, senderName, message, timestamp, isReceived) {
+            const messagesContainer = document.getElementById('messagesContainer');
+            const messageTime = new Date(timestamp).toLocaleTimeString('en-US', {
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+
+            const messageElement = document.createElement('div');
+            messageElement.className = 'chat ' + (isReceived ? 'chat-start' : 'chat-end');
+
+            messageElement.innerHTML =
+                '<div class="chat-image avatar">' +
+                '<div class="w-8 h-8 rounded-full">' +
+                '<img src="' + getCurrentUserAvatar(senderId) + '" alt="' + escapeHtml(senderName) + '" />' +
+                '</div>' +
+                '</div>' +
+                '<div class="chat-header">' +
+                escapeHtml(senderName) +
+                '<time class="text-xs opacity-50 ml-2">' + messageTime + '</time>' +
+                '</div>' +
+                '<div class="chat-bubble ' + (isReceived ? 'chat-bubble-primary' : 'chat-bubble-secondary') + '">' +
+                escapeHtml(message) +
+                '</div>';
+
+            messagesContainer.appendChild(messageElement);
+        }
+
+        // Get current user avatar helper
+        function getCurrentUserAvatar(senderId) {
+            if (senderId === currentUserId) {
+                return '@Html.Raw(Model.CurrentUser?.UserAvatar ?? "/images/defaultAvatar.png")';
+            }
+
+            const user = connectedUsers.find(u => u.userId === senderId);
+            return user ? (user.userAvatar || '/images/defaultAvatar.png') : '@Html.Raw(Model.CurrentReceiver?.UserAvatar ?? "/images/defaultAvatar.png")';
+        }
+
+        // Utility functions
+        function scrollToBottom() {
+            const messagesContainer = document.getElementById('messagesContainer');
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function showToast(message, type) {
+            type = type || 'info';
+            const toastContainer = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = 'alert alert-' + type + ' shadow-lg mb-2';
+            toast.innerHTML = '<div><span>' + escapeHtml(message) + '</span></div>';
+
+            toastContainer.appendChild(toast);
+
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        }
+
+        function showLoadingOverlay(show) {
+            const overlay = document.getElementById('loadingOverlay');
+            overlay.classList.toggle('hidden', !show);
+        }
+
+        function showTypingIndicator(userName) {
+            const messagesContainer = document.getElementById('messagesContainer');
+            const existingIndicator = document.getElementById('typingIndicator');
+
+            if (!existingIndicator) {
+                const indicator = document.createElement('div');
+                indicator.id = 'typingIndicator';
+                indicator.className = 'chat chat-start';
+                indicator.innerHTML =
+                    '<div class="chat-bubble chat-bubble-primary opacity-60">' +
+                    '<span class="loading loading-dots loading-sm"></span>' +
+                    escapeHtml(userName) + ' is typing...' +
+                    '</div>';
+                messagesContainer.appendChild(indicator);
+                scrollToBottom();
+            }
+        }
+
+        function hideTypingIndicator() {
+            const indicator = document.getElementById('typingIndicator');
+            if (indicator) {
+                indicator.remove();
+            }
+        }
+
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', function () {
+            // Send button click handler
+            const sendButton = document.getElementById('sendButton');
+            if (sendButton) {
+                sendButton.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    sendMessage();
+                });
+            }
+
+            // Form submission handler
+            const messageForm = document.getElementById('messageForm');
+            if (messageForm) {
+                messageForm.addEventListener('submit', function (e) {
+                    e.preventDefault();
+                    sendMessage();
+                });
+            }
+
+            // Message input Enter key handler
+            const messageInput = document.getElementById('messageInput');
+            if (messageInput) {
+                messageInput.addEventListener('keypress', function (e) {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        sendMessage();
+                    }
+                });
+
+                // Typing detection
+                let typingTimer;
+                messageInput.addEventListener('input', function () {
+                    if (currentReceiverId && connection && connection.state === signalR.HubConnectionState.Connected) {
+                        connection.invoke("UserTyping", currentReceiverId, true).catch(err => {
+                            console.error('Error sending typing indicator:', err);
+                        });
+
+                        clearTimeout(typingTimer);
+                        typingTimer = setTimeout(() => {
+                            if (connection && connection.state === signalR.HubConnectionState.Connected) {
+                                connection.invoke("UserTyping", currentReceiverId, false).catch(err => {
+                                    console.error('Error sending typing indicator:', err);
+                                });
+                            }
+                        }, 1000);
+                    }
+                });
+            }
+
+            // Initialize connection
+            initializeConnection();
+
+            console.log('Event listeners initialized');
+        });
+
+        // Handle browser navigation
+        window.addEventListener('popstate', function (event) {
+            const pathParts = window.location.pathname.split('/');
+            const receiverId = pathParts[pathParts.length - 1];
+
+            if (receiverId && receiverId !== 'Chat' && receiverId !== currentReceiverId) {
+                window.location.reload();
+            }
+        });
+
+        // Handle page unload
+        window.addEventListener('beforeunload', function () {
+            if (connection) {
+                connection.stop();
+            }
+        });
+
+        // Make functions globally accessible for onclick handlers
+        window.sendMessage = sendMessage;
+        window.selectUser = selectUser;
+    </script>
+}

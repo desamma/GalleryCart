@@ -1,3 +1,4 @@
+using GalleryCart.Chat;
 using GalleryCart.DataAccess;
 using GalleryCart.DataAccess.Repository;
 using GalleryCart.DataAccess.Repository.IRepository;
@@ -8,6 +9,7 @@ using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 DotNetEnv.Env.Load();
 
@@ -15,6 +17,15 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
+//SignalR
+builder.Services.AddSignalR(options =>
+{
+    options.EnableDetailedErrors = builder.Environment.IsDevelopment();
+    options.KeepAliveInterval = TimeSpan.FromSeconds(15);
+    options.ClientTimeoutInterval = TimeSpan.FromSeconds(30);
+    options.HandshakeTimeout = TimeSpan.FromSeconds(15);
+});
 
 // Add database
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -44,7 +55,6 @@ builder.Configuration["EmailSettings:FromEmail"] = Environment.GetEnvironmentVar
 builder.Configuration["EmailSettings:FromPassword"] = Environment.GetEnvironmentVariable("EMAILSETTINGS__FROMPASSWORD");
 Console.WriteLine("EMAIL: " + builder.Configuration["EmailSettings:FromEmail"]);
 builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
-
 
 // Configure Repositories
 builder.Services.AddScoped<IChatRepository, ChatRepository>();
@@ -119,15 +129,15 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-
+app.MapHub<ChatHub>("/ChatHub");
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
 
-app.UseSession();              
-app.UseAuthentication();        
-app.UseAuthorization();        
+app.UseSession();
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapRazorPages();
 
