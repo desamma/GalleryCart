@@ -1,11 +1,11 @@
-﻿@page
-@using GalleryCart.DataAccess.Repository.IRepository
-@model GalleryCart.Areas.Customer.Pages.Home.IndexModel
+﻿@using GalleryCart.DataAccess.Repository.IRepository;
+@using GalleryCart.Models.Models
+@model GalleryCart.Areas.Artist.Models.IndexModel;
+@inject IUserRepository UserRepository
 @{
     ViewData["Title"] = "Customer Home";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
-@inject IUserRepository UserRepository
 <div class="min-h-screen bg-gray-900 text-white">
     <!-- Banner Image -->
     <div class="relative w-full h-32 md:h-40 lg:h-48 overflow-hidden">

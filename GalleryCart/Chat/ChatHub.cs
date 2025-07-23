@@ -1,6 +1,4 @@
-﻿using GalleryCart.DataAccess.Repository;
-using GalleryCart.DataAccess.Repository.IRepository;
-using GalleryCart.Models.Models;
+﻿using GalleryCart.DataAccess.Repository.IRepository;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
