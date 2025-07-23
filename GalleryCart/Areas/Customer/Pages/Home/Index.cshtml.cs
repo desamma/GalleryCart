@@ -1,13 +1,15 @@
 using GalleryCart.DataAccess.Repository.IRepository;
 using GalleryCart.Models.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 
+
 namespace GalleryCart.Areas.Customer.Pages.Home
 {
-    //[Authorize(Roles = "Admin,user")]
+    [Authorize(Roles = "user")]
     public class IndexModel : PageModel
     {
         private readonly UserManager<User> _userManager;

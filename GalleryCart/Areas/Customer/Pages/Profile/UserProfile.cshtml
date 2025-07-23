@@ -1,0 +1,81 @@
+@*
+@page
+@model GalleryCart.Areas.Customer.Pages.Profile.UserProfileModel
+@{
+ViewData["Title"] = "My Profile";
+Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="max-w-2xl mx-auto mt-10 bg-gray-800 rounded-lg shadow-lg p-6 space-y-6 text-white">
+    <h2 class="text-2xl font-bold text-center mb-4">User Profile</h2>
+
+    <form method="post" asp-antiforgery="true" enctype="multipart/form-data" class="space-y-4" id="profileForm">
+        <div>
+            <label asp-for="Input.UserName" class="label-text">Username</label>
+            <input asp-for="Input.UserName" readonly class="input input-bordered w-full text-black bg-white" />
+            <span asp-validation-for="Input.UserName" class="text-error text-sm"></span>
+        </div>
+
+        <div>
+            <label asp-for="Input.UserDOB" class="label-text">Date of Birth</label>
+            <input asp-for="Input.UserDOB" type="date" readonly class="input input-bordered w-full text-black bg-white" />
+            <span asp-validation-for="Input.UserDOB" class="text-error text-sm"></span>
+        </div>
+
+        <div>
+            <label asp-for="Input.PhoneNumber" class="label-text">Phone Number</label>
+            <input asp-for="Input.PhoneNumber" readonly class="input input-bordered w-full text-black bg-white" />
+            <span asp-validation-for="Input.PhoneNumber" class="text-error text-sm"></span>
+        </div>
+
+        <div>
+            <label class="label-text">Current Avatar</label>
+            <img src="@Model.CurrentAvatarUrl" alt="User Avatar" class="w-24 h-24 rounded-full object-cover mb-4" />
+        </div>
+
+        <div>
+            <label asp-for="Input.UserAvatar" class="label-text">Upload New Avatar</label>
+            <input asp-for="Input.UserAvatar" type="file" class="file-input file-input-bordered w-full text-black bg-white" />
+            <span asp-validation-for="Input.UserAvatar" class="text-error text-sm"></span>
+        </div>
+
+
+        <div>
+            <label class="label-text">Old Password</label>
+            <input asp-for="Input.OldPassword" type="password" readonly class="input input-bordered w-full text-black bg-white" />
+        </div>
+
+        <div>
+            <label class="label-text">New Password</label>
+            <input asp-for="Input.NewPassword" type="password" readonly class="input input-bordered w-full text-black bg-white" />
+        </div>
+
+        <div class="flex justify-between">
+            <button type="button" class="btn btn-outline btn-warning" onclick="enableEdit()">Edit</button>
+            <button type="submit" class="btn btn-primary hidden" id="updateBtn">Update</button>
+        </div>
+    </form>
+
+    @if (TempData["Success"] != null)
+    {
+    <div class="alert alert-success mt-4">
+        @TempData["Success"]
+    </div>
+    }
+</div>
+
+@section Scripts {
+<partial name="_ValidationScriptsPartial" />
+<script>
+    function enableEdit() {
+        document.querySelectorAll('#profileForm input').forEach(i => i.removeAttribute('readonly'));
+        document.getElementById('updateBtn').classList.remove('hidden');
+    }
+
+    const form = document.getElementById('profileForm');
+    form.addEventListener('input', () => {
+        document.getElementById('updateBtn').classList.remove('hidden');
+    });
+</script>
+}
+*@

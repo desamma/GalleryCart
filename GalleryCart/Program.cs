@@ -16,6 +16,12 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
+// Automapper
+builder.Services.AddAutoMapper(_ => { }, typeof(MyMapper).Assembly);
+
+// Cloudinary
+builder.Services.AddSingleton<CloudinaryUploader>();
+
 // Add database
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {

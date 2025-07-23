@@ -61,7 +61,7 @@ namespace GalleryCart.Areas.Identity.Controllers
             HttpContext.Session.Clear(); // Clear the session
             await _signInManager.SignOutAsync();
 
-            return RedirectToAction("Index", "Home", new { area = "Guest" });
+            return RedirectToPage("/Home/Index", new { area = "Guest" });
         }
     }
 }

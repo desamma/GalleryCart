@@ -14,6 +14,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="15.0.1" />
+    <PackageReference Include="CloudinaryDotNet" Version="1.27.6" />
     <PackageReference Include="DotNetEnv" Version="3.1.1" />
     <PackageReference Include="Google.Apis.Auth" Version="1.69.0" />
     <PackageReference Include="Google.Apis.Oauth2.v2" Version="1.68.0.1869" />
@@ -44,6 +46,13 @@
 
 	<ItemGroup>
 	  <Folder Include="wwwroot\images\" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <_ContentIncludedByDefault Remove="Areas\Artist\Pages\Home\Index.cshtml" />
+	  <_ContentIncludedByDefault Remove="Areas\Artist\Pages\Profile\ArtistProfile.cshtml" />
+	  <_ContentIncludedByDefault Remove="Areas\Artist\Pages\_ViewImports.cshtml" />
+	  <_ContentIncludedByDefault Remove="Areas\Artist\Pages\_ViewStart.cshtml" />
 	</ItemGroup>
 
 	<Target Name="Tailwind" BeforeTargets="Build">

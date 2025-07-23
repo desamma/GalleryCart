@@ -1,9 +1,11 @@
 using GalleryCart.DataAccess.Repository.IRepository;
 using GalleryCart.Models.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace GalleryCart.Areas.Customer.Pages.Artists
 {
+    [Authorize(Roles = "user")]
     public class AllArtistModel : PageModel
     {
         private readonly IUserRepository _userRepository;
