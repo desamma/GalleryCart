@@ -27,16 +27,19 @@
             <input asp-for="PhoneNumber" readonly class="input input-bordered w-full text-black bg-white" />
             <span asp-validation-for="PhoneNumber" class="text-error text-sm"></span>
         </div>
-
+        
         <div>
-            <label class="label-text">Current Avatar</label>
-            <img src="@Model.UserAvatar" alt="User Avatar" class="w-24 h-24 rounded-full object-cover mb-4" />
-        </div>
-
-        <div>
-            <label asp-for="UserAvatar" class="label-text">Upload New Avatar</label>
-            <input asp-for="UserAvatar" type="file" class="file-input file-input-bordered w-full text-black bg-white" />
-            <span asp-validation-for="UserAvatar" class="text-error text-sm"></span>
+            <label for="changeProfile" class="relative hover:scale-105 duration-150 transition-all hover:cursor-pointer">
+                <input type="hidden" name="UserAvatar" asp-for="UserAvatar" value="@Model.UserAvatar" />
+                <input type="file" name="image" id="changeProfile" style="display: none" accept=".jpg, .jpeg, .png, .gif, .bmp, .gif"/>
+                <!-- TODO: Subtitles the user avatar here -->
+                <img src="@Model.UserAvatar" alt="User's Name" id="avatar"
+                     class="avatar w-40 h-40 object-cover rounded-full shadow-md" />
+                <div id="uploadBtn"
+                     class="bg-slate-900 text-white flex gap-2 items-center justify-center rounded w-16 p-1 text-sm h-8 absolute bottom-0 left-0 hover:bg-slate-600">
+                    &#x270E; Edit
+                </div>
+            </label>
         </div>
 
         <div class="flex justify-between">
@@ -65,6 +68,14 @@
         const artistForm = document.getElementById('artistProfileForm');
         artistForm.addEventListener('input', () => {
             document.getElementById('artistUpdateBtn').classList.remove('hidden');
+        });
+    </script>
+    @* Change picture realtime *@
+    <script>
+        $("#changeProfile").on("change", function (event) {
+            const file = event.target.files[0];
+            const tempUrl = URL.createObjectURL(file);
+            $("#avatar").attr("src", tempUrl);
         });
     </script>
 }
