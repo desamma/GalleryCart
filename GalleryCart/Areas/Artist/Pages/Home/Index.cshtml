@@ -1,8 +1,8 @@
 ﻿@page
 @using GalleryCart.DataAccess.Repository.IRepository
-@model GalleryCart.Areas.Artist.Pages.Home.IndexModel
+@model GalleryCart.Areas.Customer.Pages.Home.IndexModel
 @{
-    ViewData["Title"] = "Artist Home";
+    ViewData["Title"] = "Customer Home";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 @inject IUserRepository UserRepository
@@ -84,7 +84,7 @@
                         post.User = await UserRepository.GetAsync(a => a.Id.Equals(post.UserId));
                     if(post == null || post.User == null || string.IsNullOrEmpty(post.Path) || string.IsNullOrEmpty(post.Title) || post.Price <= 0)
                         continue; // Skip invalid posts
-                    <div class="group relative cursor-pointer">
+                    <div class="group relative">
                         <!-- Post Card -->
                         <div class="bg-gray-800 rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 group-hover:scale-105">
                             <!-- Post Image Container -->
@@ -132,8 +132,8 @@
 
                                 <!-- Hover Overlay -->
                                 <div class="absolute inset-0 bg-black bg-opacity-70 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-between p-4">
-                                    <!-- Artist Profile - Top -->
-                                    <div class="flex items-center space-x-3">
+                                    <!-- Artist Profile - Top (Now Clickable) -->
+                                    <a asp-page="/Artists/Profile" asp-route-id="@post.UserId" class="flex items-center space-x-3 hover:bg-gray-800 hover:bg-opacity-50 rounded-lg p-2 transition-colors duration-200 cursor-pointer">
                                         <div class="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
                                             <span class="text-white font-bold text-sm">@post.User.UserName?.Substring(0, 1).ToUpper()</span>
                                         </div>
@@ -141,7 +141,7 @@
                                             <h4 class="text-white font-semibold text-sm">@post.User.UserName</h4>
                                             <p class="text-gray-300 text-xs">Artist</p>
                                         </div>
-                                    </div>
+                                    </a>
 
                                     <!-- Post Info - Bottom -->
                                     <div class="space-y-3">
@@ -182,17 +182,18 @@
                                         </div>
 
                                         <!-- Action Buttons -->
-                                        <div class="flex items-center space-x-2 pt-2" style="padding-top:0px; padding-bottom:8px;">
-                                            <a asp-page="/Artists/Art" class="flex-1 bg-gray-700 hover:bg-gray-600 text-white text-xs py-2 px-3 rounded transition-colors duration-200 flex items-center justify-center space-x-1">
+                                        <div class="flex items-center space-x-2">
+                                            <a asp-page="/Artists/Art" asp-route-id="@post.PostId" class="flex-1 bg-gray-700 hover:bg-gray-600 text-white text-xs py-2 px-3 rounded transition-colors duration-200 flex items-center justify-center space-x-1 cursor-pointer">
                                                 <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                                                 </svg>
                                                 <span>View</span>
                                             </a>
-@*                                             <a asp-page="/BuyPage" class="bg-blue-600 hover:bg-blue-700 text-white text-xs py-2 px-4 rounded transition-colors duration-200">
+                                            <!-- Uncomment and add route parameter if needed -->
+                                            <!-- <a asp-page="/BuyPage" asp-route-id="@post.PostId" class="bg-blue-600 hover:bg-blue-700 text-white text-xs py-2 px-4 rounded transition-colors duration-200 cursor-pointer">
                                                 Buy
-                                            </a> *@
+                                            </a> -->
                                         </div>
                                     </div>
                                 </div>
