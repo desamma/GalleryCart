@@ -152,13 +152,13 @@ app.MapControllerRoute(
     name: "areas",
     pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}");
 
-/*app.MapControllerRoute(
+app.MapControllerRoute(
     name: "default",
-    pattern: "{area=Guest}/{controller=Home}/{action=Index}/{id?}");*/
-app.MapGet("/", context =>
+    pattern: "{area=Guest}/{controller=Home}/{action=Index}/{id?}");
+/*app.MapGet("/", context =>
 {
     context.Response.Redirect("/Guest/Home/Index");
     return Task.CompletedTask;
-});
+});*/
 
 app.Run();
