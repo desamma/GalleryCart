@@ -129,18 +129,18 @@
                                         <span class="badge badge-warning badge-sm">Admin</span>
                                     }
                                 </li>
-                                <li><a>Your Profile</a></li>
-                                <li><a>Settings</a></li>
                                 @if (isArtist)
                                 {
-                                    <li><a>Artist Profile</a></li>
+                                    <li><a asp-action="Edit" asp-controller="Artist">Artist Profile</a></li>
                                     <li><a>Commission Settings</a></li>
                                 }
                                 else
                                 {
+                                    <li><a href="@Url.Page("/Profile/UserProfile", new { area = "Customer" })">Your Profile</a></li>
                                     <li><a>Purchase History</a></li>
                                     <li><a>Wishlist</a></li>
                                 }
+                                <li><a>Settings</a></li>
                                 <li><a asp-area="Identity" asp-action="Logout" asp-controller="Auth">Sign out</a></li>
                             </ul>
                         </div>

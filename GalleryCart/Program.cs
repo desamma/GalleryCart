@@ -27,6 +27,12 @@ builder.Services.AddSignalR(options =>
     options.HandshakeTimeout = TimeSpan.FromSeconds(15);
 });
 
+// Automapper
+builder.Services.AddAutoMapper(_ => { }, typeof(MyMapper).Assembly);
+
+// Cloudinary
+builder.Services.AddSingleton<CloudinaryUploader>();
+
 // Add database
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {

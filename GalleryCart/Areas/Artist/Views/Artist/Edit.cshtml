@@ -1,0 +1,111 @@
+@model GalleryCart.Models.ViewModels.ProfileInputModel
+
+@{
+    ViewData["Title"] = "Artist Profile";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="max-w-3xl mx-auto mt-10 bg-gray-800 rounded-lg shadow-lg p-6 space-y-6 text-white">
+    <h2 class="text-2xl font-bold text-center mb-4">Artist Profile</h2>
+    @*<p>UserName: @Model.Input.UserName</p>*@
+    <form method="post" asp-antiforgery="true" enctype="multipart/form-data" class="space-y-4" id="artistProfileForm">
+        <div>
+            <label asp-for="UserName" class="label-text">Username</label>
+            <input asp-for="UserName" readonly class="input input-bordered w-full text-black bg-white" />
+            <span asp-validation-for="UserName" class="text-error text-sm"></span>
+        </div>
+
+        <div>
+            <label asp-for="UserDOB" class="label-text">Date of Birth</label>
+            <input asp-for="UserDOB" type="date" readonly class="input input-bordered w-full text-black bg-white"
+                   max="@DateTime.Now.ToString("yyyy-MM-dd")"/>
+            <span asp-validation-for="UserDOB" class="text-error text-sm"></span>
+        </div>
+
+        <div>
+            <label asp-for="PhoneNumber" class="label-text">Phone Number</label>
+            <input asp-for="PhoneNumber" readonly class="input input-bordered w-full text-black bg-white" />
+            <span asp-validation-for="PhoneNumber" class="text-error text-sm"></span>
+        </div>
+
+        <div>
+            <label class="label-text">Current Avatar</label>
+            <img src="@Model.UserAvatar" alt="User Avatar" class="w-24 h-24 rounded-full object-cover mb-4" />
+        </div>
+
+        <div>
+            <label asp-for="UserAvatar" class="label-text">Upload New Avatar</label>
+            <input asp-for="UserAvatar" type="file" class="file-input file-input-bordered w-full text-black bg-white" />
+            <span asp-validation-for="UserAvatar" class="text-error text-sm"></span>
+        </div>
+
+
+        <div>
+            <label asp-for="ProfessionSummary" class="label-text">Profession Summary</label>
+            <textarea asp-for="ProfessionSummary" readonly class="textarea textarea-bordered w-full text-black bg-white"></textarea>
+            <span asp-validation-for="ProfessionSummary" class="text-error text-sm"></span>
+        </div>
+
+        <div>
+            <label asp-for="Skills" class="label-text">Skills</label>
+            <textarea asp-for="Skills" readonly class="textarea textarea-bordered w-full text-black bg-white"></textarea>
+            <span asp-validation-for="Skills" class="text-error text-sm"></span>
+        </div>
+
+        <div>
+            <label asp-for="Software" class="label-text">Software</label>
+            <textarea asp-for="Software" readonly class="textarea textarea-bordered w-full text-black bg-white"></textarea>
+            <span asp-validation-for="Software" class="text-error text-sm"></span>
+        </div>
+
+        <div>
+            <label asp-for="ContactInfo" class="label-text">Contact Info</label>
+            <textarea asp-for="ContactInfo" readonly class="textarea textarea-bordered w-full text-black bg-white"></textarea>
+            <span asp-validation-for="ContactInfo" class="text-error text-sm"></span>
+        </div>
+
+        <div class="form-control">
+            <label class="label cursor-pointer justify-start gap-3 text-white">
+                <input asp-for="IsJobLess" type="checkbox" disabled class="checkbox checkbox-primary" />
+                <span class="label-text">Is Jobless</span>
+            </label>
+            <span asp-validation-for="IsJobLess" class="text-error text-sm"></span>
+        </div>
+
+        <div class="form-control">
+            <label class="label cursor-pointer justify-start gap-3 text-white">
+                <input asp-for="CommissionStatus" type="checkbox" disabled class="checkbox checkbox-primary" />
+                <span class="label-text">Commission Status</span>
+            </label>
+            <span asp-validation-for="CommissionStatus" class="text-error text-sm"></span>
+        </div>
+
+        <div class="flex justify-between">
+            <button type="button" class="btn btn-outline btn-warning" onclick="enableArtistEdit()">Edit</button>
+            <button type="submit" class="btn btn-primary hidden" id="artistUpdateBtn">Update</button>
+        </div>
+    </form>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success mt-4">
+            @TempData["Success"]
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        function enableArtistEdit() {
+            document.querySelectorAll('#artistProfileForm input:not([type="hidden"]), #artistProfileForm textarea').forEach(i => i.removeAttribute('readonly'));
+            document.querySelectorAll('#artistProfileForm input[type="checkbox"]').forEach(i => i.removeAttribute('disabled'));
+            document.getElementById('artistUpdateBtn').classList.remove('hidden');
+        }
+
+        const artistForm = document.getElementById('artistProfileForm');
+        artistForm.addEventListener('input', () => {
+            document.getElementById('artistUpdateBtn').classList.remove('hidden');
+        });
+    </script>
+}

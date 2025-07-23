@@ -56,6 +56,7 @@ namespace GalleryCart.Areas.Customer.Controllers
                 return BadRequest($"An error occurred while fetching posts: {ex.Message}");
             }
         }
+
         public IActionResult AllArtist()
         {
             try
@@ -77,3 +78,4 @@ namespace GalleryCart.Areas.Customer.Controllers
             }
         }
     }
+}

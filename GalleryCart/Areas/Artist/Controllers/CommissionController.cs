@@ -32,7 +32,7 @@ namespace GalleryCart.Areas.Artist.Controllers
             _chatRepository = chatRepository;
         }
 
-        public async Task<IActionResult> CommissionManangement()
+        public async Task<IActionResult> CommissionManagement()
         {
             try
             {

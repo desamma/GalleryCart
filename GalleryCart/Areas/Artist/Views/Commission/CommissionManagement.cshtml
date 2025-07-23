@@ -1,5 +1,4 @@
-﻿@page
-@model GalleryCart.Areas.Artist.Pages.Commission.CommissionManagementModel
+﻿@model List<GalleryCart.Models.Models.Commission>
 @{
     ViewData["Title"] = "Manage Your Commissions";
     Layout = "~/Views/Shared/_Layout.cshtml";
@@ -21,19 +20,19 @@
             <div class="stats shadow bg-base-100">
                 <div class="stat place-items-center">
                     <div class="stat-title">Total</div>
-                    <div class="stat-value text-2xl">@Model.Commissions.Count()</div>
+                    <div class="stat-value text-2xl">@Model.Count()</div>
                 </div>
                 <div class="stat place-items-center">
                     <div class="stat-title">Pending</div>
-                    <div class="stat-value text-2xl text-warning">@Model.Commissions.Count(c => c.Status == "Pending")</div>
+                    <div class="stat-value text-2xl text-warning">@Model.Count(c => c.Status == "Pending")</div>
                 </div>
                 <div class="stat place-items-center">
                     <div class="stat-title">In Progress</div>
-                    <div class="stat-value text-2xl text-info">@Model.Commissions.Count(c => c.Status == "In Progress")</div>
+                    <div class="stat-value text-2xl text-info">@Model.Count(c => c.Status == "In Progress")</div>
                 </div>
                 <div class="stat place-items-center">
                     <div class="stat-title">Completed</div>
-                    <div class="stat-value text-2xl text-success">@Model.Commissions.Count(c => c.Status == "Completed")</div>
+                    <div class="stat-value text-2xl text-success">@Model.Count(c => c.Status == "Completed")</div>
                 </div>
             </div>
         </div>
@@ -48,8 +47,8 @@
         </div>
 
         <!-- Commissions List -->
-        <div class="space-y-6">
-            @foreach (var statusGroup in Model.Commissions
+        @*<div class="space-y-6">
+            @foreach (var statusGroup in Model
             .GroupBy(c => c.Status)
             .OrderBy(g => Model.StatusOrder.ContainsKey(g.Key) ? Model.StatusOrder[g.Key] : 5))
             {
@@ -216,7 +215,7 @@
                     </div>
                 </div>
             }
-        </div>
+        </div>*@
     </div>
 </div>
 
