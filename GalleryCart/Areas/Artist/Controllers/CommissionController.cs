@@ -1,25 +1,20 @@
-using GalleryCart.DataAccess.Repository.IRepository;
+﻿using GalleryCart.DataAccess.Repository.IRepository;
 using GalleryCart.Models.Models;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
+using ChatModel = GalleryCart.Models.Models.Chat;
 
-namespace GalleryCart.Areas.Artist.Pages.Commission
+namespace GalleryCart.Areas.Artist.Controllers
 {
-    public class CommissionManagementModel : PageModel
+    //[Area("Artist")]
+    public class CommissionController : Controller
     {
         private readonly IUserRepository _userRepository;
         private readonly ICommissionRepository _commissionRepository;
         private readonly IChatRepository _chatRepository;
-        public CommissionManagementModel(IUserRepository userRepository, ICommissionRepository commissionRepository, IChatRepository chatRepository)
-        {
-            _userRepository = userRepository;
-            _commissionRepository = commissionRepository;
-            _chatRepository = chatRepository;
-        }
 
-        public Dictionary<string, int> StatusOrder = new()
+        private readonly Dictionary<string, int> StatusOrder = new()
         {
             ["Pending"] = 1,
             ["In Progress"] = 2,
@@ -27,23 +22,28 @@ namespace GalleryCart.Areas.Artist.Pages.Commission
             ["Rejected"] = 4
         };
 
-        public required User CurrentUser { get; set; }
+        public CommissionController(
+            IUserRepository userRepository,
+            ICommissionRepository commissionRepository,
+            IChatRepository chatRepository)
+        {
+            _userRepository = userRepository;
+            _commissionRepository = commissionRepository;
+            _chatRepository = chatRepository;
+        }
 
-        //load into memory first to fix bug and shit
-        public required List<Models.Models.Commission> Commissions { get; set; } = new();
-        public async Task OnGetAsync()
+        public async Task<IActionResult> CommissionManangement()
         {
             try
             {
                 var userJson = HttpContext.Session.GetString("CurrentUser");
+                if (string.IsNullOrEmpty(userJson))
+                    return Unauthorized();
 
-                if (!string.IsNullOrEmpty(userJson))
-                {
-                    CurrentUser = JsonConvert.DeserializeObject<User>(userJson);
-                }
+                var currentUser = JsonConvert.DeserializeObject<User>(userJson);
 
                 var commissions = await _commissionRepository
-                    .GetAllQueryable(c => c.ArtistId.Equals(CurrentUser.Id), asNoTracking: true)
+                    .GetAllQueryable(c => c.ArtistId.Equals(currentUser.Id), asNoTracking: true)
                     .ToListAsync();
 
                 foreach (var commission in commissions)
@@ -54,23 +54,26 @@ namespace GalleryCart.Areas.Artist.Pages.Commission
                     }
                 }
 
-                // sorting type shit 
-                Commissions = commissions
-               .OrderBy(c => StatusOrder.ContainsKey(c.Status) ? StatusOrder[c.Status] : 5)
-               .ThenByDescending(c => c.CreatedDate)
-               .ToList();
+                var orderedCommissions = commissions
+                    .OrderBy(c => StatusOrder.ContainsKey(c.Status) ? StatusOrder[c.Status] : 5)
+                    .ThenByDescending(c => c.CreatedDate)
+                    .ToList();
+
+                ViewData["CurrentUser"] = currentUser;
+                return View(orderedCommissions);
             }
             catch (Exception ex)
             {
-                BadRequest($"An error occurred while fetching posts: {ex.Message}");
+                return BadRequest($"An error occurred while fetching commissions: {ex.Message}");
             }
         }
 
-        public async Task<IActionResult> OnPostAcceptAsync(string commissionId)
+        [HttpPost]
+        public async Task<IActionResult> Accept(string commissionId)
         {
             try
             {
-                if (commissionId != string.Empty)
+                if (!string.IsNullOrEmpty(commissionId))
                 {
                     var commission = await _commissionRepository.GetAsync(c => c.CommissionId.ToString().Equals(commissionId));
                     if (commission != null)
@@ -79,19 +82,20 @@ namespace GalleryCart.Areas.Artist.Pages.Commission
                         await _commissionRepository.UpdateAsync(commission);
                     }
                 }
-                return RedirectToPage();
+                return RedirectToAction("Index");
             }
             catch (Exception ex)
             {
-                // Log the error
                 return BadRequest($"Error accepting commission: {ex.Message}");
             }
         }
-        public async Task<IActionResult> OnPostCompleteAsync(string commissionId)
+
+        [HttpPost]
+        public async Task<IActionResult> Complete(string commissionId)
         {
             try
             {
-                if (commissionId != string.Empty)
+                if (!string.IsNullOrEmpty(commissionId))
                 {
                     var commission = await _commissionRepository.GetAsync(c => c.CommissionId.ToString().Equals(commissionId));
                     if (commission != null)
@@ -100,37 +104,38 @@ namespace GalleryCart.Areas.Artist.Pages.Commission
                         await _commissionRepository.UpdateAsync(commission);
                     }
                 }
-                return RedirectToPage();
+                return RedirectToAction("Index");
             }
             catch (Exception ex)
             {
-                // Log the error
-                return BadRequest($"Error accepting commission: {ex.Message}");
+                return BadRequest($"Error completing commission: {ex.Message}");
             }
         }
-        public async Task<IActionResult> OnPostRejectAsync(string commissionId, string? rejectionReason)
+
+        [HttpPost]
+        public async Task<IActionResult> Reject(string commissionId, string? rejectionReason)
         {
             try
             {
                 var userJson = HttpContext.Session.GetString("CurrentUser");
+                if (string.IsNullOrEmpty(userJson))
+                    return Unauthorized();
 
-                if (!string.IsNullOrEmpty(userJson))
-                {
-                    CurrentUser = JsonConvert.DeserializeObject<User>(userJson);
-                }
-                if (commissionId != string.Empty)
+                var currentUser = JsonConvert.DeserializeObject<User>(userJson);
+
+                if (!string.IsNullOrEmpty(commissionId))
                 {
                     var commission = await _commissionRepository.GetAsync(c => c.CommissionId.ToString().Equals(commissionId));
                     if (commission != null)
                     {
                         commission.Status = "Rejected";
-                        var rejectMessage = $"This commission (id: {commission.CommissionId} has been rejected.\nReason: {rejectionReason}";
-                        var chat = new Models.Models.Chat
+
+                        var chat = new ChatModel
                         {
                             ChatId = Guid.NewGuid(),
-                            SenderId = CurrentUser.Id,
+                            SenderId = currentUser.Id,
                             ReceiverId = commission.CommissionerId,
-                            Message = rejectionReason ?? "No reason provided.",
+                            Message = $"Commission rejected with reason: {rejectionReason}" ?? "No reason provided.",
                             Timestamp = DateTime.Now
                         };
 
@@ -138,12 +143,12 @@ namespace GalleryCart.Areas.Artist.Pages.Commission
                         await _chatRepository.AddAsync(chat);
                     }
                 }
-                return RedirectToPage();
+
+                return RedirectToAction("Index");
             }
             catch (Exception ex)
             {
-                // Log the error
-                return BadRequest($"Error accepting commission: {ex.Message}");
+                return BadRequest($"Error rejecting commission: {ex.Message}");
             }
         }
     }

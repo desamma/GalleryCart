@@ -1,7 +1,6 @@
 ﻿using GalleryCart.Areas.Customer.Models;
 using GalleryCart.DataAccess.Repository.IRepository;
 using GalleryCart.Models.Models;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
@@ -9,8 +8,6 @@ using System.Security.Claims;
 namespace GalleryCart.Areas.Customer.Controllers
 {
     [Area("Customer")]
-    //[Authorize(Roles = "Admin,user")]
-    //[Route("Customer/[controller]/[action]")]
     [AutoValidateAntiforgeryToken]
     public class CommissionController : Controller
     {
