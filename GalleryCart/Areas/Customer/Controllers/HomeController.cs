@@ -1,13 +1,13 @@
-using GalleryCart.Areas.Guest.Models;
+using GalleryCart.Areas.Customer.Models;
 using GalleryCart.DataAccess.Repository.IRepository;
 using GalleryCart.Models.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 
-namespace GalleryCart.Areas.Guest.Controllers
+namespace GalleryCart.Areas.Customer.Controllers
 {
-    [Area("Guest")]
+    [Area("Customer")]
     public class HomeController : Controller
     {
         private readonly UserManager<User> _userManager;
@@ -42,7 +42,7 @@ namespace GalleryCart.Areas.Guest.Controllers
                 {
                     post.User = await _userRepository.GetAsync(a => a.Id.Equals(post.UserId));
                 }
-                
+
                 var model = new IndexModel
                 {
                     CurrentUser = currentUser,
@@ -54,6 +54,27 @@ namespace GalleryCart.Areas.Guest.Controllers
             catch (Exception ex)
             {
                 return BadRequest($"An error occurred while fetching posts: {ex.Message}");
+            }
+        }
+
+        public IActionResult AllArtist()
+        {
+            try
+            {
+                var artists = _userRepository.GetAllQueryable()
+                    .Where(u => u.IsArtits)
+                    .OrderByDescending(u => u.NormalizedUserName);
+
+                var model = new AllArtistModel
+                {
+                    Artist = artists
+                };
+
+                return View(model);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"An error occurred while fetching artists: {ex.Message}");
             }
         }
     }

@@ -1,5 +1,4 @@
-﻿@page
-@model GalleryCart.Areas.Artists.Pages.Commission.CommissionManagementModel
+﻿@model List<GalleryCart.Models.Models.Commission>
 @{
     ViewData["Title"] = "Manage Your Commissions";
     Layout = "~/Views/Shared/_Layout.cshtml";
@@ -21,19 +20,19 @@
             <div class="stats shadow bg-base-100">
                 <div class="stat place-items-center">
                     <div class="stat-title">Total</div>
-                    <div class="stat-value text-2xl">@Model.Commissions.Count()</div>
+                    <div class="stat-value text-2xl">@Model.Count()</div>
                 </div>
                 <div class="stat place-items-center">
                     <div class="stat-title">Pending</div>
-                    <div class="stat-value text-2xl text-warning">@Model.Commissions.Count(c => c.Status == "Pending")</div>
+                    <div class="stat-value text-2xl text-warning">@Model.Count(c => c.Status == "Pending")</div>
                 </div>
                 <div class="stat place-items-center">
                     <div class="stat-title">In Progress</div>
-                    <div class="stat-value text-2xl text-info">@Model.Commissions.Count(c => c.Status == "In Progress")</div>
+                    <div class="stat-value text-2xl text-info">@Model.Count(c => c.Status == "In Progress")</div>
                 </div>
                 <div class="stat place-items-center">
                     <div class="stat-title">Completed</div>
-                    <div class="stat-value text-2xl text-success">@Model.Commissions.Count(c => c.Status == "Completed")</div>
+                    <div class="stat-value text-2xl text-success">@Model.Count(c => c.Status == "Completed")</div>
                 </div>
             </div>
         </div>
@@ -48,8 +47,8 @@
         </div>
 
         <!-- Commissions List -->
-        <div class="space-y-6">
-            @foreach (var statusGroup in Model.Commissions
+        @*<div class="space-y-6">
+            @foreach (var statusGroup in Model
             .GroupBy(c => c.Status)
             .OrderBy(g => Model.StatusOrder.ContainsKey(g.Key) ? Model.StatusOrder[g.Key] : 5))
             {
@@ -184,12 +183,13 @@
                                                 </div>
                                             }
 
-                                            <button class="btn btn-ghost btn-sm w-full" onclick="openMessageModal('@commission.CommissionId', '@commission.Commissioner.UserName')">
+                                            <!-- Changed this from modal to direct link -->
+                                            <a href="@Url.Page("/Chat/Chat", new { area = "Chat", id = commission.Commissioner.Id })" class="btn btn-ghost btn-sm w-full">
                                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="inline-block w-4 h-4 stroke-current">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
                                                 </svg>
                                                 Message Customer
-                                            </button>
+                                            </a>
 
                                             <div class="dropdown dropdown-end">
                                                 <div tabindex="0" role="button" class="btn btn-ghost btn-sm w-full">
@@ -215,34 +215,11 @@
                     </div>
                 </div>
             }
-        </div>
+        </div>*@
     </div>
 </div>
 
-<!-- Message Modal -->
-<dialog id="messageModal" class="modal">
-    <div class="modal-box">
-        <form method="dialog">
-            <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
-        </form>
-        <h3 class="font-bold text-lg mb-4">Send Message</h3>
-        <form method="post">
-            <input type="hidden" id="messageCommissionId" name="commissionId" />
-            <div class="form-control">
-                <label class="label">
-                    <span class="label-text">To: <span id="modalCustomerName" class="font-semibold"></span></span>
-                </label>
-                <textarea name="message" class="textarea textarea-bordered h-32" placeholder="Type your message here..." required></textarea>
-            </div>
-            <div class="modal-action">
-                <button type="submit" class="btn btn-primary">Send Message</button>
-                <button type="button" class="btn" onclick="document.getElementById('messageModal').close()">Cancel</button>
-            </div>
-        </form>
-    </div>
-</dialog>
-
-<!-- Reject Modal -->
+<!-- Reject Modal (Message modal removed since we're now using direct links) -->
 <dialog id="rejectModal" class="modal">
     <div class="modal-box">
         <form method="dialog">
@@ -266,14 +243,8 @@
     </div>
 </dialog>
 
-
-
 <script>
-    function openMessageModal(commissionId, customerName) {
-        document.getElementById('messageCommissionId').value = commissionId;
-        document.getElementById('modalCustomerName').textContent = customerName;
-        document.getElementById('messageModal').showModal();
-    }
+    // Removed openMessageModal function since we're not using it anymore
 
     function openRejectModal(commissionId, customerName) {
         document.getElementById('rejectCommissionId').value = commissionId;
