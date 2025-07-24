@@ -35,20 +35,15 @@ public class CustomerController : Controller
         var currentUser = JsonConvert.DeserializeObject<User>(HttpContext.Session.GetString("CurrentUser"));
         var targetUserId = userId ?? currentUser.Id;
         
-        // Get user profile
         var user = await _userRepository.GetAsync(u => u.Id == targetUserId);
         if (user == null) return NotFound();
         
         var favoritePostsQuery = _favouritePostRepository.GetAllQueryable(
             fp => fp.UserId == targetUserId && fp.PostId.HasValue);
 
-        // Get total count
         var totalPostsCount = await favoritePostsQuery.CountAsync();
         
-        // Get favorite posts with tags included
         var posts = await favoritePostsQuery
-            .Include(fp => fp.Post)
-            .ThenInclude(p => p.Tags)
             .OrderByDescending(fp => fp.Post.PostDate)
             .Skip((pageNumber - 1) * pageSize)
             .Take(pageSize)
@@ -60,10 +55,53 @@ public class CustomerController : Controller
         // Map user and set additional properties
         var viewModel = _mapper.Map<UserProfileVM>(user);
         viewModel.IsOwnProfile = targetUserId == currentUser.Id;
-        viewModel.FavoritePosts = favoritePostVMs;
+        viewModel.Posts = favoritePostVMs;
         viewModel.TotalPostsCount = totalPostsCount;
         viewModel.CurrentPage = pageNumber;
         viewModel.PageSize = pageSize;
+        
+        return View(viewModel);
+    }
+    
+    public async Task<IActionResult> ArtistProfile(Guid? userId, string tab = "portfolio", int pageNumber = 1, int pageSize = 21)
+    {
+        if (userId == null) return NotFound();
+        var targetUserId = userId;
+        const bool isOwnProfile = false;
+        
+        var user = await _userRepository.GetAsync(u => u.Id == targetUserId);
+        if (user == null) return NotFound();
+        
+        // Validate tab parameter - non-owners can only view portfolio
+        if (tab != "portfolio")
+        {
+            return RedirectToAction(nameof(ArtistProfile), new { userId = targetUserId, tab = "portfolio", pageNumber = 1, pageSize });
+        }
+        
+        var postsQuery = _postRepository.GetAllQueryable(
+                p => p.UserId == targetUserId && p.IsPorfolio == true);
+
+        var totalPostsCount = await postsQuery.CountAsync();
+        
+        var posts = await postsQuery
+            .OrderByDescending(p => p.PostDate)
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+
+        // Map to ViewModels
+        var postVMs = _mapper.Map<List<PostVM>>(posts);
+        
+        // Map user and set additional properties
+        var viewModel = _mapper.Map<UserProfileVM>(user);
+        viewModel.IsOwnProfile = isOwnProfile;
+        viewModel.Posts = postVMs;
+        viewModel.TotalPostsCount = totalPostsCount;
+        viewModel.CurrentPage = pageNumber;
+        viewModel.PageSize = pageSize;
+        
+        // Pass the active tab to the view
+        ViewBag.ActiveTab = tab;
         
         return View(viewModel);
     }

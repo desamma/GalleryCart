@@ -17,7 +17,7 @@ public class MyMapper : Profile
         // User to UserProfileVM mapping (partial)
         CreateMap<User, UserProfileVM>()
             .ForMember(dest => dest.UserId, opt => opt.MapFrom(src => src.Id))
-            .ForMember(dest => dest.FavoritePosts, opt => opt.Ignore())
+            .ForMember(dest => dest.Posts, opt => opt.Ignore())
             .ForMember(dest => dest.TotalPostsCount, opt => opt.Ignore())
             .ForMember(dest => dest.CurrentPage, opt => opt.Ignore())
             .ForMember(dest => dest.PageSize, opt => opt.Ignore())

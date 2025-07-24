@@ -18,10 +18,13 @@ public class UserProfileVM
     public string ProfessionSummary { get; set; }
     public string Skills { get; set; }
     public string Software { get; set; }
+    public string ContactInfo { get; set; }
+    public bool IsJobLess { get; set; }
+    public bool CommissionStatus { get; set; }
     public bool IsOwnProfile { get; set; } // To show/hide edit buttons
     
     // Posts Information
-    public IEnumerable<PostVM> FavoritePosts { get; set; } = new List<PostVM>();
+    public IEnumerable<PostVM> Posts { get; set; } = new List<PostVM>();
     public int TotalPostsCount { get; set; }
     public int CurrentPage { get; set; } = 1;
     public int PageSize { get; set; } = 21;

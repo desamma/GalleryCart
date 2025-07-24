@@ -16,7 +16,7 @@ namespace GalleryCart.DataAccess.Repository
 
         public IQueryable<FavouritePost> GetAllQueryable(Expression<Func<FavouritePost, bool>>? predicate = null, bool asNoTracking = true)
         {
-            IQueryable<FavouritePost> query = _db.FavouritePosts.Include(fp => fp.User).Include(fp => fp.Post);
+            IQueryable<FavouritePost> query = _db.FavouritePosts.Include(fp => fp.User).Include(fp => fp.Post).ThenInclude(p => p.Tags);
             if (asNoTracking)
             {
                 query = query.AsNoTracking(); // Use AsNoTracking for read-only queries
@@ -30,7 +30,7 @@ namespace GalleryCart.DataAccess.Repository
 
         public async Task<FavouritePost?> GetAsync(Expression<Func<FavouritePost, bool>> predicate)
         {
-            return await _db.FavouritePosts.Include(fp => fp.User).Include(fp => fp.Post)
+            return await _db.FavouritePosts.Include(fp => fp.User).Include(fp => fp.Post).ThenInclude(p => p.Tags)
                 .AsNoTracking() // Use AsNoTracking for read-only queries
                 .FirstOrDefaultAsync(predicate); // Return the first matching favouritePost or null if none found
         }
