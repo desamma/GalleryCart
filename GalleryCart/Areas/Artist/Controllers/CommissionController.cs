@@ -1,4 +1,5 @@
-﻿using GalleryCart.DataAccess.Repository.IRepository;
+﻿using GalleryCart.Areas.Artist.Models;
+using GalleryCart.DataAccess.Repository.IRepository;
 using GalleryCart.Models.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -7,7 +8,7 @@ using ChatModel = GalleryCart.Models.Models.Chat;
 
 namespace GalleryCart.Areas.Artist.Controllers
 {
-    //[Area("Artist")]
+    [Area("Artist")]
     public class CommissionController : Controller
     {
         private readonly IUserRepository _userRepository;
@@ -55,12 +56,18 @@ namespace GalleryCart.Areas.Artist.Controllers
                 }
 
                 var orderedCommissions = commissions
-                    .OrderBy(c => StatusOrder.ContainsKey(c.Status) ? StatusOrder[c.Status] : 5)
+                    .OrderBy(c => StatusOrder.TryGetValue(c.Status, out int value) ? value : 5)
                     .ThenByDescending(c => c.CreatedDate)
                     .ToList();
 
-                ViewData["CurrentUser"] = currentUser;
-                return View(orderedCommissions);
+                var model = new CommissionManagementModel
+                {
+                    CurrentUser = currentUser,
+                    Posts = orderedCommissions,
+                    StatusOrder = StatusOrder
+                };
+
+                return View(model);
             }
             catch (Exception ex)
             {
