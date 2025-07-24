@@ -47,6 +47,8 @@ namespace GalleryCart.DataAccess
             builder.Entity<Post>().HasKey(p => p.PostId);
             builder.Entity<Tag>().HasKey(t => t.TagId);
             builder.Entity<User>().HasKey(u => u.Id);
+            builder.Entity<Cart>().HasKey(c => c.CartId);
+            builder.Entity<CartItem>().HasKey(ci => ci.CartItemId);
 
             // Relationships
 
@@ -138,6 +140,27 @@ namespace GalleryCart.DataAccess
                 .HasMany(p => p.Tags)
                 .WithMany(t => t.Posts)
                 .UsingEntity(j => j.ToTable("PostTags"));
+
+            // Cart to User (one-to-many)
+            builder.Entity<Cart>()
+                .HasOne(c => c.User)
+                .WithMany(u => u.Carts)
+                .HasForeignKey(c => c.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Cart to CartItems (one-to-many)
+            builder.Entity<Cart>()
+                .HasMany(c => c.CartItems)
+                .WithOne(ci => ci.Cart)
+                .HasForeignKey(ci => ci.CartId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // CartItem to Commission (many-to-one)
+            builder.Entity<CartItem>()
+                .HasOne(ci => ci.Commission)
+                .WithMany()
+                .HasForeignKey(ci => ci.CommissionId)
+                .OnDelete(DeleteBehavior.Restrict);
 
             // Add precision for decimal fields
             builder.Entity<Post>()
