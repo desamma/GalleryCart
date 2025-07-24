@@ -1,74 +1,74 @@
 @model GalleryCart.Models.ViewModels.ProfileInputModel
 
 @{
-    ViewData["Title"] = "Artist Profile";
+    ViewData["Title"] = "Edit Profile";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
 <div class="max-w-3xl mx-auto mt-10 bg-gray-800 rounded-lg shadow-lg p-6 space-y-6 text-white">
     <h2 class="text-2xl font-bold text-center mb-4">Artist Profile</h2>
     @*<p>UserName: @Model.Input.UserName</p>*@
-    <form method="post" asp-antiforgery="true" enctype="multipart/form-data" class="space-y-4" id="artistProfileForm">
+    <form method="post" asp-antiforgery="true" asp-action="Edit" enctype="multipart/form-data" class="space-y-4" id="artistProfileForm">
         <div>
             <label asp-for="UserName" class="label-text">Username</label>
-            <input asp-for="UserName" readonly class="input input-bordered w-full text-black bg-white" />
+            <input asp-for="UserName"   class="input input-bordered w-full text-black bg-white" />
             <span asp-validation-for="UserName" class="text-error text-sm"></span>
         </div>
 
         <div>
             <label asp-for="UserDOB" class="label-text">Date of Birth</label>
-            <input asp-for="UserDOB" type="date" readonly class="input input-bordered w-full text-black bg-white"
+            <input asp-for="UserDOB" type="date"   class="input input-bordered w-full text-black bg-white"
                    max="@DateTime.Now.ToString("yyyy-MM-dd")"/>
             <span asp-validation-for="UserDOB" class="text-error text-sm"></span>
         </div>
 
         <div>
             <label asp-for="PhoneNumber" class="label-text">Phone Number</label>
-            <input asp-for="PhoneNumber" readonly class="input input-bordered w-full text-black bg-white" />
+            <input asp-for="PhoneNumber"   class="input input-bordered w-full text-black bg-white" />
             <span asp-validation-for="PhoneNumber" class="text-error text-sm"></span>
         </div>
         
-        <div>
-            <label for="changeProfile" class="relative hover:scale-105 duration-150 transition-all hover:cursor-pointer">
+        <div class="flex items-center gap-4">
+            <label for="changeProfile" class="hover:scale-105 duration-150 transition-all hover:cursor-pointer">
                 <input type="hidden" name="UserAvatar" asp-for="UserAvatar" value="@Model.UserAvatar" />
                 <input type="file" name="image" id="changeProfile" style="display: none" accept=".jpg, .jpeg, .png, .gif, .bmp, .gif"/>
-                <!-- TODO: Subtitles the user avatar here -->
                 <img src="@Model.UserAvatar" alt="User's Name" id="avatar"
                      class="avatar w-40 h-40 object-cover rounded-full shadow-md" />
-                <div id="uploadBtn"
-                     class="bg-slate-900 text-white flex gap-2 items-center justify-center rounded w-16 p-1 text-sm h-8 absolute bottom-0 left-0 hover:bg-slate-600">
-                    &#x270E; Edit
-                </div>
+            </label>
+    
+            <label for="changeProfile" id="uploadBtn"
+                   class="bg-slate-900 text-white flex gap-2 items-center justify-center rounded px-4 py-2 text-sm hover:bg-slate-600 cursor-pointer">
+                &#x270E; Edit
             </label>
         </div>
 
         <div>
             <label asp-for="ProfessionSummary" class="label-text">Profession Summary</label>
-            <textarea asp-for="ProfessionSummary" readonly class="textarea textarea-bordered w-full text-black bg-white"></textarea>
+            <textarea asp-for="ProfessionSummary" class="textarea textarea-bordered w-full text-black bg-white"></textarea>
             <span asp-validation-for="ProfessionSummary" class="text-error text-sm"></span>
         </div>
 
         <div>
             <label asp-for="Skills" class="label-text">Skills</label>
-            <textarea asp-for="Skills" readonly class="textarea textarea-bordered w-full text-black bg-white"></textarea>
+            <textarea asp-for="Skills"   class="textarea textarea-bordered w-full text-black bg-white"></textarea>
             <span asp-validation-for="Skills" class="text-error text-sm"></span>
         </div>
 
         <div>
             <label asp-for="Software" class="label-text">Software</label>
-            <textarea asp-for="Software" readonly class="textarea textarea-bordered w-full text-black bg-white"></textarea>
+            <textarea asp-for="Software"   class="textarea textarea-bordered w-full text-black bg-white"></textarea>
             <span asp-validation-for="Software" class="text-error text-sm"></span>
         </div>
 
         <div>
             <label asp-for="ContactInfo" class="label-text">Contact Info</label>
-            <textarea asp-for="ContactInfo" readonly class="textarea textarea-bordered w-full text-black bg-white"></textarea>
+            <textarea asp-for="ContactInfo" class="textarea textarea-bordered w-full text-black bg-white"></textarea>
             <span asp-validation-for="ContactInfo" class="text-error text-sm"></span>
         </div>
 
         <div class="form-control">
             <label class="label cursor-pointer justify-start gap-3 text-white">
-                <input asp-for="IsJobLess" type="checkbox" disabled class="checkbox checkbox-primary" />
+                <input asp-for="IsJobLess" type="checkbox" class="checkbox checkbox-primary" />
                 <span class="label-text">Is Jobless</span>
             </label>
             <span asp-validation-for="IsJobLess" class="text-error text-sm"></span>
@@ -76,15 +76,14 @@
 
         <div class="form-control">
             <label class="label cursor-pointer justify-start gap-3 text-white">
-                <input asp-for="CommissionStatus" type="checkbox" disabled class="checkbox checkbox-primary" />
+                <input asp-for="CommissionStatus" type="checkbox" class="checkbox checkbox-primary" />
                 <span class="label-text">Commission Status</span>
             </label>
             <span asp-validation-for="CommissionStatus" class="text-error text-sm"></span>
         </div>
 
         <div class="flex justify-between">
-            <button type="button" class="btn btn-outline btn-warning" onclick="enableArtistEdit()">Edit</button>
-            <button type="submit" class="btn btn-primary hidden" id="artistUpdateBtn">Update</button>
+            <button type="submit" class="btn btn-primary" id="artistUpdateBtn" disabled>Update</button>
         </div>
     </form>
 
@@ -99,15 +98,83 @@
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
     <script>
-        function enableArtistEdit() {
-            document.querySelectorAll('#artistProfileForm input:not([type="hidden"]), #artistProfileForm textarea').forEach(i => i.removeAttribute('readonly'));
-            document.querySelectorAll('#artistProfileForm input[type="checkbox"]').forEach(i => i.removeAttribute('disabled'));
-            document.getElementById('artistUpdateBtn').classList.remove('hidden');
-        }
-
-        const artistForm = document.getElementById('artistProfileForm');
-        artistForm.addEventListener('input', () => {
-            document.getElementById('artistUpdateBtn').classList.remove('hidden');
+        $(document).ready(function() {
+            // Store original form values
+            let originalFormData = {};
+            let hasChanges = false;
+            
+            // Capture initial form state
+            function captureOriginalState() {
+                $('#artistProfileForm input, #artistProfileForm textarea, #artistProfileForm select').each(function() {
+                    if ($(this).attr('type') === 'checkbox') {
+                        originalFormData[$(this).attr('name') || $(this).attr('id')] = $(this).is(':checked');
+                    } else if ($(this).attr('type') !== 'file') {
+                        originalFormData[$(this).attr('name') || $(this).attr('id')] = $(this).val();
+                    }
+                });
+            }
+            
+            // Check if form has changes
+            function checkForChanges() {
+                hasChanges = false;
+                
+                $('#artistProfileForm input, #artistProfileForm textarea, #artistProfileForm select').each(function() {
+                    let fieldName = $(this).attr('name') || $(this).attr('id');
+                    let currentValue;
+                    
+                    if ($(this).attr('type') === 'checkbox') {
+                        currentValue = $(this).is(':checked');
+                    } else if ($(this).attr('type') === 'file') {
+                        // For file inputs, check if a file is selected
+                        if ($(this)[0].files && $(this)[0].files.length > 0) {
+                            hasChanges = true;
+                            return false; // Break out of each loop
+                        }
+                        return true; // Continue to next iteration
+                    } else {
+                        currentValue = $(this).val();
+                    }
+                    
+                    if (originalFormData[fieldName] !== currentValue) {
+                        hasChanges = true;
+                        return false; // Break out of each loop
+                    }
+                });
+                
+                // Enable/disable update button based on changes
+                $('#artistUpdateBtn').prop('disabled', !hasChanges);
+                
+                // Optional: Change button appearance
+                if (hasChanges) {
+                    $('#artistUpdateBtn').removeClass('btn-disabled').addClass('btn-primary');
+                } else {
+                    $('#artistUpdateBtn').removeClass('btn-primary').addClass('btn-disabled');
+                }
+            }
+            
+            // Initialize original state
+            captureOriginalState();
+            
+            // Monitor form changes
+            $('#artistProfileForm').on('input change', 'input, textarea, select', function() {
+                checkForChanges();
+            });
+            
+            // Handle file input change for avatar
+            $("#changeProfile").on("change", function (event) {
+                const file = event.target.files[0];
+                if (file) {
+                    const tempUrl = URL.createObjectURL(file);
+                    $("#avatar").attr("src", tempUrl);
+                }
+                checkForChanges();
+            });
+            
+            window.resetForm = function() {
+                $('#artistProfileForm')[0].reset();
+                captureOriginalState();
+                checkForChanges();
+            };
         });
     </script>
     @* Change picture realtime *@
