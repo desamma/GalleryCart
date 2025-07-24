@@ -18,6 +18,8 @@ namespace GalleryCart.DataAccess
         public virtual DbSet<History> Histories { get; set; } = null!;
         public virtual DbSet<Post> Posts { get; set; } = null!;
         public virtual DbSet<Tag> Tags { get; set; } = null!;
+        public virtual DbSet<Cart> Carts { get; set; }
+        public virtual DbSet<CartItem> CartItems { get; set; }
         // No need for this
         //public virtual DbSet<User> Users { get; set; } = null!;
 
