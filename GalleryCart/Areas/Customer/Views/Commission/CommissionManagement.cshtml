@@ -1,4 +1,5 @@
 ﻿@using GalleryCart.Areas.Customer.Models
+@using GalleryCart.Utilities.Utils
 @model CommissionManagementViewModel
 
 @{
@@ -66,6 +67,111 @@
                                         </p>
                                     </div>
 
+                                    <!-- Add this new section to display uploaded files if they exist -->
+                                    @if (commission.CommissionResultLink != null && commission.CommissionResultLink.Any())
+                                    {
+                                        <div class="mb-4 p-4 bg-base-200 rounded-lg">
+                                            <h5 class="font-semibold text-base-content mb-3 flex items-center">
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 mr-2">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                                                </svg>
+                                                Your Commission Results
+                                            </h5>
+
+                                            @{
+                                                var files = CommissionResultHelper.GetFiles(commission.CommissionResultLink);
+                                                var links = CommissionResultHelper.GetLinks(commission.CommissionResultLink);
+                                                var uploadedAt = CommissionResultHelper.GetUploadedAt(commission.CommissionResultLink);
+                                                var notes = commission.CommissionResultLink.FirstOrDefault(x => x.StartsWith("NOTES:"));
+                                            }
+
+                                            <!-- Display uploaded files -->
+                                            @if (files.Any())
+                                            {
+                                                <div class="mb-3">
+                                                    <div class="text-sm font-medium text-base-content/80 mb-2">Files:</div>
+                                                    <div class="space-y-2">
+                                                        @foreach (var file in files)
+                                                        {
+                                                            <div class="flex items-center justify-between bg-base-100 p-2 rounded">
+                                                                <div class="flex items-center gap-2">
+                                                                    @{
+                                                                        var fileExtension = System.IO.Path.GetExtension(file.OriginalName).ToLowerInvariant();
+                                                                        string fileIcon = "📄";
+                                                                        if (new[] { ".jpg", ".jpeg", ".png", ".gif" }.Contains(fileExtension)) fileIcon = "🖼️";
+                                                                        else if (fileExtension == ".pdf") fileIcon = "📑";
+                                                                        else if (new[] { ".zip", ".rar" }.Contains(fileExtension)) fileIcon = "🗜️";
+                                                                        else if (new[] { ".psd", ".ai" }.Contains(fileExtension)) fileIcon = "🎨";
+                                                                    }
+                                                                    <span class="text-lg">@fileIcon</span>
+                                                                    <span class="text-sm font-medium">@file.OriginalName</span>
+                                                                </div>
+                                                                <a href="/uploads/commissions/@file.FilePath"
+                                                                   target="_blank"
+                                                                   class="btn btn-ghost btn-xs text-primary">
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                                                                    </svg>
+                                                                    Download
+                                                                </a>
+                                                            </div>
+                                                        }
+                                                    </div>
+                                                </div>
+                                            }
+
+                                            <!-- Display external links -->
+                                            @if (links.Any())
+                                            {
+                                                <div class="mb-3">
+                                                    <div class="text-sm font-medium text-base-content/80 mb-2">External Links:</div>
+                                                    <div class="space-y-2">
+                                                        @foreach (var link in links)
+                                                        {
+                                                            <div class="flex items-center justify-between bg-base-100 p-2 rounded">
+                                                                <div class="flex items-center gap-2">
+                                                                    <span class="text-lg">🔗</span>
+                                                                    <span class="text-sm font-medium truncate">@link</span>
+                                                                </div>
+                                                                <a href="@link"
+                                                                   target="_blank"
+                                                                   rel="noopener noreferrer"
+                                                                   class="btn btn-ghost btn-xs text-primary">
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+                                                                    </svg>
+                                                                    Open
+                                                                </a>
+                                                            </div>
+                                                        }
+                                                    </div>
+                                                </div>
+                                            }
+
+                                            <!-- Display notes -->
+                                            @if (!string.IsNullOrEmpty(notes))
+                                            {
+                                                <div class="mb-3">
+                                                    <div class="text-sm font-medium text-base-content/80 mb-2">Artist Notes:</div>
+                                                    <div class="bg-base-100 p-3 rounded text-sm">
+                                                        @notes.Substring(6) <!-- Remove "NOTES:" prefix -->
+                                                    </div>
+                                                </div>
+                                            }
+
+                                            <!-- Display upload timestamp -->
+                                            @if (uploadedAt.HasValue)
+                                            {
+                                                <div class="text-xs text-base-content/60 mt-2 flex items-center">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 mr-1">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                    </svg>
+                                                    Completed on @uploadedAt.Value.ToString("MMM dd, yyyy 'at' hh:mm tt")
+                                                </div>
+                                            }
+                                        </div>
+                                    }
+
                                     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
                                         <div>
                                             <span class="text-base-content/60">Status</span>
@@ -106,16 +212,16 @@
                                         </div>
                                     </div>
 
-                                   @*  @if (commission.Status == "In Progress")
-                                    {
-                                        <div class="mt-4">
-                                            <div class="flex justify-between text-xs mb-1">
-                                                <span class="text-base-content/60">Progress</span>
-                                                <span class="font-semibold">@commission.Progress%</span>
-                                            </div>
-                                            <progress class="progress progress-primary w-full" value="@commission.Progress" max="100"></progress>
-                                        </div>
-                                    } *@
+                                    @*  @if (commission.Status == "In Progress")
+                            {
+                            <div class="mt-4">
+                            <div class="flex justify-between text-xs mb-1">
+                            <span class="text-base-content/60">Progress</span>
+                            <span class="font-semibold">@commission.Progress%</span>
+                            </div>
+                            <progress class="progress progress-primary w-full" value="@commission.Progress" max="100"></progress>
+                            </div>
+                            } *@
                                 </div>
 
                                 <!-- Actions -->
@@ -134,21 +240,45 @@
                                         </ul>
                                     </div>
 
-                                    <button class="btn btn-primary btn-sm" onclick="openMessageModal('@commission.CommissionId', '@artist.UserName')">
+                                    <a class="btn btn-primary btn-sm" href="@Url.Action("Chat", "Chat", new { area = "Chat", id = commission.ArtistId})">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="inline-block w-4 h-4 stroke-current">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
                                         </svg>
                                         Message
-                                    </button>
+                                    </a>
 
-                                    @if (commission.Status == "Completed")
+                                    @if (commission.Status == "Completed" && commission.CommissionResultLink != null && commission.CommissionResultLink.Any())
                                     {
-                                        <button class="btn btn-success btn-sm">
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="inline-block w-4 h-4 stroke-current">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                                            </svg>
-                                            Download
-                                        </button>
+                                        <div class="dropdown dropdown-end">
+                                            <div tabindex="0" role="button" class="btn btn-success btn-sm">
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="inline-block w-4 h-4 stroke-current">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                                </svg>
+                                                Download All
+                                            </div>
+                                            <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
+                                                @{
+                                                    var downloadFiles = CommissionResultHelper.GetFiles(commission.CommissionResultLink);
+                                                    var downloadLinks = CommissionResultHelper.GetLinks(commission.CommissionResultLink);
+                                                }
+                                                @if (downloadFiles.Any())
+                                                {
+                                                    <li class="menu-title">Files</li>
+                                                    @foreach (var file in downloadFiles)
+                                                    {
+                                                        <li><a href="/uploads/commissions/@file.FilePath" target="_blank">@file.OriginalName</a></li>
+                                                    }
+                                                }
+                                                @if (downloadLinks.Any())
+                                                {
+                                                    <li class="menu-title">Links</li>
+                                                    @foreach (var link in downloadLinks)
+                                                    {
+                                                        <li><a href="@link" target="_blank" rel="noopener noreferrer">Open Link</a></li>
+                                                    }
+                                                }
+                                            </ul>
+                                        </div>
                                     }
                                 </div>
                             </div>
@@ -159,41 +289,3 @@
         }
     </div>
 </div>
-
-<!-- Message Modal -->
-<dialog id="messageModal" class="modal">
-    <div class="modal-box">
-        <form method="dialog">
-            <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
-        </form>
-        <h3 class="font-bold text-lg mb-4">Send Message</h3>
-        <div class="form-control">
-            <label class="label">
-                <span class="label-text">To: <span id="modalArtistName" class="font-semibold"></span></span>
-            </label>
-            <textarea class="textarea textarea-bordered h-32" placeholder="Type your message here..."></textarea>
-        </div>
-        <div class="modal-action">
-            <button class="btn btn-primary">Send Message</button>
-            <form method="dialog">
-                <button class="btn">Cancel</button>
-            </form>
-        </div>
-    </div>
-</dialog>
-
-<script>
-    function openMessageModal(commissionId, artistName) {
-        document.getElementById('modalArtistName').textContent = artistName;
-        document.getElementById('messageModal').showModal();
-    }
-</script>
-
-<style>
-    .line-clamp-3 {
-        display: -webkit-box;
-        -webkit-line-clamp: 3;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-    }
-</style>

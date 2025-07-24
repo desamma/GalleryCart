@@ -28,6 +28,9 @@ namespace GalleryCart.Models.Models
         public string Status { get; set; } = "Pending"; // Default status is "Pending", "Rejected", "In Progress", "Completed"
 
         public Guid CommissionerId { get; set; }
+
+        public List<string>? CommissionResultLink { get; set; }
+
         [ValidateNever]
         public virtual User Commissioner { get; set; }
 
