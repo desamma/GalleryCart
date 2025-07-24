@@ -1,4 +1,4 @@
-﻿@model List<GalleryCart.Models.Models.Commission>
+﻿@model GalleryCart.Areas.Artist.Models.CommissionManagementModel
 @{
     ViewData["Title"] = "Manage Your Commissions";
     Layout = "~/Views/Shared/_Layout.cshtml";
@@ -20,19 +20,19 @@
             <div class="stats shadow bg-base-100">
                 <div class="stat place-items-center">
                     <div class="stat-title">Total</div>
-                    <div class="stat-value text-2xl">@Model.Count()</div>
+                    <div class="stat-value text-2xl">@Model.Posts.Count()</div>
                 </div>
                 <div class="stat place-items-center">
                     <div class="stat-title">Pending</div>
-                    <div class="stat-value text-2xl text-warning">@Model.Count(c => c.Status == "Pending")</div>
+                    <div class="stat-value text-2xl text-warning">@Model.Posts.Count(c => c.Status == "Pending")</div>
                 </div>
                 <div class="stat place-items-center">
                     <div class="stat-title">In Progress</div>
-                    <div class="stat-value text-2xl text-info">@Model.Count(c => c.Status == "In Progress")</div>
+                    <div class="stat-value text-2xl text-info">@Model.Posts.Count(c => c.Status == "In Progress")</div>
                 </div>
                 <div class="stat place-items-center">
                     <div class="stat-title">Completed</div>
-                    <div class="stat-value text-2xl text-success">@Model.Count(c => c.Status == "Completed")</div>
+                    <div class="stat-value text-2xl text-success">@Model.Posts.Count(c => c.Status == "Completed")</div>
                 </div>
             </div>
         </div>
@@ -47,8 +47,8 @@
         </div>
 
         <!-- Commissions List -->
-        @*<div class="space-y-6">
-            @foreach (var statusGroup in Model
+        <div class="space-y-6">
+            @foreach (var statusGroup in Model.Posts
             .GroupBy(c => c.Status)
             .OrderBy(g => Model.StatusOrder.ContainsKey(g.Key) ? Model.StatusOrder[g.Key] : 5))
             {
@@ -148,10 +148,10 @@
                                             @if (commission.Status == "Pending")
                                             {
                                                 <div class="flex flex-col gap-2 w-full">
-                                                    <form method="post" class="w-full">
+                                                    <form method="post" asp-action="Accept" asp-area="Artist" asp-controller="Commission" asp-area="Artist" class="w-full">
                                                         @Html.AntiForgeryToken()
                                                         <input type="hidden" name="commissionId" value="@commission.CommissionId.ToString()" />
-                                                        <button type="submit" formaction="?handler=Accept" class="btn btn-success btn-sm w-full">
+                                                        <button type="submit" class="btn btn-success btn-sm w-full">
                                                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="inline-block w-4 h-4 stroke-current">
                                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                                                             </svg>
@@ -170,10 +170,10 @@
                                             else if (commission.Status == "In Progress")
                                             {
                                                 <div class="flex flex-col gap-2 w-full">
-                                                    <form method="post" class="w-full">
+                                                    <form method="post" asp-action="Complete" asp-controller="Commission" class="w-full">
                                                         @Html.AntiForgeryToken()
                                                         <input type="hidden" name="commissionId" value="@commission.CommissionId.ToString()" />
-                                                        <button type="submit" formaction="?handler=Complete" class="btn btn-success btn-sm w-full">
+                                                        <button type="submit" class="btn btn-success btn-sm w-full">
                                                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="inline-block w-4 h-4 stroke-current">
                                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                                             </svg>
@@ -184,7 +184,7 @@
                                             }
 
                                             <!-- Changed this from modal to direct link -->
-                                            <a href="@Url.Page("/Chat/Chat", new { area = "Chat", id = commission.Commissioner.Id })" class="btn btn-ghost btn-sm w-full">
+                                            <a href="@Url.Action("Chat", "Chat", new { area = "Chat", id = commission.Commissioner.Id })" class="btn btn-ghost btn-sm w-full">
                                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="inline-block w-4 h-4 stroke-current">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
                                                 </svg>
@@ -215,18 +215,17 @@
                     </div>
                 </div>
             }
-        </div>*@
+        </div>
     </div>
 </div>
 
-<!-- Reject Modal (Message modal removed since we're now using direct links) -->
 <dialog id="rejectModal" class="modal">
     <div class="modal-box">
         <form method="dialog">
             <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
         </form>
         <h3 class="font-bold text-lg mb-4">Reject Commission</h3>
-        <form method="post">
+        <form method="post" asp-action="Reject" asp-controller="Commission" asp-area="Artist">
             @Html.AntiForgeryToken()
             <input type="hidden" id="rejectCommissionId" name="commissionId" />
             <div class="form-control">
@@ -236,7 +235,7 @@
                 <textarea name="rejectionReason" class="textarea textarea-bordered h-32" placeholder="Please provide a reason for rejecting this commission..."></textarea>
             </div>
             <div class="modal-action">
-                <button type="submit" formaction="?handler=Reject" class="btn btn-error">Reject Commission</button>
+                <button type="submit" class="btn btn-error">Reject Commission</button>
                 <button type="button" class="btn" onclick="document.getElementById('rejectModal').close()">Cancel</button>
             </div>
         </form>
