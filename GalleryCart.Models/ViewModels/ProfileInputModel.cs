@@ -26,7 +26,7 @@ public class ProfileInputModel
 
     [DataType(DataType.DateTime)]
     [DisplayFormat(DataFormatString = "{0:dd/MM/yyyy}")]
-    public DateTime? CreatedDate { get; set; } = DateTime.Now;
+    public DateTime? CreatedDate { get; set; }
 
     public bool IsBanned { get; set; }
     public bool IsArtits { get; set; }

@@ -55,7 +55,9 @@
                     </div>
                     <div class="flex flex-1 items-center justify-center sm:items-stretch sm:justify-start">
                         <div class="flex shrink-0 items-center">
-                            <img class="h-8 w-auto" src="https://tailwindcss.com/plus-assets/img/logos/mark.svg?color=indigo&shade=500" alt="Your Company">
+                            <a asp-area="@ViewContext.RouteData.Values["area"]" asp-action="Index" asp-controller="Home">
+                                <img class="h-8 w-auto" src="https://tailwindcss.com/plus-assets/img/logos/mark.svg?color=indigo&shade=500" alt="Your Company">
+                            </a>
                         </div>
                         <div class="hidden sm:ml-6 sm:block">
                             <div class="flex space-x-4">
@@ -131,12 +133,12 @@
                                 </li>
                                 @if (isArtist)
                                 {
-                                    <li><a asp-action="Edit" asp-controller="Artist">Artist Profile</a></li>
+                                    <li><a asp-area="Artist" asp-action="Index" asp-controller="Artist">Artist Profile</a></li>
                                     <li><a>Commission Settings</a></li>
                                 }
                                 else
                                 {
-                                    <li><a href="@Url.Page("/Profile/UserProfile", new { area = "Customer" })">Your Profile</a></li>
+                                    <li><a asp-area="Customer" asp-action="Index" asp-controller="Customer">Your Profile</a></li>
                                     <li><a>Purchase History</a></li>
                                     <li><a>Wishlist</a></li>
                                 }
@@ -178,7 +180,7 @@
                     <div class="flex flex-1 items-center justify-center sm:items-stretch sm:justify-start">
                         @*LOGO*@
                         <div class="flex shrink-0 items-center">
-                            <a asp-area="Guest" asp-action="Index" asp-controller="Home">
+                            <a asp-area="@ViewContext.RouteData.Values["area"]" asp-action="Index" asp-controller="Home">
                                 <img class="h-8 w-auto" src="https://tailwindcss.com/plus-assets/img/logos/mark.svg?color=indigo&shade=500" alt="Your Company">
                             </a>
                         </div>
