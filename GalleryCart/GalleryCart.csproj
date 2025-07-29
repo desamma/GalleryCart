@@ -46,10 +46,20 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <Folder Include="Areas\Customer\Models\" />
+	  <Folder Include="Areas\Guest\Models\" />
 	  <Folder Include="wwwroot\images\" />
 	</ItemGroup>
 
 	<ItemGroup>
+	  <Content Update="Areas\Artist\Views\Home\Index.cshtml">
+	    <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+	    <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+	  </Content>
+	  <Content Update="Areas\Customer\Views\Home\Index.cshtml">
+	    <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+	    <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+	  </Content>
 	  <Content Update="Areas\Guest\Views\Home\Index.cshtml">
 	    <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
 	    <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>

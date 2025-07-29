@@ -1,6 +1,6 @@
 ﻿using GalleryCart.Models.Models;
 
-namespace GalleryCart.Areas.Guest.Models
+namespace GalleryCart.Models.ViewModels
 {
     public class IndexModel
     {
