@@ -33,29 +33,31 @@
                     <div class="absolute inset-y-0 left-0 flex items-center sm:hidden">
                         <!-- Mobile menu button-->
                         @*<button type="button" class="relative inline-flex items-center justify-center rounded-md p-2 text-gray-400 hover:bg-gray-700 hover:text-white focus:ring-2 focus:ring-white focus:outline-hidden focus:ring-inset" aria-controls="mobile-menu" aria-expanded="false">
-                            <span class="absolute -inset-0.5"></span>
-                            <span class="sr-only">Open main menu</span>
-                            <!--
-                              Icon when menu is closed.
+                <span class="absolute -inset-0.5"></span>
+                <span class="sr-only">Open main menu</span>
+                <!--
+                Icon when menu is closed.
 
-                              Menu open: "hidden", Menu closed: "block"
-                            -->
-                            <svg class="block size-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true" data-slot="icon">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
-                            </svg>
-                            <!--
-                              Icon when menu is open.
+                Menu open: "hidden", Menu closed: "block"
+                -->
+                <svg class="block size-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true" data-slot="icon">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+                </svg>
+                <!--
+                Icon when menu is open.
 
-                              Menu open: "block", Menu closed: "hidden"
-                            -->
-                            <svg class="hidden size-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true" data-slot="icon">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
-                            </svg>
-                        </button>*@
+                Menu open: "block", Menu closed: "hidden"
+                -->
+                <svg class="hidden size-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true" data-slot="icon">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                </svg>
+                </button>*@
                     </div>
                     <div class="flex flex-1 items-center justify-center sm:items-stretch sm:justify-start">
                         <div class="flex shrink-0 items-center">
-                            <img class="h-8 w-auto" src="https://tailwindcss.com/plus-assets/img/logos/mark.svg?color=indigo&shade=500" alt="Your Company">
+                            <a asp-area="@ViewContext.RouteData.Values["area"]" asp-action="Index" asp-controller="Home">
+                                <img class="h-8 w-auto" src="https://tailwindcss.com/plus-assets/img/logos/mark.svg?color=indigo&shade=500" alt="Your Company">
+                            </a>
                         </div>
                         <div class="hidden sm:ml-6 sm:block">
                             <div class="flex space-x-4">
@@ -64,18 +66,22 @@
                                     <!-- Artist Navigation -->
                                     <a href="#" class="rounded-md bg-gray-900 px-3 py-2 text-sm font-medium text-white" aria-current="page">Artist Dashboard</a>
                                     <a href="#" class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">My Artworks</a>
-                                    <a href="@Url.Page("/Commission/CommissionManagement", new {area = "Artist"})" class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">Your Commissions</a>
+                                    <a href="@Url.Action("CommissionManagement", "Commission", new { area = "Artist" })" class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">Your Commissions</a>
                                     <a href="#" class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">Sales</a>
                                     <a href="#" class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">Gallery</a>
+                                    <a asp-area="Artist" asp-controller="Post" asp-action="Create" class="rounded-md px-3 py-2 text-sm font-medium text-green-400 hover:bg-green-700 hover:text-white">
+                                        + Create Post
+                                    </a>
                                 }
                                 else
                                 {
                                     <!-- Regular User Navigation -->
                                     <a href="#" class="rounded-md bg-gray-900 px-3 py-2 text-sm font-medium text-white" aria-current="page">Browse Gallery</a>
-                                    <a href="#" class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">My Cart</a>
-                                    <a href="@Url.Action("CommissionManagement", "Commission", new { area = "Customer"})" class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">My Commissions</a>
+                                    <!-- Change this line to use Razor Pages link for Cart -->
+                                    <a asp-area="Customer" asp-page="/Cart/Index" class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">My Cart</a>
+                                    <a href="@Url.Action("CommissionManagement", "Commission", new { area = "Customer" })" class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">My Commissions</a>
                                     <a href="#" class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">Favorites</a>
-                                    <a href="@Url.Page("/Artists/AllArtist", new { area = "Customer" })" class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">Artists</a>
+                                    <a href="@Url.Action("AllArtist", "Home", new { area = "Customer" })" class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">Artists</a>
                                 }
 
                                 @if (isAdmin)
@@ -90,7 +96,8 @@
                         @if (!isArtist)
                         {
                             <!-- Shopping Cart Icon (only for regular users) -->
-                            <button type="button" class="relative rounded-full bg-gray-800 p-1 text-gray-400 hover:text-white focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800 focus:outline-hidden mr-3">
+                            <!-- Make the cart icon clickable and link to Cart page -->
+                            <a asp-area="Customer" asp-page="/Cart/Index" class="relative rounded-full bg-gray-800 p-1 text-gray-400 hover:text-white focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800 focus:outline-hidden mr-3">
                                 <span class="absolute -inset-1.5"></span>
                                 <span class="sr-only">View cart</span>
                                 <svg class="size-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
@@ -98,9 +105,8 @@
                                 </svg>
                                 <!-- Cart item count badge -->
                                 <span class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">3</span>
-                            </button>
+                            </a>
                         }
-
                         <!-- Notifications -->
                         <button type="button" class="relative rounded-full bg-gray-800 p-1 text-gray-400 hover:text-white focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800 focus:outline-hidden">
                             <span class="absolute -inset-1.5"></span>
@@ -118,7 +124,7 @@
                                 </div>
                             </div>
                             <ul tabindex="0" class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52">
-                                <li class="menu-title">
+                                <li class="menu-title flex items-center gap-2">
                                     <span>@currentUser?.UserName</span>
                                     @if (isArtist)
                                     {
@@ -129,26 +135,25 @@
                                         <span class="badge badge-warning badge-sm">Admin</span>
                                     }
                                 </li>
-                                <li><a>Your Profile</a></li>
-                                <li><a>Settings</a></li>
                                 @if (isArtist)
                                 {
-                                    <li><a>Artist Profile</a></li>
-                                    <li><a>Commission Settings</a></li>
+                                    <li><a asp-area="Artist" asp-action="Index" asp-controller="Artist">Your Profile</a></li>
+                                    <li><a asp-area="Artist" asp-action="ArtistProfile" asp-controller="Artist">Your Portfolio</a></li>
+                                    <li><a asp-area="Artist" asp-action="CommissionSettings" asp-controller="Artist">Commission Settings</a></li>
                                 }
                                 else
                                 {
-                                    <li><a>Purchase History</a></li>
-                                    <li><a>Wishlist</a></li>
+                                    <li><a asp-area="Customer" asp-action="Index" asp-controller="Customer">Your Profile</a></li>
+                                    <li><a asp-area="Customer" asp-page="/History/Index">Purchase History</a></li>
+                                    <li><a asp-area="Customer" asp-action="Wishlist" asp-controller="Customer">Wishlist</a></li>
                                 }
+                                <li><a asp-area="Identity" asp-action="Settings" asp-controller="Auth">Settings</a></li>
                                 <li><a asp-area="Identity" asp-action="Logout" asp-controller="Auth">Sign out</a></li>
                             </ul>
                         </div>
-
                     </div>
                 </div>
             </div>
-
             <!-- Mobile menu, show/hide based on menu state. -->
             @*<div class="sm:hidden" id="mobile-menu">
     <div class="space-y-1 px-2 pt-2 pb-3">
@@ -178,7 +183,7 @@
                     <div class="flex flex-1 items-center justify-center sm:items-stretch sm:justify-start">
                         @*LOGO*@
                         <div class="flex shrink-0 items-center">
-                            <a asp-area="Guest" asp-action="Index" asp-controller="Home">
+                            <a asp-area="@ViewContext.RouteData.Values["area"]" asp-action="Index" asp-controller="Home">
                                 <img class="h-8 w-auto" src="https://tailwindcss.com/plus-assets/img/logos/mark.svg?color=indigo&shade=500" alt="Your Company">
                             </a>
                         </div>
@@ -186,7 +191,7 @@
                             <div class="flex space-x-4">
                                 <!-- Guest Navigation -->
                                 <a href="#" class="rounded-md bg-gray-900 px-3 py-2 text-sm font-medium text-white" aria-current="page">Browse Gallery</a>
-                                <a href="#" class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">Featured Artists</a>
+                                <a href="@Url.Action("AllArtist", "Guest")" class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">Featured Artists</a>
                                 <a href="#" class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">Categories</a>
                                 <a href="#" class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">About</a>
                             </div>
@@ -211,4 +216,4 @@
             </div>
         </nav>
     }
-} 
+}

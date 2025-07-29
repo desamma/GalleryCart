@@ -59,5 +59,6 @@ namespace GalleryCart.Models.Models
         public virtual ICollection<Commission> CommissionsReceived { get; set; } = new List<Commission>();
 
         public virtual ICollection<History> Histories { get; set; } = new List<History>();
+        public virtual ICollection<Cart> Carts { get; set; }
     }
 }

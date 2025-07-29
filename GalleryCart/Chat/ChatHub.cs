@@ -1,6 +1,4 @@
-﻿using GalleryCart.DataAccess.Repository;
-using GalleryCart.DataAccess.Repository.IRepository;
-using GalleryCart.Models.Models;
+﻿using GalleryCart.DataAccess.Repository.IRepository;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
@@ -28,10 +26,12 @@ namespace GalleryCart.Chat
         {
             try
             {
+                //Extracts user ID from claims
                 var identity = Context.User?.Identity as ClaimsIdentity;
                 var userIdClaim = identity?.Claims.FirstOrDefault(c => c.Type == "extension_userId")?.Value
                     ?? identity?.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
 
+                //Validates user authentication
                 if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out var userId))
                 {
                     await Clients.Caller.SendAsync("Error", "Invalid user authentication");
@@ -52,7 +52,7 @@ namespace GalleryCart.Chat
                     ConnectedUsers.TryRemove(existing.Key, out _);
                 }
 
-                // Store the user info in memory, including ConnectionId
+                // Creates ConnectedUser object
                 var connectedUser = new ConnectedUser
                 {
                     ConnectionId = Context.ConnectionId,
@@ -63,6 +63,7 @@ namespace GalleryCart.Chat
                     IsArtist = userInfo.IsArtits
                 };
 
+                //Adds to ConnectedUsers dictionary
                 ConnectedUsers.TryAdd(Context.ConnectionId, connectedUser);
 
                 // Notify all clients about updated user list
@@ -158,92 +159,7 @@ namespace GalleryCart.Chat
                 await Clients.Caller.SendAsync("Error", $"Failed to send message: {ex.Message}");
             }
         }
-
-        public async Task GetChatHistory(string receiverId)
-        {
-            try
-            {
-                if (!ConnectedUsers.TryGetValue(Context.ConnectionId, out var sender))
-                {
-                    await Clients.Caller.SendAsync("Error", "Unauthorized");
-                    return;
-                }
-
-                if (!Guid.TryParse(receiverId, out var receiverGuid))
-                {
-                    await Clients.Caller.SendAsync("Error", "Invalid receiver ID");
-                    return;
-                }
-
-                // Get chat history between two users
-                var messages = await _chatRepository
-                    .GetAllQueryable(c => (c.SenderId == sender.UserId && c.ReceiverId == receiverGuid) ||
-                                         (c.SenderId == receiverGuid && c.ReceiverId == sender.UserId))
-                    .Include(c => c.Sender)
-                    .Include(c => c.Receiver)
-                    .OrderBy(c => c.Timestamp)
-                    .ToListAsync();
-
-                var chatHistory = messages.Select(m => new
-                {
-                    chatId = m.ChatId,
-                    senderId = m.SenderId,
-                    senderName = m.Sender?.UserName ?? "Unknown",
-                    senderAvatar = m.Sender?.UserAvatar,
-                    receiverId = m.ReceiverId,
-                    receiverName = m.Receiver?.UserName ?? "Unknown",
-                    message = m.Message,
-                    timestamp = m.Timestamp
-                }).ToList();
-
-                await Clients.Caller.SendAsync("ChatHistory", chatHistory);
-            }
-            catch (Exception ex)
-            {
-                await Clients.Caller.SendAsync("Error", $"Failed to get chat history: {ex.Message}");
-            }
-        }
-
-        public async Task GetConversations()
-        {
-            try
-            {
-                if (!ConnectedUsers.TryGetValue(Context.ConnectionId, out var user))
-                {
-                    await Clients.Caller.SendAsync("Error", "Unauthorized");
-                    return;
-                }
-
-                // Get all messages where the user is either sender or receiver
-                var userMessages = await _chatRepository
-                    .GetAllQueryable(c => c.SenderId == user.UserId || c.ReceiverId == user.UserId)
-                    .Include(c => c.Sender)
-                    .Include(c => c.Receiver)
-                    .ToListAsync();
-
-                // Group by conversation partner and get the latest message for each
-                var conversations = userMessages
-                    .GroupBy(c => c.SenderId == user.UserId ? c.ReceiverId : c.SenderId)
-                    .Select(g => g.OrderByDescending(c => c.Timestamp).First())
-                    .OrderByDescending(c => c.Timestamp)
-                    .Select(c => new
-                    {
-                        userId = c.SenderId == user.UserId ? c.ReceiverId : c.SenderId,
-                        userName = c.SenderId == user.UserId ? c.Receiver?.UserName : c.Sender?.UserName,
-                        userAvatar = c.SenderId == user.UserId ? c.Receiver?.UserAvatar : c.Sender?.UserAvatar,
-                        lastMessage = c.Message,
-                        lastMessageTime = c.Timestamp
-                    })
-                    .ToList();
-
-                await Clients.Caller.SendAsync("ConversationsList", conversations);
-            }
-            catch (Exception ex)
-            {
-                await Clients.Caller.SendAsync("Error", $"Failed to get conversations: {ex.Message}");
-            }
-        }
-
+        
         public async Task UserTyping(string receiverId, bool isTyping)
         {
             try
@@ -271,53 +187,7 @@ namespace GalleryCart.Chat
                 Console.WriteLine($"Typing indicator error: {ex.Message}");
             }
         }
-
-        public async Task JoinRoom(string roomName)
-        {
-            try
-            {
-                await Groups.AddToGroupAsync(Context.ConnectionId, roomName);
-
-                if (ConnectedUsers.TryGetValue(Context.ConnectionId, out var user))
-                {
-                    await Clients.Group(roomName).SendAsync("UserJoinedRoom", user.UserId, user.UserName, roomName);
-                }
-            }
-            catch (Exception ex)
-            {
-                await Clients.Caller.SendAsync("Error", $"Failed to join room: {ex.Message}");
-            }
-        }
-
-        public async Task LeaveRoom(string roomName)
-        {
-            try
-            {
-                await Groups.RemoveFromGroupAsync(Context.ConnectionId, roomName);
-
-                if (ConnectedUsers.TryGetValue(Context.ConnectionId, out var user))
-                {
-                    await Clients.Group(roomName).SendAsync("UserLeftRoom", user.UserId, user.UserName, roomName);
-                }
-            }
-            catch (Exception ex)
-            {
-                await Clients.Caller.SendAsync("Error", $"Failed to leave room: {ex.Message}");
-            }
-        }
-
-        public async Task GetOnlineUsers()
-        {
-            try
-            {
-                await Clients.Caller.SendAsync("UpdatedConnectedUsers", ConnectedUsers.Values.ToList());
-            }
-            catch (Exception ex)
-            {
-                await Clients.Caller.SendAsync("Error", $"Failed to get online users: {ex.Message}");
-            }
-        }
-
+       
         private class ConnectedUser
         {
             public string ConnectionId { get; set; } = string.Empty;

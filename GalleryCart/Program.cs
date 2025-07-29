@@ -27,6 +27,12 @@ builder.Services.AddSignalR(options =>
     options.HandshakeTimeout = TimeSpan.FromSeconds(15);
 });
 
+// Automapper
+builder.Services.AddAutoMapper(_ => { }, typeof(MyMapper).Assembly);
+
+// Cloudinary
+builder.Services.AddSingleton<CloudinaryUploader>();
+
 // Add database
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
@@ -65,8 +71,10 @@ builder.Services.AddScoped<IHistoryRepository, HistoryRepository>();
 builder.Services.AddScoped<IPostRepository, PostRepository>();
 builder.Services.AddScoped<ITagRepository, TagRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
-
+builder.Services.AddScoped<ICartRepository, CartRepository>();
+builder.Services.AddScoped<ICommissionPaymentRepository, CommissionPaymentRepository>();
 builder.Services.AddTransient<IEmailSender, EmailSender>();
+
 
 
 // Configure default routes (This should be after configured the Identity)
@@ -146,13 +154,13 @@ app.MapControllerRoute(
     name: "areas",
     pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}");
 
-/*app.MapControllerRoute(
+app.MapControllerRoute(
     name: "default",
-    pattern: "{area=Guest}/{controller=Home}/{action=Index}/{id?}");*/
-app.MapGet("/", context =>
+    pattern: "{area=Guest}/{controller=Home}/{action=Index}/{id?}");
+/*app.MapGet("/", context =>
 {
     context.Response.Redirect("/Guest/Home/Index");
     return Task.CompletedTask;
-});
+});*/
 
 app.Run();

@@ -15,5 +15,6 @@ namespace GalleryCart.DataAccess.Repository.IRepository
         Task<bool> DeleteAsync(Guid postId);
         // Check if an entity exists
         Task<bool> ExistsAsync(Expression<Func<Post, bool>> predicate);
+        void AttachTag(Tag tag);
     }
 }

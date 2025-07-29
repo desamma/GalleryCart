@@ -14,10 +14,13 @@ namespace GalleryCart.DataAccess
         public virtual DbSet<Chat> Chats { get; set; } = null!;
         public virtual DbSet<Comment> Comments { get; set; } = null!;
         public virtual DbSet<Commission> Commissions { get; set; } = null!;
+        public virtual DbSet<CommissionPayment> CommissionPayments { get; set; } = null!;
         public virtual DbSet<FavouritePost> FavouritePosts { get; set; } = null!;
         public virtual DbSet<History> Histories { get; set; } = null!;
         public virtual DbSet<Post> Posts { get; set; } = null!;
         public virtual DbSet<Tag> Tags { get; set; } = null!;
+        public virtual DbSet<Cart> Carts { get; set; }
+        public virtual DbSet<CartItem> CartItems { get; set; }
         // No need for this
         //public virtual DbSet<User> Users { get; set; } = null!;
 
@@ -32,7 +35,7 @@ namespace GalleryCart.DataAccess
             base.OnModelCreating(builder);
 
             // Unique constraints
-            builder.Entity<User>().HasIndex(u => u.UserName).IsUnique(); 
+            builder.Entity<User>().HasIndex(u => u.UserName).IsUnique();
             builder.Entity<User>().HasIndex(u => u.Email).IsUnique();
             builder.Entity<Tag>().HasIndex(t => t.TagName).IsUnique();
 
@@ -45,6 +48,8 @@ namespace GalleryCart.DataAccess
             builder.Entity<Post>().HasKey(p => p.PostId);
             builder.Entity<Tag>().HasKey(t => t.TagId);
             builder.Entity<User>().HasKey(u => u.Id);
+            builder.Entity<Cart>().HasKey(c => c.CartId);
+            builder.Entity<CartItem>().HasKey(ci => ci.CartItemId);
 
             // Relationships
 
@@ -136,6 +141,27 @@ namespace GalleryCart.DataAccess
                 .HasMany(p => p.Tags)
                 .WithMany(t => t.Posts)
                 .UsingEntity(j => j.ToTable("PostTags"));
+
+            // Cart to User (one-to-many)
+            builder.Entity<Cart>()
+                .HasOne(c => c.User)
+                .WithMany(u => u.Carts)
+                .HasForeignKey(c => c.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Cart to CartItems (one-to-many)
+            builder.Entity<Cart>()
+                .HasMany(c => c.CartItems)
+                .WithOne(ci => ci.Cart)
+                .HasForeignKey(ci => ci.CartId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // CartItem to Post (many-to-one)
+            builder.Entity<CartItem>()
+                .HasOne(ci => ci.Post)
+                .WithMany()
+                .HasForeignKey(ci => ci.PostId)
+                .OnDelete(DeleteBehavior.Restrict);
 
             // Add precision for decimal fields
             builder.Entity<Post>()
