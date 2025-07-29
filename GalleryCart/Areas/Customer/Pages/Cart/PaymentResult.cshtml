@@ -1,45 +1,71 @@
-@page
+﻿@page
 @model GalleryCart.Areas.Customer.Pages.Cart.PaymentResultModel
 @{
     ViewData["Title"] = "Payment Result";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<div class="max-w-xl mx-auto mt-10 bg-base-100 shadow-lg rounded-lg p-8">
-    <h1 class="text-2xl font-bold mb-4 text-success">Payment Result</h1>
+<div class="max-w-2xl mx-auto mt-12 bg-white shadow-2xl rounded-2xl p-10 animate-fadeIn">
+    <h1 class="text-3xl font-extrabold mb-6 text-green-600 text-center drop-shadow-md">
+        ✅ Payment Result
+    </h1>
+
     @if (!string.IsNullOrEmpty(Model.PaymentMessage))
     {
-        <div class="alert alert-success mb-4">@Model.PaymentMessage</div>
+        <div class="alert alert-success mb-6 p-4 bg-green-100 border-l-4 border-green-500 text-green-700 rounded-lg shadow">
+            @Model.PaymentMessage
+        </div>
     }
     else
     {
-        <div class="alert alert-error mb-4">No payment information found.</div>
+        <div class="alert alert-error mb-6 p-4 bg-red-100 border-l-4 border-red-500 text-red-700 rounded-lg shadow">
+            ❌ No payment information found.
+        </div>
     }
 
-    <div class="space-y-2">
+    <div class="space-y-3 text-gray-700">
         @if (Model.PaymentInfo != null)
         {
-            <div><strong>Order Description:</strong> @Model.PaymentInfo.OrderDescription</div>
-            <div><strong>Amount:</strong> $@Model.PaymentInfo.Amount</div>
-            <div><strong>Order Type:</strong> @Model.PaymentInfo.OrderType</div>
-            <div><strong>Name:</strong> @Model.PaymentInfo.Name</div>
+            <div class="flex justify-between p-3 bg-gray-50 rounded-lg shadow-sm">
+                <strong>📝 Order Description:</strong> <span>@Model.PaymentInfo.OrderDescription</span>
+            </div>
+            <div class="flex justify-between p-3 bg-gray-50 rounded-lg shadow-sm">
+                <strong>💰 Amount:</strong> <span class="text-blue-600 font-semibold">$@Model.PaymentInfo.Amount</span>
+            </div>
+            <div class="flex justify-between p-3 bg-gray-50 rounded-lg shadow-sm">
+                <strong>📦 Order Type:</strong> <span>@Model.PaymentInfo.OrderType</span>
+            </div>
+            <div class="flex justify-between p-3 bg-gray-50 rounded-lg shadow-sm">
+                <strong>👤 Name:</strong> <span>@Model.PaymentInfo.Name</span>
+            </div>
         }
         @if (!string.IsNullOrEmpty(Model.TransactionId))
         {
-            <div><strong>Transaction ID:</strong> @Model.TransactionId</div>
+            <div class="flex justify-between p-3 bg-gray-50 rounded-lg shadow-sm">
+                <strong>🔑 Transaction ID:</strong> <span>@Model.TransactionId</span>
+            </div>
         }
         @if (!string.IsNullOrEmpty(Model.OrderId))
         {
-            <div><strong>Order ID:</strong> @Model.OrderId</div>
+            <div class="flex justify-between p-3 bg-gray-50 rounded-lg shadow-sm">
+                <strong>📄 Order ID:</strong> <span>@Model.OrderId</span>
+            </div>
         }
         @if (!string.IsNullOrEmpty(Model.PaymentMethod))
         {
-            <div><strong>Payment Method:</strong> @Model.PaymentMethod</div>
+            <div class="flex justify-between p-3 bg-gray-50 rounded-lg shadow-sm">
+                <strong>💳 Payment Method:</strong> <span>@Model.PaymentMethod</span>
+            </div>
         }
     </div>
 
-    <div class="mt-8">
-        <a href="/Customer/Cart/Index" class="btn btn-primary">Back to Cart</a>
-        <a href="/Customer/History/Index" class="btn btn-outline ml-2">View Purchase History</a>
+    <div class="mt-10 flex justify-center space-x-4">
+        <a href="/Customer/Cart/Index" class="btn btn-primary px-6 py-2 rounded-lg shadow-md hover:shadow-lg transition transform hover:scale-105">
+            🛒 Back to Cart
+        </a>
+        <a href="/Customer/History/Index" class="btn btn-outline px-6 py-2 rounded-lg border-2 border-blue-500 text-blue-500 hover:bg-blue-500 hover:text-white transition transform hover:scale-105">
+            📜 View Purchase History
+        </a>
     </div>
 </div>
+
