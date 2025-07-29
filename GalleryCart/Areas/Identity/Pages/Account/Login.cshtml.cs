@@ -186,16 +186,16 @@ namespace GalleryCart.Areas.Identity.Pages.Account
                     // Redirect based on user role
                     if (await _userManager.IsInRoleAsync(user, RoleConstants.Admin))
                     {
-                        returnUrl = Url.Action("Index", "Dashboard", new { area = "Admin" });
+                        returnUrl = Url.Action("Dashboard", "Admin", new { area = "Admin" });
                     }
                     else if (await _userManager.IsInRoleAsync(user, RoleConstants.User))
                     {
-                        returnUrl = Url.Page("/Home/Index", new { area = "Customer" });
+                        returnUrl = Url.Action(nameof(Index), "Customer", new { area = "Customer" });
 
                     }
                     else if (await _userManager.IsInRoleAsync(user, RoleConstants.Artist))
                     {
-                        returnUrl = Url.Page("/Home/Index", new { area = "Artist" });
+                        returnUrl = Url.Action(nameof(Index), "Artist", new { area = "Artist" });
                     }
                     else
                     {

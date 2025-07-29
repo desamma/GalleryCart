@@ -2,10 +2,12 @@
 using GalleryCart.Models.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 
 namespace GalleryCart.Areas.Customer.Controllers
 {
     [Area("Customer")]
+    [Authorize(Roles = "user")]
     [AutoValidateAntiforgeryToken]
     public class CartController : Controller
     {

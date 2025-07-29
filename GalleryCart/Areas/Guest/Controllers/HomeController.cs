@@ -1,11 +1,9 @@
 using AutoMapper;
-using GalleryCart.Areas.Guest.Models;
 using GalleryCart.DataAccess.Repository.IRepository;
 using GalleryCart.Models.Models;
 using GalleryCart.Models.ViewModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 
 namespace GalleryCart.Areas.Guest.Controllers
@@ -47,7 +45,7 @@ namespace GalleryCart.Areas.Guest.Controllers
                 {
                     post.User = await _userRepository.GetAsync(a => a.Id.Equals(post.UserId));
                 }
-                
+
                 var model = new IndexModel
                 {
                     CurrentUser = currentUser,

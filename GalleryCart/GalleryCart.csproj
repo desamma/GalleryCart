@@ -17,6 +17,7 @@
     <PackageReference Include="AutoMapper" Version="15.0.1" />
     <PackageReference Include="CloudinaryDotNet" Version="1.27.6" />
     <PackageReference Include="DotNetEnv" Version="3.1.1" />
+    <PackageReference Include="EPPlus" Version="8.0.8" />
     <PackageReference Include="Google.Apis.Auth" Version="1.69.0" />
     <PackageReference Include="Google.Apis.Oauth2.v2" Version="1.68.0.1869" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="8.0.16" />
@@ -46,10 +47,20 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <Folder Include="Areas\Customer\Models\" />
+	  <Folder Include="Areas\Guest\Models\" />
 	  <Folder Include="wwwroot\images\" />
 	</ItemGroup>
 
 	<ItemGroup>
+	  <Content Update="Areas\Artist\Views\Home\Index.cshtml">
+	    <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+	    <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+	  </Content>
+	  <Content Update="Areas\Customer\Views\Home\Index.cshtml">
+	    <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+	    <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+	  </Content>
 	  <Content Update="Areas\Guest\Views\Home\Index.cshtml">
 	    <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
 	    <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>

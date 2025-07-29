@@ -1,0 +1,122 @@
+@model GalleryCart.Models.ViewModels.PostPaginateVM
+@{
+    ViewData["Title"] = "Manage Posts";
+}
+
+<div class="flex h-screen">
+    @await Html.PartialAsync("_AdminSidebar")
+
+    <div class="flex-1 bg-gray-100 p-6 overflow-auto">
+        <div class="text-2xl font-bold mb-4">Manage Posts</div>
+
+        <form id="csrfTokenForm">
+            @Html.AntiForgeryToken()
+        </form>
+
+        <table class="table w-full table-zebra">
+            <thead>
+            <tr>
+                <th>Title</th>
+                <th>Description</th>
+                <th>Author</th>
+                <th>Post Date</th>
+                <th>Likes</th>
+                <th>Dislikes</th>
+                <th>Sale Count</th>
+                <th>Is Mature</th>
+                <th>Price</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            @foreach (var post in Model.Posts)
+            {
+                <tr id="post-@post.PostId" class="cursor-pointer hover:bg-gray-200" onclick="viewPost('@post.PostId')">
+                    <td>@post.Title</td>
+                    <td>@post.Description</td>
+                    <td>@post.PostAuthor</td>
+                    <td>@post.PostDate?.ToString("dd/MM/yyyy")</td>
+                    <td>@post.LikeCount</td>
+                    <td>@post.DislikeCount</td>
+                    <td>@post.SaleCount</td>
+                    <td>
+                        <span class="badge @(post.IsMature ? "badge-error" : "badge-success")">
+                            @(post.IsMature ? "Yes" : "No")
+                        </span>
+                    </td>
+                    <td>$@post.Price</td>
+                    <td>
+                        <button class="btn btn-xs btn-error" onclick="deletePost(event, '@post.PostId')">Delete</button>
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+        <div class="mt-6 flex justify-center space-x-2">
+            @for (int i = 1; i <= Model.TotalPages; i++)
+            {
+                <a asp-action="ManagePost"
+                   asp-route-page="@i"
+                   class="btn btn-sm @(Model.CurrentPage == i ? "btn-primary" : "btn-ghost")">
+                    @i
+                </a>
+            }
+        </div>
+
+    </div>
+</div>
+
+<!-- Modal -->
+<div id="postModal" class="modal hidden">
+    <div class="modal-box w-11/12 max-w-5xl">
+        <h3 class="font-bold text-lg mb-4">Post Details</h3>
+        <div id="postContent"></div>
+        <div class="modal-action">
+            <button class="btn" onclick="closeModal()">Close</button>
+        </div>
+    </div>
+</div>
+<div class="modal-backdrop hidden" onclick="closeModal()"></div>
+
+@section Scripts {
+    <script>
+        function getCsrfToken() {
+            return document.querySelector('#csrfTokenForm input[name="__RequestVerificationToken"]').value;
+        }
+
+        function deletePost(event, postId) {
+            event.stopPropagation();
+            if (!confirm("Are you sure you want to delete this post?")) return;
+
+            fetch(`/Admin/Post/Delete/${postId}`, {
+                method: 'DELETE',
+                headers: {
+                    'RequestVerificationToken': getCsrfToken()
+                }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById(`post-${postId}`).remove();
+                } else {
+                    alert("Failed to delete post.");
+                }
+            });
+        }
+
+        function viewPost(postId) {
+            fetch(`/Admin/Post/View/${postId}`)
+                .then(res => res.text())
+                .then(html => {
+                    document.getElementById("postContent").innerHTML = html;
+                    document.getElementById("postModal").classList.remove("hidden");
+                    document.querySelector(".modal-backdrop").classList.remove("hidden");
+                });
+        }
+
+        function closeModal() {
+            document.getElementById("postModal").classList.add("hidden");
+            document.querySelector(".modal-backdrop").classList.add("hidden");
+        }
+    </script>
+}
