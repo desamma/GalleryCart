@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
+using GalleryCart.Models.Models.Vnpay;
 
 namespace GalleryCart.Areas.Customer.Controllers
 {
@@ -15,10 +16,12 @@ namespace GalleryCart.Areas.Customer.Controllers
     {
         private readonly ICommissionRepository commissionRepository;
         private readonly IUserRepository userRepository;
-        public CommissionController(ICommissionRepository commissionRepository, IUserRepository userRepository)
+        private readonly ICommissionPaymentRepository commissionPaymentRepository;
+        public CommissionController(ICommissionRepository commissionRepository, IUserRepository userRepository, ICommissionPaymentRepository commissionPaymentRepository)
         {
             this.commissionRepository = commissionRepository;
             this.userRepository = userRepository;
+            this.commissionPaymentRepository = commissionPaymentRepository;
         }
 
         public IActionResult Index()
@@ -198,6 +201,27 @@ namespace GalleryCart.Areas.Customer.Controllers
 
             await commissionRepository.UpdateAsync(existingCommission);
             return RedirectToAction("CommissionManagement");
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> PaymentAsync(Guid commissionId)
+        {
+            var commission = await commissionRepository.GetAsync(c => c.CommissionId.Equals(commissionId));
+            var artist = await userRepository.GetAsync(u => u.Id.Equals(commission.ArtistId));
+            var commissionPayment = new CommissionPayment
+            {
+                CommissionPaymentId = new Guid(),
+                CommissionId = commissionId,
+            };
+
+            var paymentModel = new PaymentInformationModel
+            {
+                Amount = double.Parse(commission.Price.ToString()),
+                Name = "Commission Payment",
+                OrderDescription = $"Commission payment to {artist.UserName}",
+                OrderType = ""
+            };
+            return RedirectToAction("CreatePaymentUrlVnpay", "Payment", paymentModel);
         }
     }
 }

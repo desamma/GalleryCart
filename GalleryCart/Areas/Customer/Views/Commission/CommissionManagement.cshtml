@@ -1,9 +1,10 @@
 ﻿@using GalleryCart.Utilities.Utils;
 @model GalleryCart.Models.ViewModels.CommissionManagementViewModel
-
+@inject GalleryCart.DataAccess.Repository.IRepository.ICommissionPaymentRepository CommissionPaymentRepository
 @{
     ViewData["Title"] = "All Your Commissions";
     Layout = "~/Views/Shared/_Layout.cshtml";
+    
 }
 
 <div class="min-h-screen bg-base-200 p-4">
@@ -54,6 +55,8 @@
             <div class="space-y-4">
                 @foreach (var commission in commissions)
                 {
+                    var isPayed = false;
+
                     <div class="card bg-base-100 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1">
                         <div class="card-body p-6">
                             <div class="flex flex-col lg:flex-row gap-6">
@@ -66,109 +69,154 @@
                                         </p>
                                     </div>
 
-                                    <!-- Add this new section to display uploaded files if they exist -->
+                                    <!-- Payment Gated Commission Results Section -->
                                     @if (commission.CommissionResultLink != null && commission.CommissionResultLink.Any())
                                     {
-                                        <div class="mb-4 p-4 bg-base-200 rounded-lg">
-                                            <h5 class="font-semibold text-base-content mb-3 flex items-center">
-                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 mr-2">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
-                                                </svg>
-                                                Your Commission Results
-                                            </h5>
-
-                                            @{
-                                                var files = CommissionResultHelper.GetFiles(commission.CommissionResultLink);
-                                                var links = CommissionResultHelper.GetLinks(commission.CommissionResultLink);
-                                                var uploadedAt = CommissionResultHelper.GetUploadedAt(commission.CommissionResultLink);
-                                                var notes = commission.CommissionResultLink.FirstOrDefault(x => x.StartsWith("NOTES:"));
-                                            }
-
-                                            <!-- Display uploaded files -->
-                                            @if (files.Any())
+                                        var commissionPayments = CommissionPaymentRepository.GetAllQueryable(c => c.CommissionId == commission.CommissionId);
+                                        if (commissionPayments.Any())
+                                        {
+                                            decimal totalAmount = 0;
+                                            foreach (var payment in commissionPayments)
                                             {
-                                                <div class="mb-3">
-                                                    <div class="text-sm font-medium text-base-content/80 mb-2">Files:</div>
-                                                    <div class="space-y-2">
-                                                        @foreach (var file in files)
-                                                        {
-                                                            <div class="flex items-center justify-between bg-base-100 p-2 rounded">
-                                                                <div class="flex items-center gap-2">
-                                                                    @{
-                                                                        var fileExtension = System.IO.Path.GetExtension(file.OriginalName).ToLowerInvariant();
-                                                                        string fileIcon = "📄";
-                                                                        if (new[] { ".jpg", ".jpeg", ".png", ".gif" }.Contains(fileExtension)) fileIcon = "🖼️";
-                                                                        else if (fileExtension == ".pdf") fileIcon = "📑";
-                                                                        else if (new[] { ".zip", ".rar" }.Contains(fileExtension)) fileIcon = "🗜️";
-                                                                        else if (new[] { ".psd", ".ai" }.Contains(fileExtension)) fileIcon = "🎨";
-                                                                    }
-                                                                    <span class="text-lg">@fileIcon</span>
-                                                                    <span class="text-sm font-medium">@file.OriginalName</span>
-                                                                </div>
-                                                                <a href="/uploads/commissions/@file.FilePath"
-                                                                   target="_blank"
-                                                                   class="btn btn-ghost btn-xs text-primary">
-                                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
-                                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
-                                                                    </svg>
-                                                                    Download
-                                                                </a>
-                                                            </div>
-                                                        }
-                                                    </div>
-                                                </div>
+                                                totalAmount += payment.Amount;
                                             }
-
-                                            <!-- Display external links -->
-                                            @if (links.Any())
-                                            {
-                                                <div class="mb-3">
-                                                    <div class="text-sm font-medium text-base-content/80 mb-2">External Links:</div>
-                                                    <div class="space-y-2">
-                                                        @foreach (var link in links)
-                                                        {
-                                                            <div class="flex items-center justify-between bg-base-100 p-2 rounded">
-                                                                <div class="flex items-center gap-2">
-                                                                    <span class="text-lg">🔗</span>
-                                                                    <span class="text-sm font-medium truncate">@link</span>
-                                                                </div>
-                                                                <a href="@link"
-                                                                   target="_blank"
-                                                                   rel="noopener noreferrer"
-                                                                   class="btn btn-ghost btn-xs text-primary">
-                                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
-                                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
-                                                                    </svg>
-                                                                    Open
-                                                                </a>
-                                                            </div>
-                                                        }
-                                                    </div>
-                                                </div>
-                                            }
-
-                                            <!-- Display notes -->
-                                            @if (!string.IsNullOrEmpty(notes))
-                                            {
-                                                <div class="mb-3">
-                                                    <div class="text-sm font-medium text-base-content/80 mb-2">Artist Notes:</div>
-                                                    <div class="bg-base-100 p-3 rounded text-sm">
-                                                        @notes.Substring(6) <!-- Remove "NOTES:" prefix -->
-                                                    </div>
-                                                </div>
-                                            }
-
-                                            <!-- Display upload timestamp -->
-                                            @if (uploadedAt.HasValue)
-                                            {
-                                                <div class="text-xs text-base-content/60 mt-2 flex items-center">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 mr-1">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            if (totalAmount == commission.Price) isPayed = true;
+                                        }
+                                        @if (isPayed)
+                                        {
+                                            <!-- Show uploads if payment is made -->
+                                            <div class="mb-4 p-4 bg-base-200 rounded-lg">
+                                                <h5 class="font-semibold text-base-content mb-3 flex items-center">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 mr-2">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
                                                     </svg>
-                                                    Completed on @uploadedAt.Value.ToString("MMM dd, yyyy 'at' hh:mm tt")
+                                                    Your Commission Results
+                                                </h5>
+
+                                                @{
+                                                    var files = CommissionResultHelper.GetFiles(commission.CommissionResultLink);
+                                                    var links = CommissionResultHelper.GetLinks(commission.CommissionResultLink);
+                                                    var uploadedAt = CommissionResultHelper.GetUploadedAt(commission.CommissionResultLink);
+                                                    var notes = commission.CommissionResultLink.FirstOrDefault(x => x.StartsWith("NOTES:"));
+                                                }
+
+                                                <!-- Display uploaded files -->
+                                                @if (files.Any())
+                                                {
+                                                    <div class="mb-3">
+                                                        <div class="text-sm font-medium text-base-content/80 mb-2">Files:</div>
+                                                        <div class="space-y-2">
+                                                            @foreach (var file in files)
+                                                            {
+                                                                <div class="flex items-center justify-between bg-base-100 p-2 rounded">
+                                                                    <div class="flex items-center gap-2">
+                                                                        @{
+                                                                            var fileExtension = System.IO.Path.GetExtension(file.OriginalName).ToLowerInvariant();
+                                                                            string fileIcon = "📄";
+                                                                            if (new[] { ".jpg", ".jpeg", ".png", ".gif" }.Contains(fileExtension)) fileIcon = "🖼️";
+                                                                        }
+                                                                        <span class="text-lg">@fileIcon</span>
+                                                                        <span class="text-sm font-medium">@file.OriginalName</span>
+                                                                    </div>
+                                                                    <a href="/uploads/commissions/@file.FilePath"
+                                                                       target="_blank"
+                                                                       class="btn btn-ghost btn-xs text-primary">
+                                                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                                                                        </svg>
+                                                                        Download
+                                                                    </a>
+                                                                </div>
+                                                            }
+                                                        </div>
+                                                    </div>
+                                                }
+
+                                                <!-- Display external links -->
+                                                @if (links.Any())
+                                                {
+                                                    <div class="mb-3">
+                                                        <div class="text-sm font-medium text-base-content/80 mb-2">External Links:</div>
+                                                        <div class="space-y-2">
+                                                            @foreach (var link in links)
+                                                            {
+                                                                <div class="flex items-center justify-between bg-base-100 p-2 rounded">
+                                                                    <div class="flex items-center gap-2">
+                                                                        <span class="text-lg">🔗</span>
+                                                                        <span class="text-sm font-medium truncate">@link</span>
+                                                                    </div>
+                                                                    <a href="@link"
+                                                                       target="_blank"
+                                                                       rel="noopener noreferrer"
+                                                                       class="btn btn-ghost btn-xs text-primary">
+                                                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+                                                                        </svg>
+                                                                        Open
+                                                                    </a>
+                                                                </div>
+                                                            }
+                                                        </div>
+                                                    </div>
+                                                }
+
+                                                <!-- Display notes -->
+                                                @if (!string.IsNullOrEmpty(notes))
+                                                {
+                                                    <div class="mb-3">
+                                                        <div class="text-sm font-medium text-base-content/80 mb-2">Artist Notes:</div>
+                                                        <div class="bg-base-100 p-3 rounded text-sm">
+                                                            @notes.Substring(6) <!-- Remove "NOTES:" prefix -->
+                                                        </div>
+                                                    </div>
+                                                }
+
+                                                <!-- Display upload timestamp -->
+                                                @if (uploadedAt.HasValue)
+                                                {
+                                                    <div class="text-xs text-base-content/60 mt-2 flex items-center">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 mr-1">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                        </svg>
+                                                        Completed on @uploadedAt.Value.ToString("MMM dd, yyyy 'at' hh:mm tt")
+                                                    </div>
+                                                }
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <!-- Show payment required message if not paid -->
+                                            <div class="mb-4 p-6 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-lg">
+                                                <div class="flex items-center justify-between">
+                                                    <div class="flex items-center gap-4">
+                                                        <div class="flex-shrink-0">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-12 h-12 text-amber-600">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+                                                            </svg>
+                                                        </div>
+                                                        <div>
+                                                            <h5 class="font-bold text-amber-900 text-lg mb-1">Commission Results Available</h5>
+                                                            <p class="text-amber-700 text-sm">Your commission has been completed! Make a payment to download your files and view the final results.</p>
+                                                            <div class="mt-2 text-xs text-amber-600">
+                                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 inline mr-1">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0-1.125-.504-1.125-1.125V11.25a9 9 0 00-9-9z" />
+                                                                </svg>
+                                                                Files ready for download • Links available • Artist notes included
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="flex-shrink-0">
+                                                        <a href="@Url.Action("Payment", "Commission", new { commissionId = commission.CommissionId })" 
+                                                           class="btn btn-warning btn-lg gap-2 shadow-lg hover:shadow-xl transition-all">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z" />
+                                                            </svg>
+                                                            Make Payment
+                                                        </a>
+                                                    </div>
                                                 </div>
-                                            }
-                                        </div>
+                                            </div>
+                                        }
                                     }
 
                                     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
@@ -210,17 +258,6 @@
                                             </div>
                                         </div>
                                     </div>
-
-                                    @*  @if (commission.Status == "In Progress")
-                            {
-                            <div class="mt-4">
-                            <div class="flex justify-between text-xs mb-1">
-                            <span class="text-base-content/60">Progress</span>
-                            <span class="font-semibold">@commission.Progress%</span>
-                            </div>
-                            <progress class="progress progress-primary w-full" value="@commission.Progress" max="100"></progress>
-                            </div>
-                            } *@
                                 </div>
 
                                 <!-- Actions -->
@@ -246,7 +283,7 @@
                                         Message
                                     </a>
 
-                                    @if (commission.Status == "Completed" && commission.CommissionResultLink != null && commission.CommissionResultLink.Any())
+                                    @if (commission.Status == "Completed" && commission.CommissionResultLink != null && commission.CommissionResultLink.Any() && isPayed)
                                     {
                                         <div class="dropdown dropdown-end">
                                             <div tabindex="0" role="button" class="btn btn-success btn-sm">

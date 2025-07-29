@@ -3,6 +3,7 @@ using GalleryCart.DataAccess.Repository.IRepository;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using NuGet.Protocol.Plugins;
 using System.Security.Claims;
 using static GalleryCart.Areas.Chat.Models.ChatModel;
 
@@ -46,7 +47,7 @@ namespace GalleryCart.Areas.Chat.Controllers
         }
 
         [HttpGet]
-        public IActionResult ChatHistory(Guid receiverId)
+        public async Task<IActionResult> ChatHistoryAsync(Guid receiverId)
         {
             var userId = GetCurrentUserId();
             if (userId == null)
@@ -54,20 +55,24 @@ namespace GalleryCart.Areas.Chat.Controllers
 
             try
             {
-                var messages = _chatRepository.GetAllQueryable(
-                    c => (c.SenderId == userId.Value && c.ReceiverId == receiverId) ||
-                         (c.SenderId == receiverId && c.ReceiverId == userId.Value))
+                var messages = await _chatRepository
+                    .GetAllQueryable(c => (c.SenderId == userId.Value && c.ReceiverId == receiverId) ||
+                                         (c.SenderId == receiverId && c.ReceiverId == userId.Value))
                     .Include(c => c.Sender)
                     .Include(c => c.Receiver)
-                    .OrderBy(c => c.Timestamp);
+                    .OrderBy(c => c.Timestamp)
+                    .ToListAsync();
 
                 var chatHistory = messages.Select(m => new
                 {
-                    senderId = m.SenderId.ToString(),
-                    senderName = m.Sender.UserName,
+                    chatId = m.ChatId,
+                    senderId = m.SenderId,
+                    senderName = m.Sender?.UserName ?? "Unknown",
+                    senderAvatar = m.Sender?.UserAvatar,
+                    receiverId = m.ReceiverId,
+                    receiverName = m.Receiver?.UserName ?? "Unknown",
                     message = m.Message,
-                    timestamp = m.Timestamp.ToString("o"),
-                    receiverId = m.ReceiverId.ToString()
+                    timestamp = m.Timestamp
                 }).ToList();
 
                 return Json(chatHistory);
