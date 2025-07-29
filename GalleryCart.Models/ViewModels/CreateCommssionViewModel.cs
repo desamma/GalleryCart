@@ -1,7 +1,7 @@
 ﻿using GalleryCart.Models.Models;
 using System.ComponentModel.DataAnnotations;
 
-namespace GalleryCart.Areas.Customer.Models
+namespace GalleryCart.Models.ViewModels
 {
     public class CreateCommssionViewModel
     {

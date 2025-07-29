@@ -1,6 +1,6 @@
 ﻿using GalleryCart.Models.Models;
 
-namespace GalleryCart.Areas.Customer.Models
+namespace GalleryCart.Models.ViewModels
 {
     public class AllArtistModel
     {

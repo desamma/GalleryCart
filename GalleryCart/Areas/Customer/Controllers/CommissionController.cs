@@ -1,6 +1,6 @@
-﻿using GalleryCart.Areas.Customer.Models;
-using GalleryCart.DataAccess.Repository.IRepository;
+﻿using GalleryCart.DataAccess.Repository.IRepository;
 using GalleryCart.Models.Models;
+using GalleryCart.Models.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
