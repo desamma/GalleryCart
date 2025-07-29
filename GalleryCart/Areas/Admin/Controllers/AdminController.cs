@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 namespace GalleryCart.Areas.Admin.Controllers;
 
     [Area("Admin")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "admin")]
     public class AdminController : Controller
     {
         private readonly IUserRepository _userRepo;

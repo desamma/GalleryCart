@@ -1,6 +1,7 @@
 ﻿using GalleryCart.Areas.Artist.Models;
 using GalleryCart.DataAccess.Repository.IRepository;
 using GalleryCart.Models.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
@@ -9,6 +10,7 @@ using ChatModel = GalleryCart.Models.Models.Chat;
 namespace GalleryCart.Areas.Artist.Controllers
 {
     [Area("Artist")]
+    [Authorize(Roles = "artist")]
     public class CommissionController : Controller
     {
         private readonly IUserRepository _userRepository;
