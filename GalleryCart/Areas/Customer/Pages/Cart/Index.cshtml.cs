@@ -2,41 +2,46 @@ using GalleryCart.DataAccess.Repository.IRepository;
 using GalleryCart.Models.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 
 namespace GalleryCart.Areas.Customer.Pages.Cart
 {
     public class IndexModel : PageModel
     {
-        public Cart? CartUser { get; set; }
+        private readonly ICartRepository _cartRepository;
+
+        public IndexModel(ICartRepository cartRepository)
+        {
+            _cartRepository = cartRepository;
+        }
+
+        public GalleryCart.Models.Models.Cart? CartUser { get; set; }
 
         [TempData]
         public string? PaymentMessage { get; set; }
 
-        public class Cart
+        public async Task<IActionResult> OnGetAsync()
         {
-            public List<CartItem> CartItems { get; set; } = new List<CartItem>();
-        }
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+            {
+                return RedirectToPage("/Account/Login", new { area = "Identity" });
+            }
 
-        public class CartItem
-        {
-            public Guid PostId { get; set; } 
-            public Post Post { get; set; } = new Post(); 
-        }
 
-        public class Post
-        {
-            public string Title { get; set; } = string.Empty;
-            public Artist? Artist { get; set; }
-            public decimal Price { get; set; }
-            public DateTime CreatedDate { get; set; }
-        }
+            if (!Guid.TryParse(userId, out var guidUserId))
+            {
+                return BadRequest("Invalid user ID format.");
+            }
+            CartUser = await _cartRepository
+                .GetAllQueryable(c => c.UserId == guidUserId)
+                .Include(c => c.CartItems)
+                    .ThenInclude(ci => ci.Post)
+                        .ThenInclude(p => p.User)
+                .FirstOrDefaultAsync();
 
-        public class Artist
-        {
-            public string UserName { get; set; } = string.Empty;
+            return Page();
         }
-
-        
     }
 }

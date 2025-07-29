@@ -1,4 +1,4 @@
-using GalleryCart.DataAccess;
+﻿using GalleryCart.DataAccess;
 using GalleryCart.DataAccess.Repository.IRepository;
 using GalleryCart.Library;
 using GalleryCart.Models.Models;
@@ -33,6 +33,8 @@ namespace GalleryCart.Areas.Customer.Controllers
             var timeNow = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, timeZoneById);
             var tick = DateTime.Now.Ticks.ToString();
             var pay = new VnPayLibrary();
+
+            // ✅ Lấy callback URL từ appsettings
             var urlCallBack = _configuration["Vnpay:PaymentBackReturnUrl"];
 
             pay.AddRequestData("vnp_Version", _configuration["Vnpay:Version"]);
@@ -58,16 +60,13 @@ namespace GalleryCart.Areas.Customer.Controllers
             var pay = new VnPayLibrary();
             var response = pay.GetFullResponseData(Request.Query, _configuration["Vnpay:HashSecret"]);
 
-            // Only save to history if payment is successful
             if (response.Success)
             {
-                // Get current user
                 var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
                 if (userId != null)
                 {
                     var userGuid = Guid.Parse(userId);
 
-                    // Get user's cart and cart items
                     var cart = await _db.Carts
                         .Include(c => c.CartItems)
                         .ThenInclude(ci => ci.Post)
@@ -77,7 +76,6 @@ namespace GalleryCart.Areas.Customer.Controllers
                     {
                         foreach (var item in cart.CartItems)
                         {
-                            // Use repository method to add history
                             var history = new History
                             {
                                 UserId = userGuid,
@@ -90,14 +88,23 @@ namespace GalleryCart.Areas.Customer.Controllers
                             };
                             await _historyRepository.AddAsync(history);
                         }
-                        // Optionally: clear cart after purchase
                         _db.CartItems.RemoveRange(cart.CartItems);
                         await _db.SaveChangesAsync();
                     }
                 }
-            }
 
-            return Json(response);
+                TempData["PaymentMessage"] = "Payment successful! Thank you for your purchase.";
+                TempData["TransactionId"] = response.TransactionId;
+                TempData["OrderId"] = response.OrderId;
+                TempData["PaymentMethod"] = response.PaymentMethod;
+
+                return RedirectToPage("/Cart/PaymentResult", new { area = "Customer" });
+            }
+            else
+            {
+                TempData["PaymentMessage"] = "Payment failed or invalid signature. Please try again.";
+                return RedirectToPage("/Cart/PaymentResult", new { area = "Customer" });
+            }
         }
     }
 }
