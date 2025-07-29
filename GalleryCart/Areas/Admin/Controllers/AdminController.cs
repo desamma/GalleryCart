@@ -41,7 +41,7 @@ namespace GalleryCart.Areas.Admin.Controllers;
                 TotalUsers = await _userRepo.GetAllQueryable().CountAsync(),
                 TotalArtists = await _userRepo.GetAllQueryable(u => u.IsArtits).CountAsync(),
                 TotalRevenue = await _historyRepo.GetAllQueryable().SumAsync(h => (decimal?)h.TotalPrice) ?? 0,
-                Growth = 30.56m,
+                Growth = 100m,
                 MonthlyRevenues = await _historyRepo.GetAllQueryable()
                     .GroupBy(h => new { h.PurchaseDate.Year, h.PurchaseDate.Month })
                     .Select(g => new MonthlyRevenueDto
