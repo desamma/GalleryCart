@@ -11,14 +11,12 @@ namespace GalleryCart.Areas.Guest.Controllers
     [Area("Guest")]
     public class HomeController : Controller
     {
-        private readonly UserManager<User> _userManager;
         private readonly IPostRepository _postRepository;
         private readonly IUserRepository _userRepository;
         private readonly IMapper _mapper;
 
-        public HomeController(UserManager<User> userManager, IPostRepository postRepository, IUserRepository userRepository, IMapper mapper)
+        public HomeController(IPostRepository postRepository, IUserRepository userRepository, IMapper mapper)
         {
-            _userManager = userManager;
             _postRepository = postRepository;
             _userRepository = userRepository;
             _mapper = mapper;
