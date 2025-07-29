@@ -1,0 +1,81 @@
+@model GalleryCart.Models.ViewModels.DashboardViewModel
+@{
+    ViewData["Title"] = "Admin Dashboard";
+}
+
+<div class="flex h-screen">
+    @await Html.PartialAsync("_AdminSidebar")
+
+    <div class="flex-1 bg-gray-100 p-6 overflow-auto">
+        <div class="flex justify-between items-center mb-4">
+            <div class="text-2xl font-bold">Dashboard</div>
+            <form asp-controller="Admin" asp-action="ExportToExcel" method="get" class="flex items-center gap-2">
+                <input type="date" name="dateFrom" value="@Model.DateFrom?.ToString("yyyy-MM-dd")" class="input input-bordered" />
+                <input type="date" name="dateTo" value="@Model.DateTo?.ToString("yyyy-MM-dd")" class="input input-bordered" />
+                <button type="submit" class="btn btn-outline">Export to Excel</button>
+            </form>
+        </div>
+
+        <div class="grid grid-cols-4 gap-4 mb-6">
+            <div class="card bg-base-100 shadow p-4">
+                <p class="text-sm">Customers</p>
+                <p class="text-xl font-semibold">@Model.TotalUsers</p>
+            </div>
+            <div class="card bg-base-100 shadow p-4">
+                <p class="text-sm">Artists</p>
+                <p class="text-xl font-semibold">@Model.TotalArtists</p>
+            </div>
+            <div class="card bg-base-100 shadow p-4">
+                <p class="text-sm">Revenue</p>
+                <p class="text-xl font-semibold">$@Model.TotalRevenue</p>
+            </div>
+            <div class="card bg-base-100 shadow p-4">
+                <p class="text-sm">Growth</p>
+                <p class="text-xl font-semibold">+@Model.Growth%</p>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-6">
+            <div class="card bg-base-100 shadow">
+                <div class="card-body">
+                    <h2 class="card-title">Selling History</h2>
+                    <div class="flex gap-2 mb-4">
+                        <input type="date" id="dateFrom" class="input input-bordered" />
+                        <input type="date" id="dateTo" class="input input-bordered" />
+                        <button id="filterBtn" class="btn btn-primary">Filter</button>
+                    </div>
+                    <div id="sellingHistoryContainer">
+                        @await Html.PartialAsync("_SellingHistoryPartial", Model.SellingHistories)
+                    </div>
+                </div>
+            </div>
+            <div class="card bg-base-100 shadow">
+                <div class="card-body">
+                    <h2 class="card-title">Recent Activity</h2>
+                    <ul class="list-disc list-inside">
+                        @foreach (var activity in Model.RecentActivities)
+                        {
+                            <li><strong>@activity.Type</strong>: @activity.Name<br /><span class="text-xs text-gray-500">@activity.Date?.ToString("dd/MM/yyyy HH:mm")</span></li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.getElementById("filterBtn").addEventListener("click", function () {
+            const from = document.getElementById("dateFrom").value;
+            const to = document.getElementById("dateTo").value;
+            const url = `/Admin/Admin/GetSellingHistory?dateFrom=${from}&dateTo=${to}`;
+
+            fetch(url)
+                .then(response => response.text())
+                .then(html => {
+                    document.getElementById("sellingHistoryContainer").innerHTML = html;
+                });
+        });
+    </script>
+}
