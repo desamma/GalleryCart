@@ -255,11 +255,19 @@ namespace GalleryCart.Areas.Identity.Pages.Account
                 var result = await _userManager.CreateAsync(user);
                 if (result.Succeeded)
                 {
+                    if (Input.IsArtist)
+                    {
+                        await _userManager.AddToRoleAsync(user, RoleConstants.Artist);
+                    }
+                    else
+                    {
+                        await _userManager.AddToRoleAsync(user, RoleConstants.User);
+                    }
                     result = await _userManager.AddLoginAsync(user, info);
                     if (result.Succeeded)
                     {
                         _logger.LogInformation("User created an account using {Name} provider.", info.LoginProvider);
-
+                        
                         var userId = await _userManager.GetUserIdAsync(user);
                         var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
                         code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));

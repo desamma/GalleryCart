@@ -25,7 +25,7 @@
 }
 
 @{
-    if (currentUser != null)
+    if (currentUser != null && !isAdmin)
     {
         <nav class="bg-gray-800">
             <div class="mx-auto max-w-7xl px-2 sm:px-6 lg:px-8">
@@ -64,11 +64,9 @@
                                 @if (isArtist)
                                 {
                                     <!-- Artist Navigation -->
-                                    <a href="#" class="rounded-md bg-gray-900 px-3 py-2 text-sm font-medium text-white" aria-current="page">Artist Dashboard</a>
-                                    <a href="#" class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">My Artworks</a>
+                                    @*<a href="#" class="rounded-md bg-gray-900 px-3 py-2 text-sm font-medium text-white" aria-current="page">Artist Dashboard</a>*@
+                                    <a asp-area="Artist" asp-action="ArtistProfile" asp-controller="Artist" class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">My Artworks</a>
                                     <a href="@Url.Action("CommissionManagement", "Commission", new { area = "Artist"})" class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">Your Commissions</a>
-                                    <a href="#" class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">Sales</a>
-                                    <a href="#" class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">Gallery</a>
                                 }
                                 else
                                 {
@@ -77,14 +75,14 @@
                                     <!-- Change this line to use Razor Pages link for Cart -->
                                     <a asp-area="Customer" asp-page="/Cart/Index" class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">My Cart</a>
                                     <a href="@Url.Action("CommissionManagement", "Commission", new { area = "Customer"})" class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">My Commissions</a>
-                                    <a href="#" class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">Favorites</a>
+                                    <a asp-area="Customer" asp-action="Index" asp-controller="Customer" class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">Favorites</a>
                                     <a href="@Url.Action("AllArtist","Home", new {area = "Customer"})" class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">Artists</a>
                                 }
 
                                 @if (isAdmin)
                                 {
                                     <!-- Admin Navigation (shown in addition to user/artist nav) -->
-                                    <a href="#" class="rounded-md px-3 py-2 text-sm font-medium text-orange-300 hover:bg-orange-700 hover:text-white border border-orange-500">Admin Panel</a>
+                                    <a asp-area="Admin" asp-action="Dashboard" asp-controller="Admin" class="rounded-md px-3 py-2 text-sm font-medium text-orange-300 hover:bg-orange-700 hover:text-white border border-orange-500">Admin Panel</a>
                                 }
                             </div>
                         </div>
@@ -170,6 +168,68 @@
     }
     </div>
     </div>*@
+        </nav>
+    }
+    else if (currentUser != null && isAdmin)
+    {
+         <nav class="bg-gray-800">
+            <div class="mx-auto max-w-7xl px-2 sm:px-6 lg:px-8">
+                <div class="relative flex h-16 items-center justify-between">
+                    <div class="absolute inset-y-0 left-0 flex items-center sm:hidden">
+                    </div>
+                    <div class="flex flex-1 items-center justify-center sm:items-stretch sm:justify-start">
+                        <div class="flex shrink-0 items-center">
+                            <img class="h-8 w-auto" src="https://tailwindcss.com/plus-assets/img/logos/mark.svg?color=indigo&shade=500" alt="Your Company">
+                        </div>
+                        <div class="hidden sm:ml-6 sm:block">
+                            <div class="flex space-x-4">
+                                @if (isAdmin)
+                                {
+                                    <!-- Admin Navigation (shown in addition to user/artist nav) -->
+                                    <a asp-area="Admin" asp-action="Dashboard" asp-controller="Admin" class="rounded-md px-3 py-2 text-sm font-medium text-orange-300 hover:bg-orange-700 hover:text-white border border-orange-500">Admin Panel</a>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                    <div class="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">
+                        <!-- Profile dropdown -->
+                        <div class="dropdown dropdown-end">
+                            <div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar">
+                                <div class="w-10 rounded-full">
+                                    <img src="@(currentUser?.UserAvatar ?? GeneralConstants.DefaultAvatar)" alt="@currentUser?.UserName" />
+                                </div>
+                            </div>
+                            <ul tabindex="0" class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52">
+                                <li class="menu-title flex items-center gap-2">
+                                    <span>@currentUser?.UserName</span>
+                                    @if (isArtist)
+                                    {
+                                        <span class="badge badge-primary badge-sm">Artist</span>
+                                    }
+                                    @if (isAdmin)
+                                    {
+                                        <span class="badge badge-warning badge-sm">Admin</span>
+                                    }
+                                </li>
+                                @if (isArtist)
+                                {
+                                    <li><a asp-area="Artist" asp-action="Index" asp-controller="Artist">Your Profile</a></li>
+                                    <li><a asp-area="Artist" asp-action="ArtistProfile" asp-controller="Artist">Your Portfolio</a></li>
+                                    <li><a asp-area="Artist" asp-action="CommissionSettings" asp-controller="Artist">Commission Settings</a></li>
+                                }
+                                else if (!isAdmin && !isArtist)
+                                {
+                                    <li><a asp-area="Customer" asp-action="Index" asp-controller="Customer">Your Profile</a></li>
+                                    <li><a asp-area="Customer" asp-page="/History/Index">Purchase History</a></li>
+                                    <li><a asp-area="Customer" asp-action="Wishlist" asp-controller="Customer">Wishlist</a></li>
+                                }
+                                <li><a asp-area="Identity" asp-action="Settings" asp-controller="Auth">Settings</a></li>
+                                <li><a asp-area="Identity" asp-action="Logout" asp-controller="Auth">Sign out</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </nav>
     }
     else
