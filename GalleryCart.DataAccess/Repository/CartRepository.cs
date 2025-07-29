@@ -46,5 +46,15 @@ namespace GalleryCart.DataAccess.Repository
         {
             return await _db.Carts.AnyAsync(predicate);
         }
+
+        public IQueryable<Cart> GetAllQueryable(Expression<Func<Cart, bool>>? predicate = null)
+        {
+            var query = _db.Carts.AsQueryable();
+            if (predicate != null) query = query.Where(predicate);
+            {
+                query = query.Where(predicate);
+            }
+            return query;
+        }
     }
 }
