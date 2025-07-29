@@ -62,7 +62,12 @@
                     <form method="post" asp-page-handler="Checkout">
                         <button type="submit" class="btn btn-primary">Checkout</button>
                     </form>
-                    <form method="post" asp-page-handler="PayNow">
+                    <!-- Pay Now button: POST to PaymentController with PaymentInformationModel -->
+                    <form method="post" action="/Customer/Payment/CreatePaymentUrlVnpay">
+                        <input type="hidden" name="OrderType" value="billpayment" />
+                        <input type="hidden" name="Amount" value="@(Model.CartUser.CartItems.Sum(i => i.Post?.Price ?? 0))" />
+                        <input type="hidden" name="OrderDescription" value="Cart payment" />
+                        <input type="hidden" name="Name" value="@User.Identity?.Name" />
                         <button type="submit" class="btn btn-success">Pay Now</button>
                     </form>
                 </div>
@@ -81,7 +86,11 @@
 
         @* Always show Pay Now button for testing, even if cart is empty *@
         <div class="mt-8 flex justify-center">
-            <form method="post" asp-page-handler="PayNow">
+            <form method="post" action="/Customer/Payment/CreatePaymentUrlVnpay">
+                <input type="hidden" name="OrderType" value="billpayment" />
+                <input type="hidden" name="Amount" value="@(Model.CartUser?.CartItems?.Sum(i => i.Post?.Price ?? 0) ?? 0)" />
+                <input type="hidden" name="OrderDescription" value="Cart payment" />
+                <input type="hidden" name="Name" value="@User.Identity?.Name" />
                 <button type="submit" class="btn btn-success">Pay Now</button>
             </form>
         </div>

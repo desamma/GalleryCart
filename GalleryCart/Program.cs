@@ -75,6 +75,7 @@ builder.Services.AddScoped<ICartRepository, CartRepository>();
 builder.Services.AddTransient<IEmailSender, EmailSender>();
 
 
+
 // Configure default routes (This should be after configured the Identity)
 builder.Services.ConfigureApplicationCookie(options =>
 {

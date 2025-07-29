@@ -155,7 +155,7 @@ namespace GalleryCart.DataAccess
                 .HasForeignKey(ci => ci.CartId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // CartItem to Commission (many-to-one)
+            // CartItem to Post (many-to-one)
             builder.Entity<CartItem>()
                 .HasOne(ci => ci.Post)
                 .WithMany()
