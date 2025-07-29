@@ -76,8 +76,7 @@
 
                                 <!-- Hover Overlay -->
                                 <div class="absolute inset-0 bg-black bg-opacity-70 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-between p-4">
-                                    <!-- Artist Profile - Top (Now Clickable) -->
-                                    <a asp-page="/Artists/Profile" asp-route-id="@post.UserId" class="flex items-center space-x-3 hover:bg-gray-800 hover:bg-opacity-50 rounded-lg p-2 transition-colors duration-200 cursor-pointer">
+                                    <a asp-action="ArtistProfile" asp-controller="Guest" asp-route-userId="@post.UserId" class="flex items-center space-x-3 hover:bg-gray-800 hover:bg-opacity-50 rounded-lg p-2 transition-colors duration-200 cursor-pointer">
                                         <div class="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
                                             <span class="text-white font-bold text-sm">@post.User.UserName?.Substring(0, 1).ToUpper()</span>
                                         </div>
