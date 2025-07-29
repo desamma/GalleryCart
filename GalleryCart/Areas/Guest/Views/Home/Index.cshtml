@@ -1,9 +1,9 @@
 ﻿@using GalleryCart.DataAccess.Repository.IRepository;
-@using GalleryCart.Models.Models
-@model GalleryCart.Areas.Guest.Models.IndexModel;
+@using GalleryCart.Models.Models;
+@model GalleryCart.Models.ViewModels.IndexModel;
 @inject IUserRepository UserRepository
 @{
-    ViewData["Title"] = "Guest Home";
+    ViewData["Title"] = "Customer Home";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 <div class="min-h-screen bg-gray-900 text-white">
@@ -16,64 +16,8 @@
         </div>
     </div>
 
-    <!-- Navigation Tabs -->
-    <div class="bg-gray-800 border-b border-gray-700">
-        <div class="container mx-auto px-4">
-            <div class="flex items-center space-x-8">
-                <!-- All Channel Tab (Active) -->
-                <div class="flex items-center space-x-2 py-4 border-b-2 border-blue-500">
-                    <div class="w-8 h-8 bg-gray-600 rounded flex items-center justify-center">
-                        <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z" />
-                        </svg>
-                    </div>
-                    <span class="text-sm font-medium">All Channel</span>
-                </div>
-
-                <!-- Other Tabs -->
-                <div class="flex items-center space-x-2 py-4 text-gray-400 hover:text-white cursor-pointer">
-                    <div class="w-8 h-8 rounded-full bg-gray-600 flex items-center justify-center">
-                        <span class="text-xs">CA</span>
-                    </div>
-                    <span class="text-sm">Character Animation</span>
-                </div>
-
-                <div class="flex items-center space-x-2 py-4 text-gray-400 hover:text-white cursor-pointer">
-                    <div class="w-8 h-8 rounded-full bg-gray-600 flex items-center justify-center">
-                        <span class="text-xs">FC</span>
-                    </div>
-                    <span class="text-sm">Fashion & Costume Design</span>
-                </div>
-
-                <div class="flex items-center space-x-2 py-4 text-gray-400 hover:text-white cursor-pointer">
-                    <div class="w-8 h-8 rounded-full bg-gray-600 flex items-center justify-center">
-                        <span class="text-xs">CA</span>
-                    </div>
-                    <span class="text-sm">Character Animation</span>
-                </div>
-
-                <div class="flex items-center space-x-2 py-4 text-gray-400 hover:text-white cursor-pointer">
-                    <div class="w-8 h-8 rounded-full bg-gray-600 flex items-center justify-center">
-                        <span class="text-xs">FD</span>
-                    </div>
-                    <span class="text-sm">Fashion & Costume Design</span>
-                </div>
-
-                <div class="flex items-center space-x-2 py-4 text-gray-400 hover:text-white cursor-pointer">
-                    <div class="w-8 h-8 rounded-full bg-gray-600 flex items-center justify-center">
-                        <span class="text-xs">CA</span>
-                    </div>
-                    <span class="text-sm">Character Animation</span>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <!-- Main Content -->
     <div class="container mx-auto px-4 py-8">
-        <!-- Page Title -->
-        <h1 class="text-3xl font-bold mb-8">All Channel</h1>
-
         <!-- Posts Grid -->
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-7 gap-4">
             @if (Model != null && Model.Posts.Any())
@@ -82,7 +26,7 @@
                 {
                     if (post.User == null)
                         post.User = await UserRepository.GetAsync(a => a.Id.Equals(post.UserId));
-                    if(post == null || post.User == null || string.IsNullOrEmpty(post.Path) || string.IsNullOrEmpty(post.Title) || post.Price <= 0)
+                    if (post == null || post.User == null || string.IsNullOrEmpty(post.Path) || string.IsNullOrEmpty(post.Title) || post.Price <= 0)
                         continue; // Skip invalid posts
                     <div class="group relative">
                         <!-- Post Card -->
@@ -91,11 +35,11 @@
                             <div class="relative aspect-square overflow-hidden">
                                 @if (post.IsImage)
                                 {
-                                    <img src="@post.Path" alt="@post.Title" class="w-full h-full object-cover" />
+                                    <img src="@post.Path" alt="@post.Title" class="w-full h-full object-cover @(post.IsMature ? "mature-image" : "")" />
                                 }
                                 else
                                 {
-                                    <video class="w-full h-full object-cover" poster="@post.Path" preload="metadata">
+                                    <video class="w-full h-full object-cover @(post.IsMature ? "mature-image" : "")" poster="@post.Path" preload="metadata">
                                         <source src="@post.Path" type="video/mp4">
                                         Your browser does not support the video tag.
                                     </video>
@@ -132,8 +76,7 @@
 
                                 <!-- Hover Overlay -->
                                 <div class="absolute inset-0 bg-black bg-opacity-70 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-between p-4">
-                                    <!-- Artist Profile - Top (Now Clickable) -->
-                                    <a asp-page="/Artists/Profile" asp-route-id="@post.UserId" class="flex items-center space-x-3 hover:bg-gray-800 hover:bg-opacity-50 rounded-lg p-2 transition-colors duration-200 cursor-pointer">
+                                    <a asp-action="ArtistProfile" asp-controller="Guest" asp-route-userId="@post.UserId" class="flex items-center space-x-3 hover:bg-gray-800 hover:bg-opacity-50 rounded-lg p-2 transition-colors duration-200 cursor-pointer">
                                         <div class="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
                                             <span class="text-white font-bold text-sm">@post.User.UserName?.Substring(0, 1).ToUpper()</span>
                                         </div>
@@ -236,5 +179,15 @@
         -webkit-line-clamp: 2;
         -webkit-box-orient: vertical;
         overflow: hidden;
+    }
+
+    /* Blur effect for mature content images only */
+    .mature-image {
+        filter: blur(20px);
+        transition: filter 0.5s ease;
+    }
+
+    .group:hover .mature-image {
+        filter: blur(0px);
     }
 </style>

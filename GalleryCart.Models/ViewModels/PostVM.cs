@@ -33,5 +33,9 @@ public class PostVM
 
     public bool IsImage { get; set; } // true: image, false: video
     
+    public decimal? Price { get; set; }
+    
+    public string PostAuthor { get; set; }
+    
     public IEnumerable<Tag> PostTags { get; set; } = new List<Tag>();
 }

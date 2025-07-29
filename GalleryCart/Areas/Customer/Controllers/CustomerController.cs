@@ -3,6 +3,7 @@ using GalleryCart.DataAccess.Repository.IRepository;
 using GalleryCart.Models.Models;
 using GalleryCart.Models.ViewModels;
 using GalleryCart.Utilities.Utils;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -11,6 +12,7 @@ using Newtonsoft.Json;
 namespace GalleryCart.Areas.Customer.Controllers;
 
 [Area("Customer")]
+[Authorize(Roles = "user")]
 public class CustomerController : Controller
 {
     private readonly UserManager<User> _userManager;

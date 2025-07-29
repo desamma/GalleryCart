@@ -1,0 +1,109 @@
+@model GalleryCart.Models.ViewModels.UserPaginateVM
+@{
+ViewData["Title"] = "Manage Users";
+}
+
+<div class="flex h-screen">
+    @await Html.PartialAsync("_AdminSidebar")
+
+    <div class="flex-1 bg-gray-100 p-6 overflow-auto">
+        <div class="text-2xl font-bold mb-4">Manage Users</div>
+
+        <form id="csrfTokenForm">
+            @Html.AntiForgeryToken()
+        </form>
+
+        <table class="table w-full table-zebra">
+            <thead>
+            <tr>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Date of Birth</th>
+                <th>Created Date</th>
+                <th>Is Banned</th>
+                <th>Is Artist</th>
+                <th>Email Confirmed</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            @foreach (var user in Model.Users)
+            {
+                <tr id="user-@user.Id">
+                    <td>@user.UserName</td>
+                    <td>@user.Email</td>
+                    <td>@user.UserDOB?.ToString("dd/MM/yyyy")</td>
+                    <td>@user.CreatedDate?.ToString("dd/MM/yyyy")</td>
+                    <td>
+                        <span class="badge @(user.IsBanned ? "badge-error" : "badge-success")">
+                            @(user.IsBanned ? "Yes" : "No")
+                        </span>
+                    </td>
+                    <td>@(user.IsArtist ? "Yes" : "No")</td>
+                    <td>@(user.IsEmailConfirmed ? "Yes" : "No")</td>
+                    <td class="space-x-2">
+                        <button class="btn btn-xs btn-warning" onclick="toggleBan('@user.Id')">
+                            @(user.IsBanned ? "Unban" : "Ban")
+                        </button>
+                        <button class="btn btn-xs btn-error" onclick="deleteUser('@user.Id')">Delete</button>
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+        <div class="mt-6 flex justify-center space-x-2">
+            @for (int i = 1; i <= Model.TotalPages; i++)
+            {
+                <a asp-action="ManageUser"
+                   asp-route-page="@i"
+                   class="btn btn-sm @(Model.CurrentPage == i ? "btn-primary" : "btn-ghost")">
+                    @i
+                </a>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    function getCsrfToken() {
+        return document.querySelector('#csrfTokenForm input[name="__RequestVerificationToken"]').value;
+    }
+
+    function toggleBan(userId) {
+        fetch(`/Admin/Admin/ToggleBan/${userId}`, {
+            method: 'POST',
+            headers: {
+                'RequestVerificationToken': getCsrfToken()
+            }
+        })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert("Failed to update user status.");
+                }
+            });
+    }
+
+    function deleteUser(userId) {
+        if (!confirm("Are you sure you want to delete this user?")) return;
+
+        fetch(`/Admin/Admin/DeleteUser/${userId}`, {
+            method: 'DELETE',
+            headers: {
+                'RequestVerificationToken': getCsrfToken()
+            }
+        })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById(`user-${userId}`).remove();
+                } else {
+                    alert("Failed to delete user.");
+                }
+            });
+    }
+</script>
+}
