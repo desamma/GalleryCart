@@ -21,7 +21,7 @@ namespace GalleryCart.DataAccess.Repository
 
         public IQueryable<Post> GetAllQueryable(Expression<Func<Post, bool>>? predicate = null, bool asNoTracking = true)
         {
-            IQueryable<Post> query = _db.Posts.Include(p => p.Tags);
+            IQueryable<Post> query = _db.Posts.Include(p => p.Tags).Include(p => p.User);
             if (asNoTracking)
             {
                 query = query.AsNoTracking(); // Use AsNoTracking for read-only queries
@@ -35,7 +35,7 @@ namespace GalleryCart.DataAccess.Repository
 
         public async Task<Post?> GetAsync(Expression<Func<Post, bool>> predicate)
         {
-            return await _db.Posts.Include(p => p.Tags)
+            return await _db.Posts.Include(p => p.Tags).Include(p => p.User)
                 .AsNoTracking() // Use AsNoTracking for read-only queries
                 .FirstOrDefaultAsync(predicate); // Return the first matching post or null if none found
         }
