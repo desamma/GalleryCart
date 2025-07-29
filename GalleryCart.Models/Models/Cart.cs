@@ -29,8 +29,8 @@ namespace GalleryCart.Models.Models
         public virtual Cart Cart { get; set; }
 
         [Required]
-        public Guid CommissionId { get; set; }
-        [ForeignKey(nameof(CommissionId))]
-        public virtual Commission Commission { get; set; }
+        public Guid PostId { get; set; } 
+        [ForeignKey(nameof(PostId))]
+        public virtual Post Post { get; set; } = null!; 
     }
 }

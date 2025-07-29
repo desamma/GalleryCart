@@ -14,16 +14,7 @@ namespace GalleryCart.DataAccess.Repository
             _db = db;
         }
 
-        public IQueryable<Cart> GetAllQueryable(Expression<Func<Cart, bool>>? predicate = null, bool asNoTracking = true)
-        {
-            IQueryable<Cart> query = _db.Carts.Include(c => c.CartItems);
-            if (asNoTracking)
-                query = query.AsNoTracking();
-            if (predicate != null)
-                query = query.Where(predicate);
-            return query;
-        }
-
+   
         public async Task<Cart?> GetAsync(Expression<Func<Cart, bool>> predicate)
         {
             return await _db.Carts.Include(c => c.CartItems)
