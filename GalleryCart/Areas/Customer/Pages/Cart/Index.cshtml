@@ -15,9 +15,6 @@
         @if (!string.IsNullOrEmpty(Model.PaymentMessage))
         {
             <div class="alert alert-success my-4">
-                <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
                 <span>@Model.PaymentMessage</span>
             </div>
         }
@@ -33,14 +30,14 @@
                                 @item.Post.Title
                             </h2>
                             <div class="text-sm text-base-content/70 mb-1">
-                                Artist: <span class="font-semibold">@item.Post.Artist?.UserName</span>
+                                Artist: <span class="font-semibold">@item.Post.User?.UserName</span>
                             </div>
                             <div class="text-sm text-base-content/70 mb-1">
                                 Price: <span class="font-semibold text-success">$@item.Post.Price</span>
                             </div>
-                            <div class="text-xs text-base-content/60">
-                                Created: @item.Post.CreatedDate.ToString("MMM dd, yyyy")
-                            </div>
+                            @* <div class="text-xs text-base-content/60">
+                                Created: @item.Post.PostDate.ToString("MMM dd, yyyy")
+                            </div> *@
                         </div>
                         <form asp-area="Customer" asp-controller="Cart" asp-action="RemoveFromCart" method="post" class="ml-auto">
                             <input type="hidden" name="postId" value="@item.PostId" />
