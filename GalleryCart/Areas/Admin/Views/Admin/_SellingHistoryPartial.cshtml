@@ -1,0 +1,25 @@
+@model List<GalleryCart.Models.ViewModels.SellingHistoryDto>
+
+<table class="table w-full">
+   <thead>
+   <tr>
+      <th>Title</th>
+      <th>Price</th>
+      <th>Quantity</th>
+      <th>Amount</th>
+      <th>Purchase Date</th>
+   </tr>
+   </thead>
+   <tbody>
+   @foreach (var item in Model)
+   {
+      <tr>
+         <td>@item.Title</td>
+         <td>$@item.Price</td>
+         <td>@item.Quantity</td>
+         <td>$@item.Amount</td>
+         <td>@item.PurchaseDate.ToString("dd/MM/yyyy HH:mm")</td>
+      </tr>
+   }
+   </tbody>
+</table>

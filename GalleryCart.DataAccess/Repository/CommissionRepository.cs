@@ -16,7 +16,7 @@ namespace GalleryCart.DataAccess.Repository
 
         public IQueryable<Commission> GetAllQueryable(Expression<Func<Commission, bool>>? predicate = null, bool asNoTracking = true)
         {
-            IQueryable<Commission> query = _db.Commissions;
+            IQueryable<Commission> query = _db.Commissions.Include(c => c.Commissioner).Include(c => c.Artist);
             if (asNoTracking)
             {
                 query = query.AsNoTracking(); // Use AsNoTracking for read-only queries
@@ -30,7 +30,7 @@ namespace GalleryCart.DataAccess.Repository
 
         public async Task<Commission?> GetAsync(Expression<Func<Commission, bool>> predicate)
         {
-            return await _db.Commissions
+            return await _db.Commissions.Include(c => c.Commissioner).Include(c => c.Artist)
                 .AsNoTracking() // Use AsNoTracking for read-only queries
                 .FirstOrDefaultAsync(predicate); // Return the first matching commission or null if none found
         }

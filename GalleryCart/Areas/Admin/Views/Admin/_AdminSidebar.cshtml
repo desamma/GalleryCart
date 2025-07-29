@@ -1,0 +1,12 @@
+<aside class="w-64 bg-gray-900 text-white flex flex-col p-4">
+   <div class="text-2xl font-bold mb-8">logo</div>
+   <nav class="flex-1 space-y-2">
+      <a asp-action="Dashboard" class="flex items-center p-2 rounded hover:bg-gray-800 @(ViewContext.RouteData.Values["action"]?.ToString() == "Dashboard" ? "bg-gray-800" : "")">
+         <span class="mr-3">📊</span> Dashboards
+         <span class="ml-auto bg-green-500 text-xs px-2 py-0.5 rounded-full">5</span>
+      </a>
+      <a asp-action="User" class="flex items-center p-2 rounded hover:bg-gray-800">👤 User</a>
+      <a asp-action="Post" class="flex items-center p-2 rounded hover:bg-gray-800">📝 Post</a>
+      <a asp-action="Commission" class="flex items-center p-2 rounded hover:bg-gray-800">📜 Commission</a>
+   </nav>
+</aside>
