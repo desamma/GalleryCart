@@ -4,6 +4,7 @@ using GalleryCart.Models.Models;
 using GalleryCart.Models.ViewModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 
 namespace GalleryCart.Areas.Guest.Controllers
@@ -13,49 +14,73 @@ namespace GalleryCart.Areas.Guest.Controllers
     {
         private readonly IPostRepository _postRepository;
         private readonly IUserRepository _userRepository;
+        private readonly ITagRepository _tagRepository;
         private readonly IMapper _mapper;
 
-        public HomeController(IPostRepository postRepository, IUserRepository userRepository, IMapper mapper)
+        public HomeController(IPostRepository postRepository, IUserRepository userRepository, IMapper mapper, ITagRepository tagRepository)
         {
             _postRepository = postRepository;
             _userRepository = userRepository;
             _mapper = mapper;
+            _tagRepository = tagRepository;
         }
 
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string? search, DateTime? startDate, DateTime? endDate, Guid? tagId)
         {
-            try
+            var userJson = HttpContext.Session.GetString("CurrentUser");
+            User? currentUser = null;
+
+            if (!string.IsNullOrEmpty(userJson))
+                currentUser = JsonConvert.DeserializeObject<User>(userJson);
+
+            // Load tags for the ViewData dropdown
+            var tags = await _tagRepository.GetAllQueryable().ToListAsync();
+            ViewData["Tags"] = tags;
+            ViewData["Search"] = search;
+            ViewData["StartDate"] = startDate?.ToString("yyyy-MM-dd");
+            ViewData["EndDate"] = endDate?.ToString("yyyy-MM-dd");
+            ViewData["TagId"] = tagId;
+
+            // Query posts
+            var postsQuery = _postRepository.GetAllQueryable(p => p.IsImage);
+
+            if (!string.IsNullOrWhiteSpace(search))
             {
-                var userJson = HttpContext.Session.GetString("CurrentUser");
-                User? currentUser = null;
-
-                if (!string.IsNullOrEmpty(userJson))
-                {
-                    currentUser = JsonConvert.DeserializeObject<User>(userJson);
-                }
-
-                var posts = _postRepository.GetAllQueryable(p => p.IsImage)
-                    .OrderByDescending(p => p.LikeCount)
-                    .ThenBy(p => p.IsMature)
-                    .ThenBy(p => p.PostDate);
-
-                foreach (var post in posts)
-                {
-                    post.User = await _userRepository.GetAsync(a => a.Id.Equals(post.UserId));
-                }
-
-                var model = new IndexModel
-                {
-                    CurrentUser = currentUser,
-                    Posts = posts
-                };
-
-                return View(model);
+                postsQuery = postsQuery.Where(p => p.Title.Contains(search) || p.Description.Contains(search));
             }
-            catch (Exception ex)
+
+            if (startDate.HasValue)
             {
-                return BadRequest($"An error occurred while fetching posts: {ex.Message}");
+                postsQuery = postsQuery.Where(p => p.PostDate >= startDate.Value);
             }
+
+            if (endDate.HasValue)
+            {
+                postsQuery = postsQuery.Where(p => p.PostDate <= endDate.Value);
+            }
+
+            if (tagId.HasValue)
+            {
+                postsQuery = postsQuery.Where(p => p.Tags.Any(t => t.TagId == tagId.Value));
+            }
+
+            var posts = postsQuery.OrderByDescending(p => p.LikeCount)
+                .ThenBy(p => p.IsMature)
+                .ThenBy(p => p.PostDate);
+
+            foreach (var post in posts)
+            {
+                post.User = await _userRepository.GetAsync(u => u.Id == post.UserId);
+            }
+
+            var model = new IndexModel
+            {
+                CurrentUser = currentUser,
+                Posts = posts
+            };
+
+            return View(model);
         }
+
     }
 }

@@ -16,6 +16,24 @@
         </div>
     </div>
 
+    <!-- Search and Filter Form -->
+    <form method="get" class="bg-gray-800 p-4 rounded-lg mb-6 flex flex-wrap items-end gap-4">
+        <input name="search" type="text" placeholder="Search by title or description" value="@ViewData["Search"]" class="input input-bordered w-full sm:w-60" />
+
+        <input name="startDate" type="date" value="@ViewData["StartDate"]" class="input input-bordered" />
+        <input name="endDate" type="date" value="@ViewData["EndDate"]" class="input input-bordered" />
+
+        <select name="tagId" class="select select-bordered">
+            <option value="">All Tags</option>
+            @foreach (var tag in ViewData["Tags"] as List<Tag> ?? new())
+            {
+                <option value="@tag.TagId" selected="@(ViewData["TagId"]?.ToString() == tag.TagId.ToString())">@tag.TagName</option>
+            }
+        </select>
+
+        <button type="submit" class="btn btn-primary">Filter</button>
+    </form>
+    
     <!-- Main Content -->
     <div class="container mx-auto px-4 py-8">
         <!-- Posts Grid -->
