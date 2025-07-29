@@ -1,0 +1,53 @@
+@page
+@model GalleryCart.Areas.Customer.Pages.History.IndexModel
+@{
+    ViewData["Title"] = "Purchase History";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mx-auto py-6">
+    <h1 class="text-3xl font-bold mb-6">Purchase History</h1>
+    @if (Model.Histories.Count == 0)
+    {
+        <div class="alert alert-info">You have no purchase history yet.</div>
+    }
+    else
+    {
+        <div class="overflow-x-auto">
+            <table class="table table-zebra w-full">
+                <thead>
+                    <tr>
+                        <th>Artwork</th>
+                        <th>Title</th>
+                        <th>Price</th>
+                        <th>Discount</th>
+                        <th>Total Paid</th>
+                        <th>Purchase Date</th>
+                        <th>Payment Method</th>
+                        <th>Order ID</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @foreach (var h in Model.Histories)
+                {
+                    <tr>
+                        <td>
+                            @if (!string.IsNullOrEmpty(h.Post?.Path))
+                            {
+                                <img src="@h.Post.Path" alt="@h.Post.Title" class="w-16 h-16 object-cover rounded" />
+                            }
+                        </td>
+                        <td>@h.Post?.Title</td>
+                        <td>@h.Post?.Price.ToString("C")</td>
+                        <td>@(h.Discount > 0 ? $"{h.Discount}%" : "-")</td>
+                        <td>@h.TotalPrice.ToString("C")</td>
+                        <td>@h.PurchaseDate.ToString("dd/MM/yyyy HH:mm")</td>
+                        <td>@h.PaymentMethod</td>
+                        <td>@h.OrderId</td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

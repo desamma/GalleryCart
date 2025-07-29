@@ -52,7 +52,7 @@ namespace GalleryCart.DataAccess.Repository
             var history = await _db.Histories.FindAsync(historyId);
             if (history == null)
             {
-                return false; // History not found
+                return false; 
             }
 
             _db.Histories.Remove(history);

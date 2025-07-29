@@ -12,7 +12,7 @@ namespace GalleryCart.Areas.Customer.Controllers
     public class CartController : Controller
     {
         private readonly ICartRepository _cartRepository;
-        private readonly IPostRepository _postRepository; // Changed from ICommissionRepository
+        private readonly IPostRepository _postRepository;
 
         public CartController(ICartRepository cartRepository, IPostRepository postRepository)
         {
@@ -40,13 +40,13 @@ namespace GalleryCart.Areas.Customer.Controllers
             }
 
 
-            // Kiểm tra post đã có trong cart chưa
+            // Cheking Post exists in the cart
             if (cart.CartItems.Any(ci => ci.PostId == postId))
             {
                 return BadRequest("Post already in cart.");
             }
 
-            // Thêm post vào cart
+            // Add the post to the cart
             cart.CartItems.Add(new CartItem
             {
                 CartItemId = Guid.NewGuid(),

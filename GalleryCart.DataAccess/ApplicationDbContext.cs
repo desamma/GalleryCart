@@ -14,6 +14,7 @@ namespace GalleryCart.DataAccess
         public virtual DbSet<Chat> Chats { get; set; } = null!;
         public virtual DbSet<Comment> Comments { get; set; } = null!;
         public virtual DbSet<Commission> Commissions { get; set; } = null!;
+        public virtual DbSet<CommissionPayment> CommissionPayments { get; set; } = null!;
         public virtual DbSet<FavouritePost> FavouritePosts { get; set; } = null!;
         public virtual DbSet<History> Histories { get; set; } = null!;
         public virtual DbSet<Post> Posts { get; set; } = null!;
@@ -155,7 +156,7 @@ namespace GalleryCart.DataAccess
                 .HasForeignKey(ci => ci.CartId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // CartItem to Commission (many-to-one)
+            // CartItem to Post (many-to-one)
             builder.Entity<CartItem>()
                 .HasOne(ci => ci.Post)
                 .WithMany()

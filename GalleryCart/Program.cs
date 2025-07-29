@@ -72,7 +72,9 @@ builder.Services.AddScoped<IPostRepository, PostRepository>();
 builder.Services.AddScoped<ITagRepository, TagRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<ICartRepository, CartRepository>();
+builder.Services.AddScoped<ICommissionPaymentRepository, CommissionPaymentRepository>();
 builder.Services.AddTransient<IEmailSender, EmailSender>();
+
 
 
 // Configure default routes (This should be after configured the Identity)
