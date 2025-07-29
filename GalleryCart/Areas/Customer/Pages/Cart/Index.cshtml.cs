@@ -20,8 +20,8 @@ namespace GalleryCart.Areas.Customer.Pages.Cart
 
         public class CartItem
         {
-            public Guid PostId { get; set; } // Changed from CommissionId
-            public Post Post { get; set; } = new Post(); // Changed from Commission
+            public Guid PostId { get; set; } 
+            public Post Post { get; set; } = new Post(); 
         }
 
         public class Post
@@ -37,10 +37,6 @@ namespace GalleryCart.Areas.Customer.Pages.Cart
             public string UserName { get; set; } = string.Empty;
         }
 
-        public IActionResult OnPostPayNow()
-        {
-            PaymentMessage = "Payment test successful! (This is a test message for Pay Now button.)";
-            return RedirectToPage();
-        }
+        
     }
 }
