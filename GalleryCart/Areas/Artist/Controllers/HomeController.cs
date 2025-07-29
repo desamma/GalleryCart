@@ -1,6 +1,6 @@
-using GalleryCart.Areas.Artist.Models;
 using GalleryCart.DataAccess.Repository.IRepository;
 using GalleryCart.Models.Models;
+using GalleryCart.Models.ViewModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
