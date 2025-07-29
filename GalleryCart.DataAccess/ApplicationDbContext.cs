@@ -157,9 +157,9 @@ namespace GalleryCart.DataAccess
 
             // CartItem to Commission (many-to-one)
             builder.Entity<CartItem>()
-                .HasOne(ci => ci.Commission)
+                .HasOne(ci => ci.Post)
                 .WithMany()
-                .HasForeignKey(ci => ci.CommissionId)
+                .HasForeignKey(ci => ci.PostId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             // Add precision for decimal fields

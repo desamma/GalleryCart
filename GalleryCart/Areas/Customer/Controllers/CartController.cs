@@ -10,23 +10,23 @@ namespace GalleryCart.Areas.Customer.Controllers
     public class CartController : Controller
     {
         private readonly ICartRepository _cartRepository;
-        private readonly ICommissionRepository _commissionRepository;
+        private readonly IPostRepository _postRepository; // Changed from ICommissionRepository
 
-        public CartController(ICartRepository cartRepository, ICommissionRepository commissionRepository)
+        public CartController(ICartRepository cartRepository, IPostRepository postRepository)
         {
             _cartRepository = cartRepository;
-            _commissionRepository = commissionRepository;
+            _postRepository = postRepository;
         }
 
-        // Thêm commission vào cart
+        // Add post to cart
         [HttpPost]
-        public async Task<IActionResult> AddToCart(Guid commissionId)
+        public async Task<IActionResult> AddToCart(Guid postId)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (userId == null) return Unauthorized();
 
-            // Lấy cart hiện tại của user, nếu chưa có thì tạo mới
-            var cart = _cartRepository.GetAllQueryable(c => c.UserId.ToString() == userId, false).FirstOrDefault();
+            // Lấy cart hiện tại của user, nếu chưa có thì tạo mới  
+            var cart = await _cartRepository.GetAsync(c => c.UserId.ToString() == userId);
             if (cart == null)
             {
                 cart = new Cart
@@ -37,35 +37,35 @@ namespace GalleryCart.Areas.Customer.Controllers
                 await _cartRepository.AddAsync(cart);
             }
 
-            // Kiểm tra commission đã có trong cart chưa
-            if (cart.CartItems.Any(ci => ci.CommissionId == commissionId))
+
+            // Kiểm tra post đã có trong cart chưa
+            if (cart.CartItems.Any(ci => ci.PostId == postId))
             {
-                return BadRequest("Commission already in cart.");
+                return BadRequest("Post already in cart.");
             }
 
-            // Thêm commission vào cart
+            // Thêm post vào cart
             cart.CartItems.Add(new CartItem
             {
                 CartItemId = Guid.NewGuid(),
                 CartId = cart.CartId,
-                CommissionId = commissionId
+                PostId = postId
             });
 
             await _cartRepository.UpdateAsync(cart);
             return RedirectToAction("Index", "Cart");
         }
 
-        // Xóa commission khỏi cart
+        // Remove post from cart
         [HttpPost]
-        public async Task<IActionResult> RemoveFromCart(Guid commissionId)
+        public async Task<IActionResult> RemoveFromCart(Guid postId)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (userId == null) return Unauthorized();
-
-            var cart = _cartRepository.GetAllQueryable(c => c.UserId.ToString() == userId, false).FirstOrDefault();
+            var cart = await _cartRepository.GetAsync(c => c.UserId.ToString() == userId);
             if (cart == null) return NotFound();
 
-            var cartItem = cart.CartItems.FirstOrDefault(ci => ci.CommissionId == commissionId);
+            var cartItem = cart.CartItems.FirstOrDefault(ci => ci.PostId == postId);
             if (cartItem == null) return NotFound();
 
             cart.CartItems.Remove(cartItem);
@@ -74,16 +74,14 @@ namespace GalleryCart.Areas.Customer.Controllers
             return RedirectToAction("Index", "Cart");
         }
 
-        // Hiển thị cart
+        // Display cart
         [HttpGet]
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (userId == null) return Unauthorized();
 
-            var cart = _cartRepository.GetAllQueryable(c => c.UserId.ToString() == userId, true)
-                .FirstOrDefault();
-
+            var cart = await _cartRepository.GetAsync(c => c.UserId.ToString() == userId);
             return View(cart);
         }
     }
