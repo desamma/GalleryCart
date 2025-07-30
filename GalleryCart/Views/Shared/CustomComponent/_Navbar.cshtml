@@ -67,6 +67,7 @@
                                     @*<a href="#" class="rounded-md bg-gray-900 px-3 py-2 text-sm font-medium text-white" aria-current="page">Artist Dashboard</a>*@
                                     <a asp-area="Artist" asp-action="ArtistProfile" asp-controller="Artist" class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">My Artworks</a>
                                     <a href="@Url.Action("CommissionManagement", "Commission", new { area = "Artist"})" class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">Your Commissions</a>
+                                    <a asp-area="Artist" asp-action="Create" asp-controller="Post" class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">Upload post</a>
                                 }
                                 else
                                 {

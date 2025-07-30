@@ -62,3 +62,19 @@
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        document.getElementById("filterBtn").addEventListener("click", function () {
+            const from = document.getElementById("dateFrom").value;
+            const to = document.getElementById("dateTo").value;
+            const url = `/Admin/Admin/GetSellingHistory?dateFrom=${from}&dateTo=${to}`;
+
+            fetch(url)
+                .then(response => response.text())
+                .then(html => {
+                    document.getElementById("sellingHistoryContainer").innerHTML = html;
+                });
+        });
+    </script>
+}

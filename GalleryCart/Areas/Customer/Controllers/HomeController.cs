@@ -81,7 +81,6 @@ namespace GalleryCart.Areas.Customer.Controllers
             return View(model);
         }
 
-
         public IActionResult AllArtist()
         {
             try

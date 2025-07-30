@@ -1,4 +1,4 @@
-﻿using GalleryCart.DataAccess;
+using GalleryCart.DataAccess;
 using GalleryCart.DataAccess.Repository.IRepository;
 using GalleryCart.Library;
 using GalleryCart.Models.Models;
@@ -33,8 +33,6 @@ namespace GalleryCart.Areas.Customer.Controllers
             var timeNow = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, timeZoneById);
             var tick = DateTime.Now.Ticks.ToString();
             var pay = new VnPayLibrary();
-
-            // ✅ Lấy callback URL từ appsettings
             var urlCallBack = _configuration["Vnpay:PaymentBackReturnUrl"];
 
             pay.AddRequestData("vnp_Version", _configuration["Vnpay:Version"]);
@@ -105,6 +103,7 @@ namespace GalleryCart.Areas.Customer.Controllers
                 TempData["PaymentMessage"] = "Payment failed or invalid signature. Please try again.";
                 return RedirectToPage("/Cart/PaymentResult", new { area = "Customer" });
             }
+            //return Json(response);
         }
     }
 }

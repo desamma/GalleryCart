@@ -9,5 +9,4 @@ namespace GalleryCart.Models.ViewModels
         public IEnumerable<Tag> AllTags { get; set; } = Enumerable.Empty<Tag>();
         public PostFilterModel Filter { get; set; } = new PostFilterModel();
     }
-
 }

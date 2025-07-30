@@ -14,11 +14,13 @@ namespace GalleryCart.DataAccess.Repository
             _db = db;
         }
 
-   
+
         public async Task<Cart?> GetAsync(Expression<Func<Cart, bool>> predicate)
         {
-            return await _db.Carts.Include(c => c.CartItems)
-                .AsNoTracking()
+            return await _db.Carts
+                .Include(c => c.CartItems)
+                    .ThenInclude(ci => ci.Post)
+                        .ThenInclude(p => p.User) // 🔥 THÊM DÒNG NÀY
                 .FirstOrDefaultAsync(predicate);
         }
 
