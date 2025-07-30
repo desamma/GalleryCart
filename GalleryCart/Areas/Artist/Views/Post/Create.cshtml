@@ -2,67 +2,89 @@
 @{
     ViewData["Title"] = "Create Post";
     var tags = ViewBag.Tags as List<GalleryCart.Models.Models.Tag>;
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h1 class="text-2xl font-bold mb-4">Create New Post</h1>
+<div class="max-w-3xl mx-auto p-6 bg-base-100 rounded-2xl shadow-md">
+    <h1 class="text-3xl font-bold mb-6">Create New Post</h1>
 
-<form asp-action="Create" method="post" enctype="multipart/form-data" class="space-y-4">
+    <form asp-action="Create" method="post" enctype="multipart/form-data" class="space-y-6">
 
-    <div>
-        <label asp-for="Title" class="block text-sm font-medium text-gray-700">Title</label>
-        <input asp-for="Title" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" />
-        <span asp-validation-for="Title" class="text-red-500 text-sm"></span>
-    </div>
-
-    <div>
-        <label asp-for="Description" class="block text-sm font-medium text-gray-700">Description</label>
-        <textarea asp-for="Description" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"></textarea>
-        <span asp-validation-for="Description" class="text-red-500 text-sm"></span>
-    </div>
-
-    <div>
-        <label class="block text-sm font-medium text-gray-700">Upload Images</label>
-        <input type="file" name="files" multiple accept=".jpg,.jpeg,.png,.webp,.gif" class="mt-1 block w-full" />
-    </div>
-
-    <div>
-        <label asp-for="Price" class="block text-sm font-medium text-gray-700">Price</label>
-        <input asp-for="Price" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" />
-        <span asp-validation-for="Price" class="text-red-500 text-sm"></span>
-    </div>
-
-    <div class="flex gap-4">
-        <div class="flex items-center">
-            <input asp-for="IsImage" type="checkbox" class="rounded border-gray-300" />
-            <label asp-for="IsImage" class="ml-2 text-sm text-gray-700">This is an image post</label>
+        <!-- Title -->
+        <div class="form-control">
+            <label asp-for="Title" class="label">
+                <span class="label-text">Title</span>
+            </label>
+            <input asp-for="Title" class="input input-bordered" />
+            <span asp-validation-for="Title" class="text-error text-sm mt-1"></span>
         </div>
-        <div class="flex items-center">
-            <input asp-for="IsPorfolio" type="checkbox" class="rounded border-gray-300" />
-            <label asp-for="IsPorfolio" class="ml-2 text-sm text-gray-700">Show in portfolio</label>
-        </div>
-        <div class="flex items-center">
-            <input asp-for="IsMature" type="checkbox" class="rounded border-gray-300" />
-            <label asp-for="IsMature" class="ml-2 text-sm text-gray-700">Mature content</label>
-        </div>
-    </div>
 
-    <div>
-        <label class="block text-sm font-medium text-gray-700">Select Tags</label>
-        <div class="grid grid-cols-2 gap-2 mt-1">
-            @foreach (var tag in tags)
-            {
-                <div class="flex items-center">
-                    <input type="checkbox" name="SelectedTags" value="@tag.TagId" class="rounded border-gray-300" />
-                    <span class="ml-2 text-sm text-gray-700">@tag.TagName</span>
-                </div>
-            }
+        <!-- Description -->
+        <div class="form-control">
+            <label asp-for="Description" class="label">
+                <span class="label-text">Description</span>
+            </label>
+            <textarea asp-for="Description" class="textarea textarea-bordered"></textarea>
+            <span asp-validation-for="Description" class="text-error text-sm mt-1"></span>
         </div>
-    </div>
 
-    <div>
-        <button type="submit" class="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-md hover:bg-green-700">Create Post</button>
-    </div>
-</form>
+        <!-- Image Upload -->
+        <div class="form-control">
+            <label class="label">
+                <span class="label-text">Upload Images</span>
+            </label>
+            <input type="file" name="files" multiple accept=".jpg,.jpeg,.png,.webp,.gif" class="file-input file-input-bordered w-full" />
+        </div>
+
+        <!-- Price -->
+        <div class="form-control">
+            <label asp-for="Price" class="label">
+                <span class="label-text">Price</span>
+            </label>
+            <input asp-for="Price" class="input input-bordered" />
+            <span asp-validation-for="Price" class="text-error text-sm mt-1"></span>
+        </div>
+
+        <!-- Checkboxes -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <label class="label cursor-pointer flex items-center gap-2">
+                <input asp-for="IsImage" type="checkbox" class="checkbox" />
+                <span class="label-text">Image Post</span>
+            </label>
+
+            <label class="label cursor-pointer flex items-center gap-2">
+                <input asp-for="IsPorfolio" type="checkbox" class="checkbox" />
+                <span class="label-text">Show in Portfolio</span>
+            </label>
+
+            <label class="label cursor-pointer flex items-center gap-2">
+                <input asp-for="IsMature" type="checkbox" class="checkbox" />
+                <span class="label-text">Mature Content</span>
+            </label>
+        </div>
+
+        <!-- Tags -->
+        <div class="form-control">
+            <label class="label">
+                <span class="label-text">Select Tags</span>
+            </label>
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                @foreach (var tag in tags)
+                {
+                    <label class="cursor-pointer flex items-center gap-2">
+                        <input type="checkbox" name="SelectedTags" value="@tag.TagId" class="checkbox checkbox-sm" />
+                        <span class="text-sm">@tag.TagName</span>
+                    </label>
+                }
+            </div>
+        </div>
+
+        <!-- Submit Button -->
+        <div class="form-control">
+            <button type="submit" class="btn btn-success">Create Post</button>
+        </div>
+    </form>
+</div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />

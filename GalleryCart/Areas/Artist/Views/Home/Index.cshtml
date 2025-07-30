@@ -3,7 +3,7 @@
 @model GalleryCart.Models.ViewModels.IndexModel;
 @inject IUserRepository UserRepository
 @{
-    ViewData["Title"] = "Customer Home";
+    ViewData["Title"] = "Artist Home";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 <div class="min-h-screen bg-gray-900 text-white">
@@ -89,7 +89,7 @@
 
                                 <!-- Price Badge - Always visible -->
                                 <div class="absolute top-2 right-2 bg-green-600 text-white text-xs px-2 py-1 rounded font-semibold">
-                                    $@post.Price.ToString("F2")
+                                    @post.Price.ToString("F2")VND
                                 </div>
 
                                 <!-- Hover Overlay -->

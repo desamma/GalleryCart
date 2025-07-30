@@ -37,7 +37,7 @@
                                 Artist: <span class="font-semibold">@post.PostAuthor</span>
                             </div>
                             <div class="text-sm text-base-content/70 mb-1">
-                                Price: <span class="font-semibold text-success">$@post.Price</span>
+                                Price: <span class="font-semibold text-success">@post.Price VND</span>
                             </div>
                             <div class="text-xs text-base-content/60">
                                 Created: @post.PostDate?.ToString("MMM dd, yyyy")
@@ -57,7 +57,7 @@
             </div>
             <div class="mt-8 flex justify-between items-center">
                 <div class="text-xl font-bold text-base-content">
-                    Total: $@(vm.Posts.Sum(p => p.Price ?? 0))
+                    Total: @(vm.Posts.Sum(p => p.Price ?? 0)) VND
                 </div>
                 <div class="flex gap-2">
                     <form method="post" asp-page-handler="Checkout">
