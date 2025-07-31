@@ -1,6 +1,7 @@
 ﻿using GalleryCart.DataAccess.Repository.IRepository;
 using GalleryCart.Models.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Query;
 using System.Linq.Expressions;
 
 namespace GalleryCart.DataAccess.Repository
@@ -15,14 +16,20 @@ namespace GalleryCart.DataAccess.Repository
         }
 
 
-        public async Task<Cart?> GetAsync(Expression<Func<Cart, bool>> predicate)
+
+        public async Task<Cart?> GetAsync(
+     Expression<Func<Cart, bool>> predicate,
+     Func<IQueryable<Cart>, IIncludableQueryable<Cart, object>>? include = null)
         {
-            return await _db.Carts
-                .Include(c => c.CartItems)
-                    .ThenInclude(ci => ci.Post)
-                        .ThenInclude(p => p.User) // 🔥 THÊM DÒNG NÀY
-                .FirstOrDefaultAsync(predicate);
+            IQueryable<Cart> query = _db.Carts;
+
+            if (include != null)
+                query = include(query);
+
+            return await query.FirstOrDefaultAsync(predicate);
+
         }
+
 
         public async Task<bool> AddAsync(Cart entity)
         {

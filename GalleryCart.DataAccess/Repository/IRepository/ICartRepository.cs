@@ -1,9 +1,16 @@
-﻿using System.Linq.Expressions;
-using GalleryCart.Models.Models;
+
+﻿using GalleryCart.Models.Models;
+using Microsoft.EntityFrameworkCore.Query;
+using System.Linq.Expressions;
+
 
 public interface ICartRepository
 {
-    Task<Cart?> GetAsync(Expression<Func<Cart, bool>> predicate);
+    Task<Cart?> GetAsync(
+        Expression<Func<Cart, bool>> predicate,
+        Func<IQueryable<Cart>, IIncludableQueryable<Cart, object>>? include = null
+    );
+
     Task<bool> AddAsync(Cart entity);
     Task<bool> UpdateAsync(Cart entity);
     Task<bool> DeleteAsync(Guid cartId);

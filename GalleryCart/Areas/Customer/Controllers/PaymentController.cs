@@ -13,7 +13,7 @@ namespace GalleryCart.Areas.Customer.Controllers
     public class PaymentController : Controller
     {
         private readonly IConfiguration _configuration;
-        private readonly ApplicationDbContext _db;
+        private readonly ICartRepository _cartRepository;
         private readonly IHistoryRepository _historyRepository;
         private readonly ICommissionPaymentRepository _commissionPaymentRepository;
         private readonly ICommissionRepository _commissionRepository;
@@ -26,7 +26,7 @@ namespace GalleryCart.Areas.Customer.Controllers
             ICommissionRepository commissionRepository)
         {
             _configuration = configuration;
-            _db = db;
+            _cartRepository = cartRepository;
             _historyRepository = historyRepository;
             _commissionPaymentRepository = commissionPaymentRepository;
             _commissionRepository = commissionRepository;
