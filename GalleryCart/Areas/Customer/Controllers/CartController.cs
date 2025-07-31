@@ -1,6 +1,11 @@
-﻿using GalleryCart.DataAccess.Repository.IRepository;
+using GalleryCart.Areas.Customer.ViewModels;
+using GalleryCart.DataAccess;
+using GalleryCart.DataAccess.Repository.IRepository;
 using GalleryCart.Models.Models;
+using GalleryCart.Models.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 
@@ -13,11 +18,13 @@ namespace GalleryCart.Areas.Customer.Controllers
     {
         private readonly ICartRepository _cartRepository;
         private readonly IPostRepository _postRepository;
+        private readonly ApplicationDbContext _db;
 
-        public CartController(ICartRepository cartRepository, IPostRepository postRepository)
+        public CartController(ICartRepository cartRepository, IPostRepository postRepository, ApplicationDbContext db)
         {
             _cartRepository = cartRepository;
             _postRepository = postRepository;
+            _db = db;
         }
 
         // Add post to cart
@@ -45,16 +52,14 @@ namespace GalleryCart.Areas.Customer.Controllers
             {
                 return BadRequest("Post already in cart.");
             }
-
-            // Add the post to the cart
-            cart.CartItems.Add(new CartItem
+            _db.CartItems.Add(new CartItem
             {
                 CartItemId = Guid.NewGuid(),
                 CartId = cart.CartId,
                 PostId = postId
             });
+            await _db.SaveChangesAsync();
 
-            await _cartRepository.UpdateAsync(cart);
             return RedirectToAction("Index", "Cart");
         }
 
@@ -70,8 +75,8 @@ namespace GalleryCart.Areas.Customer.Controllers
             var cartItem = cart.CartItems.FirstOrDefault(ci => ci.PostId == postId);
             if (cartItem == null) return NotFound();
 
-            cart.CartItems.Remove(cartItem);
-            await _cartRepository.UpdateAsync(cart);
+            _db.CartItems.Remove(cartItem);
+            await _db.SaveChangesAsync();
 
             return RedirectToAction("Index", "Cart");
         }
@@ -84,7 +89,42 @@ namespace GalleryCart.Areas.Customer.Controllers
             if (userId == null) return Unauthorized();
 
             var cart = await _cartRepository.GetAsync(c => c.UserId.ToString() == userId);
-            return View(cart);
+            if (cart == null)
+            {
+                return View(new CartIndexVM
+                {
+                    CartUser = new Cart(),
+                    Posts = new List<PostVM>()
+                });
+            }
+
+            var postVMs = cart.CartItems
+                .Where(ci => ci.Post != null)
+                .Select(ci => new PostVM
+                {
+                    PostId = ci.Post.PostId,
+                    Title = ci.Post.Title,
+                    Description = ci.Post.Description,
+                    Path = ci.Post.Path,
+                    PostDate = ci.Post.PostDate,
+                    LikeCount = ci.Post.LikeCount,
+                    DislikeCount = ci.Post.DislikeCount,
+                    SaleCount = ci.Post.SaleCount,
+                    IsPorfolio = ci.Post.IsPorfolio,
+                    IsMature = ci.Post.IsMature,
+                    IsImage = ci.Post.IsImage,
+                    Price = ci.Post.Price,
+                    PostAuthor = ci.Post.User?.UserName ?? "Unknown",
+                    PostTags = ci.Post.Tags
+                }).ToList();
+
+            var vm = new CartIndexVM
+            {
+                CartUser = cart,
+                Posts = postVMs
+            };
+
+            return View(vm);
         }
     }
 }

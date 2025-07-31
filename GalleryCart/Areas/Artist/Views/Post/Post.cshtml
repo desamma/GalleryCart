@@ -1,0 +1,140 @@
+﻿@model GalleryCart.Models.Models.Post
+@using Microsoft.AspNetCore.Identity
+@inject UserManager<GalleryCart.Models.Models.User> UserManager
+@{
+    ViewData["Title"] = "Post Detail";
+    var currentUserId = UserManager.GetUserId(User);
+    var isOwner = currentUserId == Model.UserId.ToString();
+    var images = Model.Path?.Split(",") ?? new string[0];
+}
+
+<div class="max-w-5xl mx-auto p-4 text-white">
+    <!-- Media Preview -->
+    <div class="rounded-xl overflow-hidden border border-gray-700 shadow-lg">
+        @foreach (var img in images)
+        {
+            if (Model.IsImage)
+            {
+                <img src="@img"
+                     alt="Post Image"
+                     loading="lazy"
+                     class="w-full object-cover transition duration-300"
+                     style="filter: blur(@((Model.IsMature && !isOwner) ? "5px" : "1px"));" />
+            }
+            else
+            {
+                <video class="w-full"
+                       controls
+                       style="filter: blur(@((Model.IsMature && !isOwner) ? "5px" : "1px"));">
+                    <source src="@img" type="video/mp4" />
+                    Your browser does not support the video tag.
+                </video>
+            }
+        }
+    </div>
+
+    <!-- Post Header -->
+    <div class="flex justify-between items-center mt-6">
+        <div>
+            <h1 class="text-3xl font-bold">@Model.Title</h1>
+            <p class="text-sm text-gray-400">
+                By <span class="font-semibold">@Model.User?.UserName</span> · @Model.PostDate?.ToString("dd/MM/yyyy")
+            </p>
+        </div>
+        <div class="flex gap-2">
+            <!-- Like -->
+            <form method="post" asp-action="Like" asp-route-id="@Model.PostId">
+                <button type="submit"
+                        class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded-lg">
+                    ❤️ @Model.LikeCount
+                </button>
+            </form>
+
+
+
+            <!-- Favourite -->
+            <form method="post" asp-action="Favourite" asp-route-id="@Model.PostId">
+                <button type="submit"
+                        class="bg-pink-600 hover:bg-pink-700 text-white px-3 py-1 rounded-lg">
+                    ⭐ Favourite
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Tags -->
+    <div class="mt-4">
+        <strong class="text-gray-300">Tags:</strong>
+        <div class="flex flex-wrap gap-2 mt-1">
+            @foreach (var tag in Model.Tags)
+            {
+                <span class="bg-blue-900 text-white text-xs px-2 py-1 rounded-full">@tag.TagName</span>
+            }
+        </div>
+    </div>
+
+    <!-- Description -->
+    <div class="mt-4 text-gray-200">
+        <p>@Model.Description</p>
+    </div>
+
+    <!-- Price & Owner Tools -->
+    <div class="mt-6 flex justify-between items-center text-gray-300">
+        <div>
+            <span class="text-yellow-400 text-lg font-bold">@Model.Price VND</span>
+            <span class="ml-2">Sold: @Model.SaleCount</span>
+        </div>
+        @if (isOwner)
+        {
+            <div class="flex gap-2">
+                <a asp-action="Create" asp-route-id="@Model.PostId"
+                   class="bg-yellow-600 hover:bg-yellow-700 text-white px-3 py-1 rounded">
+                    ✏️ Edit
+                </a>
+                <form asp-action="Delete" asp-route-id="@Model.PostId" method="post">
+                    <button type="submit"
+                            class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded">
+                        🗑️ Delete
+                    </button>
+                </form>
+            </div>
+        }
+    </div>
+
+    <!-- Comments -->
+    <div class="mt-10">
+        <h2 class="text-xl font-semibold text-white mb-4">Comments</h2>
+
+        @if (Model.Comments != null && Model.Comments.Any())
+        {
+            <div class="space-y-4">
+                @foreach (var comment in Model.Comments.OrderByDescending(c => c.CommentDate))
+                {
+                    <div class="bg-gray-800 rounded p-3">
+                        <div class="text-sm text-gray-400 mb-1">
+                            @comment.User?.UserName · @comment.CommentDate?.ToString("dd/MM/yyyy HH:mm")
+                        </div>
+                        <div class="text-white">@comment.Content</div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <p class="text-gray-500">No comments yet.</p>
+        }
+
+        <!-- Comment Form -->
+        <form method="post" asp-action="AddComment" asp-route-id="@Model.PostId" class="mt-6">
+            <textarea name="Content"
+                      rows="3"
+                      required
+                      class="w-full p-3 bg-gray-900 border border-gray-700 rounded resize-none text-white"
+                      placeholder="Write a comment..."></textarea>
+            <button type="submit"
+                    class="mt-2 bg-blue-600 hover:bg-blue-700 px-4 py-2 text-white rounded">
+                Submit
+            </button>
+        </form>
+    </div>
+</div>

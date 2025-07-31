@@ -16,6 +16,7 @@ namespace GalleryCart.DataAccess.Repository
         }
 
 
+
         public async Task<Cart?> GetAsync(
      Expression<Func<Cart, bool>> predicate,
      Func<IQueryable<Cart>, IIncludableQueryable<Cart, object>>? include = null)
@@ -26,6 +27,7 @@ namespace GalleryCart.DataAccess.Repository
                 query = include(query);
 
             return await query.FirstOrDefaultAsync(predicate);
+
         }
 
 

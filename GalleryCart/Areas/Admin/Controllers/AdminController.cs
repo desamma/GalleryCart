@@ -1,7 +1,10 @@
 using GalleryCart.DataAccess.Repository.IRepository;
+using GalleryCart.Models.Models;
 using GalleryCart.Models.ViewModels;
+using GalleryCart.Utilities.Constants;
 using GalleryCart.Utilities.Utils;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -15,18 +18,20 @@ namespace GalleryCart.Areas.Admin.Controllers;
         private readonly IPostRepository _postRepo;
         private readonly ICommissionRepository _commissionRepo;
         private readonly IHistoryRepository _historyRepo;
+        private readonly UserManager<User> _userManager;
         private const int PageSize = 20;
 
         public AdminController(
             IUserRepository userRepo,
             IPostRepository postRepo,
             ICommissionRepository commissionRepo,
-            IHistoryRepository historyRepo)
+            IHistoryRepository historyRepo, UserManager<User> userManager)
         {
             _userRepo = userRepo;
             _postRepo = postRepo;
             _commissionRepo = commissionRepo;
             _historyRepo = historyRepo;
+            _userManager = userManager;
         }
 
         public async Task<IActionResult> Dashboard()
@@ -36,7 +41,7 @@ namespace GalleryCart.Areas.Admin.Controllers;
                 TotalUsers = await _userRepo.GetAllQueryable().CountAsync(),
                 TotalArtists = await _userRepo.GetAllQueryable(u => u.IsArtits).CountAsync(),
                 TotalRevenue = await _historyRepo.GetAllQueryable().SumAsync(h => (decimal?)h.TotalPrice) ?? 0,
-                Growth = 30.56m,
+                Growth = 100m,
                 MonthlyRevenues = await _historyRepo.GetAllQueryable()
                     .GroupBy(h => new { h.PurchaseDate.Year, h.PurchaseDate.Month })
                     .Select(g => new MonthlyRevenueDto
@@ -98,7 +103,16 @@ namespace GalleryCart.Areas.Admin.Controllers;
             if (user == null)
                 return Json(new { success = false, message = "User not found" });
 
-            user.IsBanned = !user.IsBanned;
+            if (user.IsBanned)
+            {
+                user.IsBanned = !user.IsBanned;
+                await _userManager.RemoveFromRoleAsync(user, RoleConstants.Banned);
+            }
+            else
+            {
+                user.IsBanned = !user.IsBanned;
+                await _userManager.AddToRoleAsync(user, RoleConstants.Banned);
+            }
             if (await _userRepo.UpdateAsync(user))
             {
                 return Json(new { success = true, isBanned = user.IsBanned });

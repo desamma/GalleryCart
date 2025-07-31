@@ -7,6 +7,11 @@ namespace GalleryCart.DataAccess.Repository
 {
     public class PostRepository : IPostRepository
     {
+        public void AttachTag(Tag tag)
+        {
+            _db.Attach(tag); // Let EF know: this already exists
+        }
+
         private readonly ApplicationDbContext _db;
 
         public PostRepository(ApplicationDbContext db)

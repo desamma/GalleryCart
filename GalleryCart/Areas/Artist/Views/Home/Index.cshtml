@@ -3,7 +3,7 @@
 @model GalleryCart.Models.ViewModels.IndexModel;
 @inject IUserRepository UserRepository
 @{
-    ViewData["Title"] = "Customer Home";
+    ViewData["Title"] = "Artist Home";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 <div class="min-h-screen bg-gray-900 text-white">
@@ -15,7 +15,25 @@
             <h1 class="text-4xl font-bold text-white drop-shadow-lg">Join us bro</h1>
         </div>
     </div>
+    
+    <!-- Search and Filter Form -->
+    <form method="get" class="bg-gray-800 p-4 rounded-lg mb-6 flex flex-wrap items-end gap-4">
+        <input name="search" type="text" placeholder="Search by title or description" value="@ViewData["Search"]" class="input input-bordered w-full sm:w-60" />
 
+        <input name="startDate" type="date" value="@ViewData["StartDate"]" class="input input-bordered" />
+        <input name="endDate" type="date" value="@ViewData["EndDate"]" class="input input-bordered" />
+
+        <select name="tagId" class="select select-bordered">
+            <option value="">All Tags</option>
+            @foreach (var tag in ViewData["Tags"] as List<Tag> ?? new())
+            {
+                <option value="@tag.TagId" selected="@(ViewData["TagId"]?.ToString() == tag.TagId.ToString())">@tag.TagName</option>
+            }
+        </select>
+
+        <button type="submit" class="btn btn-primary">Filter</button>
+    </form>
+    
     <!-- Main Content -->
     <div class="container mx-auto px-4 py-8">
         <!-- Posts Grid -->
@@ -71,7 +89,7 @@
 
                                 <!-- Price Badge - Always visible -->
                                 <div class="absolute top-2 right-2 bg-green-600 text-white text-xs px-2 py-1 rounded font-semibold">
-                                    $@post.Price.ToString("F2")
+                                    @post.Price.ToString("F2")VND
                                 </div>
 
                                 <!-- Hover Overlay -->
@@ -126,7 +144,8 @@
 
                                         <!-- Action Buttons -->
                                         <div class="flex items-center space-x-2">
-                                            <a asp-page="/Artists/Art" asp-route-id="@post.PostId" class="flex-1 bg-gray-700 hover:bg-gray-600 text-white text-xs py-2 px-3 rounded transition-colors duration-200 flex items-center justify-center space-x-1 cursor-pointer">
+                                            <a asp-area="Artist" asp-controller="Post" asp-action="Read" asp-route-id="@post.PostId"
+                                               class="flex-1 bg-gray-700 hover:bg-gray-600 text-white text-xs py-2 px-3 rounded transition-colors duration-200 flex items-center justify-center space-x-1 cursor-pointer">
                                                 <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />

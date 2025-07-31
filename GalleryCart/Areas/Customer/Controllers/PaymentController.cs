@@ -64,7 +64,6 @@ namespace GalleryCart.Areas.Customer.Controllers
                 if (userId != null)
                 {
                     var userGuid = Guid.Parse(userId);
-
                     var cart = await _cartRepository.GetAsync(
                         c => c.UserId == userGuid,
                         include: q => q.Include(c => c.CartItems).ThenInclude(ci => ci.Post)
@@ -86,14 +85,27 @@ namespace GalleryCart.Areas.Customer.Controllers
                             };
                             await _historyRepository.AddAsync(history);
                         }
+
                       
                         cart.CartItems.Clear();
                         await _cartRepository.UpdateAsync(cart);
+
                     }
                 }
-            }
 
-            return Json(response);
+                TempData["PaymentMessage"] = "Payment successful! Thank you for your purchase.";
+                TempData["TransactionId"] = response.TransactionId;
+                TempData["OrderId"] = response.OrderId;
+                TempData["PaymentMethod"] = response.PaymentMethod;
+
+                return RedirectToPage("/Cart/PaymentResult", new { area = "Customer" });
+            }
+            else
+            {
+                TempData["PaymentMessage"] = "Payment failed or invalid signature. Please try again.";
+                return RedirectToPage("/Cart/PaymentResult", new { area = "Customer" });
+            }
+            //return Json(response);
         }
     }
 }
