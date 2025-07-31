@@ -165,7 +165,7 @@ public class ArtistController : Controller
             // Handle image upload
             if (image != null)
             {
-                var imgUrl = await _cloudinaryUploader.UploadImageAsync(image);
+                var imgUrl = await _cloudinaryUploader.UploadMediaAsync(image);
                 if (imgUrl.Equals("Wrong file extension", StringComparison.OrdinalIgnoreCase))
                 {
                     ModelState.AddModelError("UserAvatar", "Wrong file extension.");

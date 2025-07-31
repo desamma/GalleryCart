@@ -303,7 +303,6 @@
                                                 </div>
                                                 <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
                                                     <li><a href="@Url.Page("/Commission/Details", new {commissionId = commission.CommissionId})">View Details</a></li>
-                                                    <li><a href="@Url.Action("/Commission/Edit", new {commissionId = commission.CommissionId})">Edit Commission</a></li>
                                                     @if (commission.Status == "Completed")
                                                     {
                                                         <li><a href="#" onclick="openUploadModal('@commission.CommissionId', '@commission.Commissioner.UserName')">Upload Files</a></li>
@@ -492,7 +491,7 @@
                 else if (file.type.includes('zip') || file.type.includes('rar')) fileIcon = '🗜️';
 
                 html += `
-                    <div class="flex items-center justify-between py-2 px-2 bg-base-100 rounded mb-1 text-sm" data-file-index="${index}">
+                    <div class="flex items-center justify-between py-2 px-2 bg-base-100 rounded mb-1 text-sm" data-file-index="{index}">
                         <div class="flex items-center gap-2 flex-1 min-w-0">
                             <span class="text-lg">${fileIcon}</span>
                             <span class="truncate font-medium">${file.name}</span>

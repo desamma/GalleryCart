@@ -59,6 +59,7 @@ namespace GalleryCart.Areas.Admin.Controllers;
                 SellingHistories = await _historyRepo.GetAllQueryable().OrderByDescending(h => h.PurchaseDate).Select(h => new SellingHistoryDto
                 {
                     Title = h.Post.Title,
+                    Artist = h.User.UserName,
                     Price = h.TotalPrice,
                     PurchaseDate = h.PurchaseDate
                 }).ToListAsync(),
@@ -264,11 +265,11 @@ namespace GalleryCart.Areas.Admin.Controllers;
             var histories = await _historyRepo.GetAllQueryable(h =>
                 (!dateFrom.HasValue || h.PurchaseDate >= dateFrom) &&
                 (!dateTo.HasValue || h.PurchaseDate <= dateTo))
-                .Include(h => h.Post)
                 .Select(h => new SellingHistoryDto
                 {
                     Title = h.Post.Title,
                     Price = h.TotalPrice,
+                    Artist = h.User.UserName,
                     PurchaseDate = h.PurchaseDate
                 }).ToListAsync();
 

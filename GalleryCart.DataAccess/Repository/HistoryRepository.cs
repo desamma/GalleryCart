@@ -16,7 +16,7 @@ namespace GalleryCart.DataAccess.Repository
 
         public IQueryable<History> GetAllQueryable(Expression<Func<History, bool>>? predicate = null, bool asNoTracking = true)
         {
-            IQueryable<History> query = _db.Histories.Include(h => h.Post);
+            IQueryable<History> query = _db.Histories.Include(h => h.Post).ThenInclude(p => p.User);
             if (asNoTracking)
             {
                 query = query.AsNoTracking(); // Use AsNoTracking for read-only queries

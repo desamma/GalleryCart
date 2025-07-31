@@ -35,7 +35,11 @@ namespace GalleryCart.Areas.Customer.Controllers
             _commissionPaymentRepository = commissionPaymentRepository;
             _commissionRepository = commissionRepository;
         }
-
+        /**
+             * 9704198526191432198
+             * NGUYEN VAN A
+             * 07/15
+             */
         [HttpPost]
         public IActionResult CreatePaymentUrlVnpay(PaymentInformationModel model)
         {

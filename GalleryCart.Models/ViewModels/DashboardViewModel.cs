@@ -31,6 +31,7 @@ public class RecentActivityDto
 public class SellingHistoryDto
 {
     public string Title { get; set; } = string.Empty;
+    public string Artist { get; set; } = string.Empty;
     public decimal Price { get; set; }
     public DateTime PurchaseDate { get; set; }
 }

@@ -13,15 +13,17 @@ public class ExcelExportHelper
 
         // Header
         worksheet.Cells[1, 1].Value = "Title";
-        worksheet.Cells[1, 2].Value = "Price";
-        worksheet.Cells[1, 3].Value = "Purchase Date";
+        worksheet.Cells[1, 2].Value = "Artist";
+        worksheet.Cells[1, 3].Value = "Price";
+        worksheet.Cells[1, 4].Value = "Purchase Date";
 
         int row = 2;
         foreach (var item in data)
         {
             worksheet.Cells[row, 1].Value = item.Title;
-            worksheet.Cells[row, 2].Value = item.Price;
-            worksheet.Cells[row, 3].Value = item.PurchaseDate.ToString("dd/MM/yyyy HH:mm");
+            worksheet.Cells[row, 2].Value = item.Artist;
+            worksheet.Cells[row, 3].Value = item.Price;
+            worksheet.Cells[row, 4].Value = item.PurchaseDate.ToString("dd/MM/yyyy HH:mm");
             row++;
         }
 
