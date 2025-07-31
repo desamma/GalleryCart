@@ -46,7 +46,6 @@ namespace GalleryCart.Areas.Customer.Controllers
                 await _cartRepository.AddAsync(cart);
             }
 
-
             // Cheking Post exists in the cart
             if (cart.CartItems.Any(ci => ci.PostId == postId))
             {

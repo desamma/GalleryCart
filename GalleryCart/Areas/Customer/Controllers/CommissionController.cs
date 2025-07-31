@@ -183,10 +183,6 @@ namespace GalleryCart.Areas.Customer.Controllers
             }
 
             var existingCommission = await commissionRepository.GetAsync(c => c.CommissionId == model.CommissionId);
-            if (existingCommission == null)
-            {
-                return NotFound("Commission not found.");
-            }
 
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (userId != existingCommission.CommissionerId.ToString())
@@ -203,25 +199,31 @@ namespace GalleryCart.Areas.Customer.Controllers
             return RedirectToAction("CommissionManagement");
         }
 
-        [HttpGet]
-        public async Task<IActionResult> PaymentAsync(Guid commissionId)
-        {
-            var commission = await commissionRepository.GetAsync(c => c.CommissionId.Equals(commissionId));
-            var artist = await userRepository.GetAsync(u => u.Id.Equals(commission.ArtistId));
-            var commissionPayment = new CommissionPayment
-            {
-                CommissionPaymentId = new Guid(),
-                CommissionId = commissionId,
-            };
+        //[HttpPost]
+        //public async Task<IActionResult> PaymentAsync(Guid commissionId)
+        //{
+        //    // Create your database records first
+        //    var commission = await commissionRepository.GetAsync(c => c.CommissionId.Equals(commissionId));
+        //    var commissionPayment = new CommissionPayment
+        //    {
+        //        CommissionPaymentId = Guid.NewGuid(),
+        //        CommissionId = commissionId,
+        //    };
 
-            var paymentModel = new PaymentInformationModel
-            {
-                Amount = double.Parse(commission.Price.ToString()),
-                Name = "Commission Payment",
-                OrderDescription = $"Commission payment to {artist.UserName}",
-                OrderType = ""
-            };
-            return RedirectToAction("CreatePaymentUrlVnpay", "Payment", paymentModel);
-        }
+        //    // Save to database
+        //    await commissionPaymentRepository.AddAsync(commissionPayment);
+
+        //    // Create payment model with necessary data
+        //    var paymentModel = new PaymentInformationModel
+        //    {
+        //        OrderType = "billpayment",
+        //        Amount = commission.Amount, // or calculate from your data
+        //        OrderDescription = "Commission payment",
+        //        Name = User.Identity?.Name
+        //    };
+
+        //    Now redirect to the payment creation
+        //    return RedirectToAction("CreatePaymentUrlVnpay", "Payment", paymentModel);
+        //}
     }
 }
