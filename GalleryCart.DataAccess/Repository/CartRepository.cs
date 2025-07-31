@@ -24,7 +24,7 @@ namespace GalleryCart.DataAccess.Repository
             IQueryable<Cart> query = _db.Carts
                 .Include(c => c.CartItems)
                     .ThenInclude(ci => ci.Post)
-                        .ThenInclude(p => p.User); // 🔥 THÊM DÒNG NÀY
+                        .ThenInclude(p => p.User);
 
             if (include != null)
                 query = include(query);

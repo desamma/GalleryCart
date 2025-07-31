@@ -141,7 +141,7 @@ namespace GalleryCart.Areas.Customer.Controllers
                 return RedirectToPage("/Cart/PaymentResult", new { area = "Customer" });
             }
             else
-            {
+            {   
                 TempData["PaymentMessage"] = "Payment failed or invalid signature. Please try again.";
                 return RedirectToPage("/Cart/PaymentResult", new { area = "Customer" });
             }

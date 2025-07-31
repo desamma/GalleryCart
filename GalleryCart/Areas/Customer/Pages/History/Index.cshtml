@@ -1,4 +1,5 @@
 @page
+@using System.Globalization
 @model GalleryCart.Areas.Customer.Pages.History.IndexModel
 @{
     ViewData["Title"] = "Purchase History";
@@ -20,7 +21,6 @@
                         <th>Artwork</th>
                         <th>Title</th>
                         <th>Price</th>
-                        <th>Discount</th>
                         <th>Total Paid</th>
                         <th>Purchase Date</th>
                         <th>Payment Method</th>
@@ -38,9 +38,8 @@
                             }
                         </td>
                         <td>@h.Post?.Title</td>
-                        <td>@h.Post?.Price.ToString("C")</td>
-                        <td>@(h.Discount > 0 ? $"{h.Discount}%" : "-")</td>
-                        <td>@h.TotalPrice.ToString("C")</td>
+                        <td>@h.Post?.Price.ToString("C", new CultureInfo("vi-VN"))</td>
+                        <td>@h.TotalPrice.ToString("C", new CultureInfo("vi-VN"))</td>
                         <td>@h.PurchaseDate.ToString("dd/MM/yyyy HH:mm")</td>
                         <td>@h.PaymentMethod</td>
                         <td>@h.OrderId</td>
