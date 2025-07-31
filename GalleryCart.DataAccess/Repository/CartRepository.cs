@@ -21,11 +21,14 @@ namespace GalleryCart.DataAccess.Repository
      Expression<Func<Cart, bool>> predicate,
      Func<IQueryable<Cart>, IIncludableQueryable<Cart, object>>? include = null)
         {
-            IQueryable<Cart> query = _db.Carts;
+            IQueryable<Cart> query = _db.Carts
+                .Include(c => c.CartItems)
+                    .ThenInclude(ci => ci.Post)
+                        .ThenInclude(p => p.User); // 🔥 THÊM DÒNG NÀY
 
             if (include != null)
                 query = include(query);
-
+            
             return await query.FirstOrDefaultAsync(predicate);
 
         }
