@@ -10,8 +10,10 @@
 <div class="min-h-screen bg-base-200 p-4">
     <div class="max-w-3xl mx-auto">
         <h1 class="text-3xl font-bold mb-8 text-base-content">Your Cart</h1>
+        
+        <a asp-area="Customer" asp-page="/Cart/Index">My Cart</a>
 
-        @* Payment message *@
+        @* Payment test message *@
         @if (!string.IsNullOrEmpty(Model.PaymentMessage))
         {
             <div class="alert alert-success my-4">
@@ -35,7 +37,7 @@
                                 Artist: <span class="font-semibold">@post.PostAuthor</span>
                             </div>
                             <div class="text-sm text-base-content/70 mb-1">
-                                Price: <span class="font-semibold text-success">$@post.Price</span>
+                                Price: <span class="font-semibold text-success">@post.Price VND</span>
                             </div>
                             <div class="text-xs text-base-content/60">
                                 Created: @post.PostDate?.ToString("MMM dd, yyyy")
@@ -53,15 +55,15 @@
                     </div>
                 }
             </div>
-
             <div class="mt-8 flex justify-between items-center">
                 <div class="text-xl font-bold text-base-content">
-                    Total: $@(vm.Posts.Sum(p => p.Price ?? 0))
+                    Total: @(vm.Posts.Sum(p => p.Price ?? 0)) VND
                 </div>
                 <div class="flex gap-2">
                     <form method="post" asp-page-handler="Checkout">
                         <button type="submit" class="btn btn-primary">Checkout</button>
                     </form>
+                    <!-- Pay Now button: POST to PaymentController with PaymentInformationModel -->
                     <form method="post" action="/Customer/Payment/CreatePaymentUrlVnpay">
                         <input type="hidden" name="OrderType" value="billpayment" />
                         <input type="hidden" name="Amount" value="@(vm.Posts.Sum(p => p.Price ?? 0))" />
@@ -83,6 +85,7 @@
             </div>
         }
 
+        @* Always show Pay Now button for testing, even if cart is empty *@
         <div class="mt-8 flex justify-center">
             <form method="post" action="/Customer/Payment/CreatePaymentUrlVnpay">
                 <input type="hidden" name="OrderType" value="billpayment" />

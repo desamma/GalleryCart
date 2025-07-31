@@ -2,82 +2,153 @@
 @{
     ViewData["Title"] = "Edit Post";
     var tags = ViewBag.Tags as List<GalleryCart.Models.Models.Tag>;
-    var selectedTags = ViewBag.SelectedTags as List<Guid>;
+    var selectedTagIds = ViewBag.SelectedTags as List<Guid> ?? new();
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var existingFiles = (Model.Path ?? "").Split(',', StringSplitOptions.RemoveEmptyEntries);
 }
 
-<h1 class="text-2xl font-bold mb-4">Edit Post</h1>
+<div class="min-h-screen bg-[#0e0e0e] text-white px-4 py-6">
+    <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6">
 
-<form asp-action="Edit" method="post" enctype="multipart/form-data" class="space-y-4">
-    <input type="hidden" asp-for="PostId" />
+        <!-- LEFT: Existing Preview & New Upload -->
+        <div class="lg:col-span-8 space-y-4">
+            <h2 class="text-xl font-semibold">Current Media</h2>
 
-    <div>
-        <label asp-for="Title" class="block text-sm font-medium text-gray-700">Title</label>
-        <input asp-for="Title" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" />
-        <span asp-validation-for="Title" class="text-red-500 text-sm"></span>
-    </div>
+            <!-- Preview existing media -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 max-h-[50vh] overflow-y-auto">
+                @foreach (var file in existingFiles)
+                {
+                    if (Model.IsImage)
+                    {
+                        <img src="@file" alt="Uploaded Image" class="w-full rounded shadow" />
+                    }
+                    else
+                    {
+                        <video src="@file" controls class="w-full rounded shadow" />
+                    }
+                }
+            </div>
 
-    <div>
-        <label asp-for="Description" class="block text-sm font-medium text-gray-700">Description</label>
-        <textarea asp-for="Description" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"></textarea>
-        <span asp-validation-for="Description" class="text-red-500 text-sm"></span>
-    </div>
+            <h2 class="text-xl font-semibold pt-6">Upload New Media (Optional)</h2>
+            <input type="file" id="fileInput" name="files" multiple accept="image/*,video/mp4"
+                   class="file-input w-full file-input-bordered bg-gray-900 border-gray-700 text-white" form="post-form" />
 
-    <div>
-        <label class="block text-sm font-medium text-gray-700">Upload New Images (optional)</label>
-        <input type="file" name="files" multiple accept=".jpg,.jpeg,.png,.webp,.gif" class="mt-1 block w-full" />
-    </div>
-
-    <div>
-        <label asp-for="Price" class="block text-sm font-medium text-gray-700">Price</label>
-        <input asp-for="Price" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" />
-        <span asp-validation-for="Price" class="text-red-500 text-sm"></span>
-    </div>
-
-    <div class="flex gap-4">
-        <div class="flex items-center">
-            <input asp-for="IsImage" type="checkbox" class="rounded border-gray-300" />
-            <label asp-for="IsImage" class="ml-2 text-sm text-gray-700">This is an image post</label>
+            <div id="preview" class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 max-h-[40vh] overflow-y-auto">
+                <!-- JS renders preview here -->
+            </div>
         </div>
-        <div class="flex items-center">
-            <input asp-for="IsPorfolio" type="checkbox" class="rounded border-gray-300" />
-            <label asp-for="IsPorfolio" class="ml-2 text-sm text-gray-700">Show in portfolio</label>
-        </div>
-        <div class="flex items-center">
-            <input asp-for="IsMature" type="checkbox" class="rounded border-gray-300" />
-            <label asp-for="IsMature" class="ml-2 text-sm text-gray-700">Mature content</label>
-        </div>
-    </div>
 
-    <div>
-        <label class="block text-sm font-medium text-gray-700">Select Tags</label>
-        <div class="grid grid-cols-2 gap-2 mt-1">
-            @foreach (var tag in tags)
-            {
-                <div class="flex items-center">
-                    <input type="checkbox" name="SelectedTags" value="@tag.TagId"
-                           class="rounded border-gray-300"
-                           @(selectedTags != null && selectedTags.Contains(tag.TagId) ? "checked" : "") />
-                    <span class="ml-2 text-sm text-gray-700">@tag.TagName</span>
+        <!-- RIGHT: Edit Info -->
+        <div class="lg:col-span-4 bg-[#1a1a1a] rounded-xl p-6 shadow space-y-6">
+            <h1 class="text-2xl font-bold">Edit Post</h1>
+
+            <form id="post-form" asp-action="Edit" method="post" enctype="multipart/form-data" class="space-y-5">
+                <input type="hidden" asp-for="PostId" />
+
+                <!-- Title -->
+                <div>
+                    <label asp-for="Title" class="block text-sm font-medium mb-1">Title</label>
+                    <input asp-for="Title" class="w-full bg-gray-800 border border-gray-600 rounded px-3 py-2 text-white" />
+                    <span asp-validation-for="Title" class="text-red-500 text-sm"></span>
                 </div>
-            }
+
+                <!-- Description -->
+                <div>
+                    <label asp-for="Description" class="block text-sm font-medium mb-1">Description</label>
+                    <textarea asp-for="Description" rows="3"
+                              class="w-full bg-gray-800 border border-gray-600 rounded px-3 py-2 text-white resize-none"></textarea>
+                    <span asp-validation-for="Description" class="text-red-500 text-sm"></span>
+                </div>
+
+                <!-- Price -->
+                <div>
+                    <label asp-for="Price" class="block text-sm font-medium mb-1">Price (VND)</label>
+                    <input asp-for="Price" type="number"
+                           class="w-full bg-gray-800 border border-gray-600 rounded px-3 py-2 text-white" />
+                    <span asp-validation-for="Price" class="text-red-500 text-sm"></span>
+                </div>
+
+                <!-- Checkboxes -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-sm">
+                    <label class="flex items-center gap-2">
+                        <input asp-for="IsImage" type="checkbox" class="checkbox checkbox-sm" />
+                        Image Post
+                    </label>
+                    <label class="flex items-center gap-2">
+                        <input asp-for="IsPorfolio" type="checkbox" class="checkbox checkbox-sm" />
+                        Show in Portfolio
+                    </label>
+                    <label class="flex items-center gap-2">
+                        <input asp-for="IsMature" type="checkbox" class="checkbox checkbox-sm" />
+                        Mature Content
+                    </label>
+                </div>
+
+                <!-- Tags -->
+                <div>
+                    <label class="block text-sm font-medium mb-1">Select Tags</label>
+                    <div class="bg-gray-800 border border-gray-600 rounded max-h-40 overflow-y-auto p-2 space-y-1">
+                        @foreach (var tag in tags)
+                        {
+                            <label class="flex items-center gap-2 text-sm">
+                                <input type="checkbox" name="SelectedTags" value="@tag.TagId"
+                                       class="checkbox checkbox-xs"
+                                       @(selectedTagIds.Contains(tag.TagId) ? "checked" : "") />
+                                @tag.TagName
+                            </label>
+                        }
+                    </div>
+                </div>
+
+                <!-- Submit -->
+                <div>
+                    <button type="submit"
+                            class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded font-semibold">
+                        💾 Save Changes
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
-
-    <div class="flex space-x-4">
-        <button type="submit" class="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700">
-            Save Changes
-        </button>
-
-        <form asp-action="Delete" method="post" class="inline">
-            <input type="hidden" name="id" value="@Model.PostId" />
-            <button type="submit" class="px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-md hover:bg-red-700"
-                    onclick="return confirm('Are you sure you want to delete this post?');">
-                Delete Post
-            </button>
-        </form>
-    </div>
-</form>
+</div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        const fileInput = document.getElementById('fileInput');
+        const preview = document.getElementById('preview');
+
+        fileInput.addEventListener('change', function () {
+            preview.innerHTML = "";
+            const files = fileInput.files;
+
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                const reader = new FileReader();
+
+                reader.onload = function (e) {
+                    const isImage = file.type.startsWith("image/");
+                    const isVideo = file.type === "video/mp4";
+
+                    if (isImage) {
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        img.className = "rounded shadow w-full object-cover";
+                        preview.appendChild(img);
+                    }
+                    else if (isVideo) {
+                        const video = document.createElement('video');
+                        video.src = e.target.result;
+                        video.controls = true;
+                        video.className = "rounded shadow w-full";
+                        preview.appendChild(video);
+                    }
+                };
+
+                reader.readAsDataURL(file);
+            }
+        });
+    </script>
 }

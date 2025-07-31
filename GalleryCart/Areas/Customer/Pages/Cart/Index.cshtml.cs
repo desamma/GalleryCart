@@ -1,6 +1,4 @@
 using GalleryCart.Areas.Customer.ViewModels;
-using GalleryCart.DataAccess.Repository.IRepository;
-using GalleryCart.Models.Models;
 using GalleryCart.Models.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;

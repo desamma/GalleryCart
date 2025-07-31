@@ -24,10 +24,6 @@ namespace GalleryCart.DataAccess.Repository
                 .FirstOrDefaultAsync(predicate);
         }
 
-
-
-
-
         public async Task<bool> AddAsync(Cart entity)
         {
             _db.Carts.Add(entity);
@@ -35,11 +31,10 @@ namespace GalleryCart.DataAccess.Repository
         }
 
         public async Task<bool> UpdateAsync(Cart entity)
-{
-    return await _db.SaveChangesAsync() > 0; // không gọi Update(), EF đang theo dõi cart và CartItems
-}
-
-
+        {
+            _db.Carts.Update(entity);
+            return await _db.SaveChangesAsync() > 0;
+        }
 
         public async Task<bool> DeleteAsync(Guid cartId)
         {
@@ -52,6 +47,16 @@ namespace GalleryCart.DataAccess.Repository
         public async Task<bool> ExistsAsync(Expression<Func<Cart, bool>> predicate)
         {
             return await _db.Carts.AnyAsync(predicate);
+        }
+
+        public IQueryable<Cart> GetAllQueryable(Expression<Func<Cart, bool>>? predicate = null)
+        {
+            var query = _db.Carts.AsQueryable();
+            if (predicate != null) query = query.Where(predicate);
+            {
+                query = query.Where(predicate);
+            }
+            return query;
         }
     }
 }

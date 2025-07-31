@@ -3,7 +3,7 @@
 @model GalleryCart.Models.ViewModels.IndexModel;
 @inject IUserRepository UserRepository
 @{
-    ViewData["Title"] = "Customer Home";
+    ViewData["Title"] = "Artist Home";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 <div class="min-h-screen bg-gray-900 text-white">
@@ -15,7 +15,25 @@
             <h1 class="text-4xl font-bold text-white drop-shadow-lg">Join us bro</h1>
         </div>
     </div>
+    
+    <!-- Search and Filter Form -->
+    <form method="get" class="bg-gray-800 p-4 rounded-lg mb-6 flex flex-wrap items-end gap-4">
+        <input name="search" type="text" placeholder="Search by title or description" value="@ViewData["Search"]" class="input input-bordered w-full sm:w-60" />
 
+        <input name="startDate" type="date" value="@ViewData["StartDate"]" class="input input-bordered" />
+        <input name="endDate" type="date" value="@ViewData["EndDate"]" class="input input-bordered" />
+
+        <select name="tagId" class="select select-bordered">
+            <option value="">All Tags</option>
+            @foreach (var tag in ViewData["Tags"] as List<Tag> ?? new())
+            {
+                <option value="@tag.TagId" selected="@(ViewData["TagId"]?.ToString() == tag.TagId.ToString())">@tag.TagName</option>
+            }
+        </select>
+
+        <button type="submit" class="btn btn-primary">Filter</button>
+    </form>
+    
     <!-- Main Content -->
     <div class="container mx-auto px-4 py-8">
         <!-- Posts Grid -->
@@ -24,23 +42,24 @@
             {
                 @foreach (var post in Model.Posts)
                 {
+                    var thumbnail = post.Path?.Split(',')?.FirstOrDefault();
                     if (post.User == null)
                         post.User = await UserRepository.GetAsync(a => a.Id.Equals(post.UserId));
                     if (post == null || post.User == null || string.IsNullOrEmpty(post.Path) || string.IsNullOrEmpty(post.Title) || post.Price <= 0)
                         continue; // Skip invalid posts
-                                  <div class="group relative">
-                                      <!-- Post Card -->
-                                      <div class="bg-gray-800 rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 group-hover:scale-105">
-                                          <!-- Post Image Container -->
-                                          <div class="relative aspect-square overflow-hidden">
+                    <div class="group relative">
+                        <!-- Post Card -->
+                        <div class="bg-gray-800 rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 group-hover:scale-105">
+                            <!-- Post Image Container -->
+                            <div class="relative aspect-square overflow-hidden">
                                 @if (post.IsImage)
                                 {
-                                    <img src="@post.Path" alt="@post.Title" class="w-full h-full object-cover @(post.IsMature ? "mature-image" : "")" />
+                                    <img src="@thumbnail" alt="@post.Title" class="w-full h-full object-cover @(post.IsMature ? "mature-image" : "")" />
                                 }
                                 else
                                 {
-                                    <video class="w-full h-full object-cover @(post.IsMature ? "mature-image" : "")" poster="@post.Path" preload="metadata">
-                                        <source src="@post.Path" type="video/mp4">
+                                    <video class="w-full h-full object-cover @(post.IsMature ? "mature-image" : "")" poster="@thumbnail" preload="metadata">
+                                        <source src="@thumbnail" type="video/mp4">
                                         Your browser does not support the video tag.
                                     </video>
                                     <!-- Video Play Icon -->
@@ -71,7 +90,7 @@
 
                                 <!-- Price Badge - Always visible -->
                                 <div class="absolute top-2 right-2 bg-green-600 text-white text-xs px-2 py-1 rounded font-semibold">
-                                    $@post.Price.ToString("F2")
+                                    @post.Price.ToString("F2")VND
                                 </div>
 
                                 <!-- Hover Overlay -->

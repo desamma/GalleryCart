@@ -3,10 +3,9 @@
    <nav class="flex-1 space-y-2">
       <a asp-action="Dashboard" class="flex items-center p-2 rounded hover:bg-gray-800 @(ViewContext.RouteData.Values["action"]?.ToString() == "Dashboard" ? "bg-gray-800" : "")">
          <span class="mr-3">📊</span> Dashboards
-         <span class="ml-auto bg-green-500 text-xs px-2 py-0.5 rounded-full">5</span>
       </a>
-      <a asp-action="User" class="flex items-center p-2 rounded hover:bg-gray-800">👤 User</a>
-      <a asp-action="Post" class="flex items-center p-2 rounded hover:bg-gray-800">📝 Post</a>
-      <a asp-action="Commission" class="flex items-center p-2 rounded hover:bg-gray-800">📜 Commission</a>
+      <a asp-action="ManageUser" class="flex items-center p-2 rounded hover:bg-gray-800">👤 User</a>
+      <a asp-action="ManagePost" class="flex items-center p-2 rounded hover:bg-gray-800">📝 Post</a>
+      <a asp-action="ManageCommission" class="flex items-center p-2 rounded hover:bg-gray-800">📜 Commission</a>
    </nav>
 </aside>

@@ -1,4 +1,4 @@
-﻿using GalleryCart.Areas.Customer.ViewModels;
+using GalleryCart.Areas.Customer.ViewModels;
 using GalleryCart.DataAccess;
 using GalleryCart.DataAccess.Repository.IRepository;
 using GalleryCart.Models.Models;
@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 
 namespace GalleryCart.Areas.Customer.Controllers
 {
@@ -26,12 +27,14 @@ namespace GalleryCart.Areas.Customer.Controllers
             _db = db;
         }
 
+        // Add post to cart
         [HttpPost]
         public async Task<IActionResult> AddToCart(Guid postId)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (userId == null) return Unauthorized();
 
+            // Lấy cart hiện tại của user, nếu chưa có thì tạo mới  
             var cart = await _cartRepository.GetAsync(c => c.UserId.ToString() == userId);
             if (cart == null)
             {
@@ -43,22 +46,22 @@ namespace GalleryCart.Areas.Customer.Controllers
                 await _cartRepository.AddAsync(cart);
             }
 
-            // Kiểm tra xem post đã trong giỏ chưa, nếu chưa thì thêm
-            if (!cart.CartItems.Any(ci => ci.PostId == postId))
-            {
-                _db.CartItems.Add(new CartItem
-                {
-                    CartItemId = Guid.NewGuid(),
-                    CartId = cart.CartId,
-                    PostId = postId
-                });
-                await _db.SaveChangesAsync();
-            }
 
-            // Luôn redirect về trang giỏ hàng
+            // Cheking Post exists in the cart
+            if (cart.CartItems.Any(ci => ci.PostId == postId))
+            {
+                return BadRequest("Post already in cart.");
+            }
+            _db.CartItems.Add(new CartItem
+            {
+                CartItemId = Guid.NewGuid(),
+                CartId = cart.CartId,
+                PostId = postId
+            });
+            await _db.SaveChangesAsync();
+
             return RedirectToAction("Index", "Cart");
         }
-
 
         // Remove post from cart
         [HttpPost]
@@ -66,7 +69,6 @@ namespace GalleryCart.Areas.Customer.Controllers
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (userId == null) return Unauthorized();
-
             var cart = await _cartRepository.GetAsync(c => c.UserId.ToString() == userId);
             if (cart == null) return NotFound();
 
@@ -79,6 +81,7 @@ namespace GalleryCart.Areas.Customer.Controllers
             return RedirectToAction("Index", "Cart");
         }
 
+        // Display cart
         [HttpGet]
         public async Task<IActionResult> Index()
         {

@@ -16,6 +16,7 @@ namespace GalleryCart.Areas.Artist.Controllers
     {
         private readonly IPostRepository _postRepository;
         private readonly ITagRepository _tagRepository;
+        private readonly IFavouritePostRepository _favouriteRepo;
         private readonly CloudinaryUploader _cloudinaryUploader;
         private readonly UserManager<User> _userManager;
         private readonly ApplicationDbContext _context;
@@ -23,12 +24,14 @@ namespace GalleryCart.Areas.Artist.Controllers
         public PostController(
             IPostRepository postRepository,
             ITagRepository tagRepository,
+            IFavouritePostRepository favouriteRepo,
             CloudinaryUploader cloudinaryUploader,
             UserManager<User> userManager,
             ApplicationDbContext context)
         {
             _postRepository = postRepository;
             _tagRepository = tagRepository;
+            _favouriteRepo = favouriteRepo;
             _cloudinaryUploader = cloudinaryUploader;
             _userManager = userManager;
             _context = context;
@@ -88,54 +91,76 @@ namespace GalleryCart.Areas.Artist.Controllers
             return View(model);
         }
 
+        [HttpGet]
+        public async Task<IActionResult> Edit(Guid id)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null) return Unauthorized();
+
+            var post = await _context.Posts
+                .Include(p => p.Tags)
+                .FirstOrDefaultAsync(p => p.PostId == id && p.UserId.ToString() == userId);
+
+            if (post == null) return NotFound();
+
+            ViewBag.Tags = await _tagRepository.GetAllQueryable().ToListAsync();
+            ViewBag.SelectedTags = post.Tags.Select(t => t.TagId).ToList();
+
+            return View(post);
+        }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(Guid id, Post model, List<IFormFile> files, List<Guid> SelectedTags)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (userId == null) return Unauthorized();
-            if (id != model.PostId) return BadRequest();
+
+            var existingPost = await _context.Posts
+                .Include(p => p.Tags)
+                .FirstOrDefaultAsync(p => p.PostId == id && p.UserId.ToString() == userId);
+            if (existingPost == null) return NotFound();
 
             if (ModelState.IsValid)
             {
-                string imageUrls = model.Path;
+                // Upload lại ảnh nếu có
                 if (files != null && files.Count > 0)
                 {
-                    imageUrls = await _cloudinaryUploader.UploadMultiImagesAsync(files);
+                    existingPost.Path = await _cloudinaryUploader.UploadMultiImagesAsync(files);
                 }
 
-                var newPost = new Post
-                {
-                    PostId = Guid.NewGuid(),
-                    Title = model.Title,
-                    Description = model.Description,
-                    Price = model.Price,
-                    IsImage = model.IsImage,
-                    IsMature = model.IsMature,
-                    IsPorfolio = model.IsPorfolio,
-                    Path = imageUrls,
-                    PostDate = DateTime.Now,
-                    UserId = Guid.Parse(userId),
-                    Tags = new List<Tag>()
-                };
+                // Cập nhật các field
+                existingPost.Title = model.Title;
+                existingPost.Description = model.Description;
+                existingPost.Price = model.Price;
+                existingPost.IsImage = model.IsImage;
+                existingPost.IsMature = model.IsMature;
+                existingPost.IsPorfolio = model.IsPorfolio;
+                existingPost.PostDate = DateTime.Now;
 
+                // Xóa và cập nhật lại tags
+                // Xóa tags cũ
+                existingPost.Tags.Clear();
+
+                // Gán lại tag từ database
                 foreach (var tagId in SelectedTags)
                 {
-                    var tag = new Tag { TagId = tagId };
-                    _postRepository.AttachTag(tag);
-                    newPost.Tags.Add(tag);
+                    var tag = await _context.Tags.FindAsync(tagId);
+                    if (tag != null)
+                    {
+                        existingPost.Tags.Add(tag);
+                    }
                 }
 
-                await _postRepository.AddAsync(newPost);
-                await _postRepository.DeleteAsync(id);
-
+                await _context.SaveChangesAsync();
                 return RedirectToAction("Index", "Home", new { area = "Artist" });
             }
 
             ViewBag.Tags = await _tagRepository.GetAllQueryable().ToListAsync();
-            ViewBag.SelectedTags = SelectedTags;
             return View(model);
         }
+
+
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -165,19 +190,44 @@ namespace GalleryCart.Areas.Artist.Controllers
             if (post == null)
                 return NotFound();
 
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            bool isFavourited = false;
+            int favouriteCount = await _favouriteRepo.GetAllQueryable(fp => fp.PostId == id).CountAsync();
+
+            if (!string.IsNullOrEmpty(userId))
+            {
+                isFavourited = await _favouriteRepo.ExistsAsync(fp => fp.UserId.ToString() == userId && fp.PostId == id);
+            }
+
+            ViewBag.FavouriteCount = favouriteCount;
+            ViewBag.IsFavourited = isFavourited;
+
             return View("~/Areas/Artist/Views/Post/Post.cshtml", post);
         }
 
-        [AllowAnonymous]
         [HttpPost]
-        public async Task<IActionResult> Like(Guid id)
+        public async Task<IActionResult> Favourite(Guid id)
         {
-            var post = await _context.Posts.FirstOrDefaultAsync(p => p.PostId == id);
-            if (post == null)
-                return NotFound();
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId)) return Unauthorized();
 
-            post.LikeCount += 1;
-            await _context.SaveChangesAsync();
+            var existing = await _favouriteRepo.GetAsync(fp => fp.UserId.ToString() == userId && fp.PostId == id);
+            if (existing != null)
+            {
+                _context.FavouritePosts.Remove(existing);
+                await _context.SaveChangesAsync();
+            }
+            else
+            {
+                var fav = new FavouritePost
+                {
+                    UserId = Guid.Parse(userId),
+                    PostId = id
+                };
+                await _favouriteRepo.AddAsync(fav);
+            }
+
             return RedirectToAction("Read", new { id });
         }
 

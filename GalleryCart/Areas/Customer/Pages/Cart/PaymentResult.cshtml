@@ -1,0 +1,45 @@
+@page
+@model GalleryCart.Areas.Customer.Pages.Cart.PaymentResultModel
+@{
+    ViewData["Title"] = "Payment Result";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="max-w-xl mx-auto mt-10 bg-base-100 shadow-lg rounded-lg p-8">
+    <h1 class="text-2xl font-bold mb-4 text-success">Payment Result</h1>
+    @if (!string.IsNullOrEmpty(Model.PaymentMessage))
+    {
+        <div class="alert alert-success mb-4">@Model.PaymentMessage</div>
+    }
+    else
+    {
+        <div class="alert alert-error mb-4">No payment information found.</div>
+    }
+
+    <div class="space-y-2">
+        @if (Model.PaymentInfo != null)
+        {
+            <div><strong>Order Description:</strong> @Model.PaymentInfo.OrderDescription</div>
+            <div><strong>Amount:</strong> $@Model.PaymentInfo.Amount</div>
+            <div><strong>Order Type:</strong> @Model.PaymentInfo.OrderType</div>
+            <div><strong>Name:</strong> @Model.PaymentInfo.Name</div>
+        }
+        @if (!string.IsNullOrEmpty(Model.TransactionId))
+        {
+            <div><strong>Transaction ID:</strong> @Model.TransactionId</div>
+        }
+        @if (!string.IsNullOrEmpty(Model.OrderId))
+        {
+            <div><strong>Order ID:</strong> @Model.OrderId</div>
+        }
+        @if (!string.IsNullOrEmpty(Model.PaymentMethod))
+        {
+            <div><strong>Payment Method:</strong> @Model.PaymentMethod</div>
+        }
+    </div>
+
+    <div class="mt-8">
+        <a href="/Customer/Cart/Index" class="btn btn-primary">Back to Cart</a>
+        <a href="/Customer/History/Index" class="btn btn-outline ml-2">View Purchase History</a>
+    </div>
+</div>
