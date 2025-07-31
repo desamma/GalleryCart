@@ -1,6 +1,7 @@
 ﻿using GalleryCart.DataAccess.Repository.IRepository;
 using GalleryCart.Models.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Query;
 using System.Linq.Expressions;
 
 namespace GalleryCart.DataAccess.Repository
@@ -14,13 +15,19 @@ namespace GalleryCart.DataAccess.Repository
             _db = db;
         }
 
-   
-        public async Task<Cart?> GetAsync(Expression<Func<Cart, bool>> predicate)
+
+        public async Task<Cart?> GetAsync(
+     Expression<Func<Cart, bool>> predicate,
+     Func<IQueryable<Cart>, IIncludableQueryable<Cart, object>>? include = null)
         {
-            return await _db.Carts.Include(c => c.CartItems)
-                .AsNoTracking()
-                .FirstOrDefaultAsync(predicate);
+            IQueryable<Cart> query = _db.Carts;
+
+            if (include != null)
+                query = include(query);
+
+            return await query.FirstOrDefaultAsync(predicate);
         }
+
 
         public async Task<bool> AddAsync(Cart entity)
         {
@@ -45,6 +52,16 @@ namespace GalleryCart.DataAccess.Repository
         public async Task<bool> ExistsAsync(Expression<Func<Cart, bool>> predicate)
         {
             return await _db.Carts.AnyAsync(predicate);
+        }
+
+        public IQueryable<Cart> GetAllQueryable(Expression<Func<Cart, bool>>? predicate = null)
+        {
+            var query = _db.Carts.AsQueryable();
+            if (predicate != null) query = query.Where(predicate);
+            {
+                query = query.Where(predicate);
+            }
+            return query;
         }
     }
 }
