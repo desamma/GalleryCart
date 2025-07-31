@@ -3,7 +3,8 @@
 <table class="table w-full">
    <thead>
    <tr>
-      <th>Title</th>
+      <th>Title (VND)</th>
+      <th>Artist</th>
       <th>Price</th>
       <th>Purchase Date</th>
    </tr>
@@ -13,7 +14,8 @@
    {
       <tr>
          <td>@item.Title</td>
-         <td>$@item.Price</td>
+         <td>@item.Artist</td>
+         <td>@item.Price</td>
          <td>@item.PurchaseDate.ToString("dd/MM/yyyy HH:mm")</td>
       </tr>
    }

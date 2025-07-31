@@ -98,12 +98,12 @@
                                 <img src="@thumbnail"
                                      alt="@post.Title"
                                      class="w-full h-full object-cover transition duration-300
-                                                            @(post.IsMature ? "filter blur-xl group-hover:blur-0" : "")" />
+                                     @(post.IsMature ? "filter blur-xl group-hover:blur-0" : "")" />
                             }
                             else
                             {
                                 <video class="w-full h-full object-cover transition duration-300
-                                                             @(post.IsMature ? "filter blur-xl group-hover:blur-0" : "")"
+                                    @(post.IsMature ? "filter blur-xl group-hover:blur-0" : "")"
                                        poster="@thumbnail"
                                        preload="metadata"
                                        muted>
@@ -222,22 +222,5 @@
                 }
             </div>
         </div>
-    }
-    }
-    else
-    {
-    <!-- No Posts Message -->
-    <div class="text-center py-12">
-        <div class="text-gray-400 text-lg">
-            @if (Model.IsOwnProfile)
-            {
-                <p>You haven't favorited any posts yet.</p>
-            }
-            else
-            {
-                <p>@Model.UserName hasn't favorited any posts yet.</p>
-            }
-        </div>
-    </div>
     }
 </div>

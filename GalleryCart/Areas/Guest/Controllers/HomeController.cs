@@ -42,7 +42,7 @@ namespace GalleryCart.Areas.Guest.Controllers
             ViewData["TagId"] = tagId;
 
             // Query posts
-            var postsQuery = _postRepository.GetAllQueryable(p => p.IsImage);
+            var postsQuery = _postRepository.GetAllQueryable();
 
             if (!string.IsNullOrWhiteSpace(search))
             {

@@ -20,47 +20,69 @@ public class CloudinaryUploader
     /**
      * Upload to the cloud and return an URL connect to it
      */
-    public async Task<string?> UploadImageAsync(IFormFile file)
+    public async Task<string?> UploadMediaAsync(IFormFile file)
     {
-        var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp" };
-        if (!allowedExtensions.Contains(Path.GetExtension(file.FileName).ToLower()))
+        var imageExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp", ".svg" };
+        var videoExtensions = new[] { ".mp4", ".mov", ".avi", ".webm" };
+        var extension = Path.GetExtension(file.FileName).ToLower();
+
+        if (!imageExtensions.Contains(extension) && !videoExtensions.Contains(extension))
         {
-            return "Wrong file extension";
-        }
-        var uploadParams = new ImageUploadParams()
-        {
-            File = new FileDescription(file.FileName, file.OpenReadStream()),
-            UseFilename = true,
-            UniqueFilename = false,
-            Overwrite = true,
-        };
-        var uploadResult = await cloudinary.UploadAsync(uploadParams);
-        if (uploadResult.Error == null)
-        {
-            return uploadResult.Url.AbsoluteUri;
+            return "Unsupported file type";
         }
 
-        // Debug and check for the message if error happens on server side
+        var fileDesc = new FileDescription(file.FileName, file.OpenReadStream());
+
+        if (imageExtensions.Contains(extension))
+        {
+            var imageParams = new ImageUploadParams
+            {
+                File = fileDesc,
+                UseFilename = true,
+                UniqueFilename = false,
+                Overwrite = true
+            };
+
+            var uploadResult = await cloudinary.UploadAsync(imageParams);
+            return uploadResult.Error == null ? uploadResult.Url?.AbsoluteUri : null;
+        }
+        else if (videoExtensions.Contains(extension))
+        {
+            var videoParams = new VideoUploadParams
+            {
+                File = fileDesc,
+                UseFilename = true,
+                UniqueFilename = false,
+                Overwrite = true
+            };
+
+            var uploadResult = await cloudinary.UploadAsync(videoParams);
+            return uploadResult.Error == null ? uploadResult.Url?.AbsoluteUri : null;
+        }
+
         return null;
     }
 
-    public async Task<string> UploadMultiImagesAsync(List<IFormFile> files, bool? checkValid = true)
+    public async Task<string> UploadMultiMediaAsync(List<IFormFile> files, bool? checkValid = true)
     {
         if (checkValid == true && files.Count == 0) return "No file";
 
-        var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp",".svg" };
-        List<string> result = new List<string>();
+        var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp", ".svg", ".mp4", ".mov", ".avi", ".webm" };
+        List<string> result = new();
+
         foreach (var file in files)
         {
-            if (checkValid == true && !allowedExtensions.Contains(Path.GetExtension(file.FileName).ToLower()))
+            var ext = Path.GetExtension(file.FileName).ToLower();
+
+            if (checkValid == true && !allowedExtensions.Contains(ext))
             {
-                return "Wrong extension";
+                return "Wrong extension: " + ext;
             }
 
-            var img = await UploadImageAsync(file);
-            if (img != null)
+            var url = await UploadMediaAsync(file);
+            if (url != null)
             {
-                result.Add(img);
+                result.Add(url);
             }
         }
 

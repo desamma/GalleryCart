@@ -60,9 +60,6 @@
                     Total: @(vm.Posts.Sum(p => p.Price ?? 0)) VND
                 </div>
                 <div class="flex gap-2">
-                    <form method="post" asp-page-handler="Checkout">
-                        <button type="submit" class="btn btn-primary">Checkout</button>
-                    </form>
                     <!-- Pay Now button: POST to PaymentController with PaymentInformationModel -->
                     <form method="post" action="/Customer/Payment/CreatePaymentUrlVnpay">
                         <input type="hidden" name="OrderType" value="billpayment" />

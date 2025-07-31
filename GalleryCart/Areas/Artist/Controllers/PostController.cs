@@ -53,7 +53,7 @@ namespace GalleryCart.Areas.Artist.Controllers
             if (ModelState.IsValid)
             {
                 var postId = Guid.NewGuid();
-                var imageUrls = await _cloudinaryUploader.UploadMultiImagesAsync(files);
+                var imageUrls = await _cloudinaryUploader.UploadMultiMediaAsync(files);
                 if (string.IsNullOrWhiteSpace(imageUrls))
                 {
                     ModelState.AddModelError("", "Image upload failed.");
@@ -126,7 +126,7 @@ namespace GalleryCart.Areas.Artist.Controllers
                 // Upload lại ảnh nếu có
                 if (files != null && files.Count > 0)
                 {
-                    existingPost.Path = await _cloudinaryUploader.UploadMultiImagesAsync(files);
+                    existingPost.Path = await _cloudinaryUploader.UploadMultiMediaAsync(files);
                 }
 
                 // Cập nhật các field
