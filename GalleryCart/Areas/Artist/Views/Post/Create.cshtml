@@ -5,87 +5,128 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<div class="max-w-3xl mx-auto p-6 bg-base-100 rounded-2xl shadow-md">
-    <h1 class="text-3xl font-bold mb-6">Create New Post</h1>
+<div class="min-h-screen bg-[#0e0e0e] text-white px-4 py-6">
+    <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6">
 
-    <form asp-action="Create" method="post" enctype="multipart/form-data" class="space-y-6">
+        <!-- LEFT: Upload & Preview -->
+        <div class="lg:col-span-8 space-y-4">
+            <h2 class="text-xl font-semibold">Upload Preview</h2>
 
-        <!-- Title -->
-        <div class="form-control">
-            <label asp-for="Title" class="label">
-                <span class="label-text">Title</span>
-            </label>
-            <input asp-for="Title" class="input input-bordered" />
-            <span asp-validation-for="Title" class="text-error text-sm mt-1"></span>
-        </div>
+            <input type="file" id="fileInput" name="files" multiple accept="image/*,video/mp4"
+                   class="file-input w-full file-input-bordered bg-gray-900 border-gray-700 text-white" form="post-form" />
 
-        <!-- Description -->
-        <div class="form-control">
-            <label asp-for="Description" class="label">
-                <span class="label-text">Description</span>
-            </label>
-            <textarea asp-for="Description" class="textarea textarea-bordered"></textarea>
-            <span asp-validation-for="Description" class="text-error text-sm mt-1"></span>
-        </div>
-
-        <!-- Image Upload -->
-        <div class="form-control">
-            <label class="label">
-                <span class="label-text">Upload Images</span>
-            </label>
-            <input type="file" name="files" multiple accept=".jpg,.jpeg,.png,.webp,.gif" class="file-input file-input-bordered w-full" />
-        </div>
-
-        <!-- Price -->
-        <div class="form-control">
-            <label asp-for="Price" class="label">
-                <span class="label-text">Price</span>
-            </label>
-            <input asp-for="Price" class="input input-bordered" />
-            <span asp-validation-for="Price" class="text-error text-sm mt-1"></span>
-        </div>
-
-        <!-- Checkboxes -->
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <label class="label cursor-pointer flex items-center gap-2">
-                <input asp-for="IsImage" type="checkbox" class="checkbox" />
-                <span class="label-text">Image Post</span>
-            </label>
-
-            <label class="label cursor-pointer flex items-center gap-2">
-                <input asp-for="IsPorfolio" type="checkbox" class="checkbox" />
-                <span class="label-text">Show in Portfolio</span>
-            </label>
-
-            <label class="label cursor-pointer flex items-center gap-2">
-                <input asp-for="IsMature" type="checkbox" class="checkbox" />
-                <span class="label-text">Mature Content</span>
-            </label>
-        </div>
-
-        <!-- Tags -->
-        <div class="form-control">
-            <label class="label">
-                <span class="label-text">Select Tags</span>
-            </label>
-            <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                @foreach (var tag in tags)
-                {
-                    <label class="cursor-pointer flex items-center gap-2">
-                        <input type="checkbox" name="SelectedTags" value="@tag.TagId" class="checkbox checkbox-sm" />
-                        <span class="text-sm">@tag.TagName</span>
-                    </label>
-                }
+            <div id="preview" class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 max-h-[60vh] overflow-y-auto">
+                <!-- JS renders preview here -->
             </div>
         </div>
 
-        <!-- Submit Button -->
-        <div class="form-control">
-            <button type="submit" class="btn btn-success">Create Post</button>
+        <!-- RIGHT: Post Info Form -->
+        <div class="lg:col-span-4 bg-[#1a1a1a] rounded-xl p-6 shadow space-y-6">
+            <h1 class="text-2xl font-bold">Create New Post</h1>
+
+            <form id="post-form" asp-action="Create" method="post" enctype="multipart/form-data" class="space-y-5">
+
+                <!-- Title -->
+                <div>
+                    <label asp-for="Title" class="block text-sm font-medium mb-1">Title</label>
+                    <input asp-for="Title" class="w-full bg-gray-800 border border-gray-600 rounded px-3 py-2 text-white" />
+                    <span asp-validation-for="Title" class="text-red-500 text-sm"></span>
+                </div>
+
+                <!-- Description -->
+                <div>
+                    <label asp-for="Description" class="block text-sm font-medium mb-1">Description</label>
+                    <textarea asp-for="Description" rows="3"
+                              class="w-full bg-gray-800 border border-gray-600 rounded px-3 py-2 text-white resize-none"></textarea>
+                    <span asp-validation-for="Description" class="text-red-500 text-sm"></span>
+                </div>
+
+                <!-- Price -->
+                <div>
+                    <label asp-for="Price" class="block text-sm font-medium mb-1">Price (VND)</label>
+                    <input asp-for="Price" type="number"
+                           class="w-full bg-gray-800 border border-gray-600 rounded px-3 py-2 text-white" />
+                    <span asp-validation-for="Price" class="text-red-500 text-sm"></span>
+                </div>
+
+                <!-- Checkboxes -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-sm">
+                    <label class="flex items-center gap-2">
+                        <input asp-for="IsImage" type="checkbox" class="checkbox checkbox-sm" />
+                        Image Post
+                    </label>
+                    <label class="flex items-center gap-2">
+                        <input asp-for="IsPorfolio" type="checkbox" class="checkbox checkbox-sm" />
+                        Show in Portfolio
+                    </label>
+                    <label class="flex items-center gap-2">
+                        <input asp-for="IsMature" type="checkbox" class="checkbox checkbox-sm" />
+                        Mature Content
+                    </label>
+                </div>
+
+                <!-- Tags -->
+                <div>
+                    <label class="block text-sm font-medium mb-1">Select Tags</label>
+                    <div class="bg-gray-800 border border-gray-600 rounded max-h-40 overflow-y-auto p-2 space-y-1">
+                        @foreach (var tag in tags)
+                        {
+                            <label class="flex items-center gap-2 text-sm">
+                                <input type="checkbox" name="SelectedTags" value="@tag.TagId" class="checkbox checkbox-xs" />
+                                @tag.TagName
+                            </label>
+                        }
+                    </div>
+                </div>
+
+                <!-- Submit -->
+                <div>
+                    <button type="submit"
+                            class="w-full bg-green-600 hover:bg-green-700 text-white py-2 rounded font-semibold">
+                        🚀 Create Post
+                    </button>
+                </div>
+            </form>
         </div>
-    </form>
+    </div>
 </div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        const fileInput = document.getElementById('fileInput');
+        const preview = document.getElementById('preview');
+
+        fileInput.addEventListener('change', function () {
+            preview.innerHTML = "";
+            const files = fileInput.files;
+
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                const reader = new FileReader();
+
+                reader.onload = function (e) {
+                    const isImage = file.type.startsWith("image/");
+                    const isVideo = file.type === "video/mp4";
+
+                    if (isImage) {
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        img.className = "rounded shadow w-full object-cover";
+                        preview.appendChild(img);
+                    }
+                    else if (isVideo) {
+                        const video = document.createElement('video');
+                        video.src = e.target.result;
+                        video.controls = true;
+                        video.className = "rounded shadow w-full";
+                        preview.appendChild(video);
+                    }
+                };
+
+                reader.readAsDataURL(file);
+            }
+        });
+    </script>
 }
