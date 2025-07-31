@@ -7,25 +7,21 @@ public class ExcelExportHelper
 {
     public static byte[] ExportSellingHistoryToExcel(List<SellingHistoryDto> data)
     {
-        ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
-        using var package = new ExcelPackage();
+        ExcelPackage.License.SetNonCommercialPersonal("My Name"); //This will also set the Author property to the name provided in the argument.
+        using var package = new ExcelPackage(new FileInfo("SellingHistory.xlsx"));
         var worksheet = package.Workbook.Worksheets.Add("SellingHistory");
 
         // Header
         worksheet.Cells[1, 1].Value = "Title";
         worksheet.Cells[1, 2].Value = "Price";
-        worksheet.Cells[1, 3].Value = "Quantity";
-        worksheet.Cells[1, 4].Value = "Amount";
-        worksheet.Cells[1, 5].Value = "Purchase Date";
+        worksheet.Cells[1, 3].Value = "Purchase Date";
 
         int row = 2;
         foreach (var item in data)
         {
             worksheet.Cells[row, 1].Value = item.Title;
             worksheet.Cells[row, 2].Value = item.Price;
-            worksheet.Cells[row, 3].Value = item.Quantity;
-            worksheet.Cells[row, 4].Value = item.Amount;
-            worksheet.Cells[row, 5].Value = item.PurchaseDate.ToString("dd/MM/yyyy HH:mm");
+            worksheet.Cells[row, 3].Value = item.PurchaseDate.ToString("dd/MM/yyyy HH:mm");
             row++;
         }
 

@@ -47,8 +47,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Folder Include="Areas\Customer\Models\" />
-	  <Folder Include="Areas\Guest\Models\" />
 	  <Folder Include="wwwroot\images\" />
 	</ItemGroup>
 

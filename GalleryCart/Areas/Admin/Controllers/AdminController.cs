@@ -54,10 +54,16 @@ namespace GalleryCart.Areas.Admin.Controllers;
                     _userRepo.GetAllQueryable().OrderByDescending(u => u.CreatedDate).Take(5).Select(u => new RecentActivityDto { Type = "User", Name = u.UserName, Date = u.CreatedDate }).ToListAsync(),
                     _postRepo.GetAllQueryable().OrderByDescending(p => p.PostDate).Take(5).Select(p => new RecentActivityDto { Type = "Post", Name = p.Title, Date = p.PostDate }).ToListAsync(),
                     _commissionRepo.GetAllQueryable().OrderByDescending(c => c.CreatedDate).Take(5).Select(c => new RecentActivityDto { Type = "Commission", Name = c.Description, Date = c.CreatedDate }).ToListAsync(),
-                    _historyRepo.GetAllQueryable().OrderByDescending(h => h.PurchaseDate).Take(5).Include(h => h.Post).Select(h => new RecentActivityDto { Type = "Purchase", Name = h.Post.Title, Date = h.PurchaseDate }).ToListAsync()
-                )).SelectMany(x => x).OrderByDescending(x => x.Date).Take(20).ToList()
+                    _historyRepo.GetAllQueryable().OrderByDescending(h => h.PurchaseDate).Take(5).Select(h => new RecentActivityDto { Type = "Purchase", Name = h.Post.Title, Date = h.PurchaseDate }).ToListAsync()
+                )).SelectMany(x => x).OrderByDescending(x => x.Date).Take(20).ToList(),
+                SellingHistories = await _historyRepo.GetAllQueryable().OrderByDescending(h => h.PurchaseDate).Select(h => new SellingHistoryDto
+                {
+                    Title = h.Post.Title,
+                    Price = h.TotalPrice,
+                    PurchaseDate = h.PurchaseDate
+                }).ToListAsync(),
             };
-
+            //TODO: change sellinghistorydto
             return View(viewModel);
         }
         
@@ -99,7 +105,7 @@ namespace GalleryCart.Areas.Admin.Controllers;
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ToggleBan(Guid id)
         {
-            var user = await _userRepo.GetAsync(u => u.Id == id);
+            var user = await _userManager.FindByIdAsync(id.ToString());
             if (user == null)
                 return Json(new { success = false, message = "User not found" });
 
@@ -247,7 +253,6 @@ namespace GalleryCart.Areas.Admin.Controllers;
                 {
                     Title = h.Post.Title,
                     Price = h.TotalPrice,
-                    Quantity = 1,
                     PurchaseDate = h.PurchaseDate
                 }).ToListAsync();
 
@@ -265,7 +270,6 @@ namespace GalleryCart.Areas.Admin.Controllers;
                 {
                     Title = h.Post.Title,
                     Price = h.TotalPrice,
-                    Quantity = 1,
                     PurchaseDate = h.PurchaseDate
                 }).ToListAsync();
 
