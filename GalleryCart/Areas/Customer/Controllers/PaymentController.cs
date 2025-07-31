@@ -13,16 +13,16 @@ namespace GalleryCart.Areas.Customer.Controllers
     public class PaymentController : Controller
     {
         private readonly IConfiguration _configuration;
-        private readonly ApplicationDbContext _db;
+        private readonly ICartRepository _cartRepository;
         private readonly IHistoryRepository _historyRepository;
 
         public PaymentController(
             IConfiguration configuration,
-            ApplicationDbContext db,
+            ICartRepository cartRepository,
             IHistoryRepository historyRepository)
         {
             _configuration = configuration;
-            _db = db;
+            _cartRepository = cartRepository;
             _historyRepository = historyRepository;
         }
 
@@ -64,11 +64,10 @@ namespace GalleryCart.Areas.Customer.Controllers
                 if (userId != null)
                 {
                     var userGuid = Guid.Parse(userId);
-
-                    var cart = await _db.Carts
-                        .Include(c => c.CartItems)
-                        .ThenInclude(ci => ci.Post)
-                        .FirstOrDefaultAsync(c => c.UserId == userGuid);
+                    var cart = await _cartRepository.GetAsync(
+                        c => c.UserId == userGuid,
+                        include: q => q.Include(c => c.CartItems).ThenInclude(ci => ci.Post)
+                    );
 
                     if (cart != null && cart.CartItems.Any())
                     {
@@ -86,8 +85,11 @@ namespace GalleryCart.Areas.Customer.Controllers
                             };
                             await _historyRepository.AddAsync(history);
                         }
-                        _db.CartItems.RemoveRange(cart.CartItems);
-                        await _db.SaveChangesAsync();
+
+                      
+                        cart.CartItems.Clear();
+                        await _cartRepository.UpdateAsync(cart);
+
                     }
                 }
 
