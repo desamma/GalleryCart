@@ -63,7 +63,6 @@ namespace GalleryCart.Areas.Admin.Controllers;
                     PurchaseDate = h.PurchaseDate
                 }).ToListAsync(),
             };
-            //TODO: change sellinghistorydto
             return View(viewModel);
         }
         

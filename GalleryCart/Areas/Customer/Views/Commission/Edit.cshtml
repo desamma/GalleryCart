@@ -73,7 +73,7 @@
             @Html.AntiForgeryToken()
 
             <!-- Hidden Fields for Required Properties -->
-            <input type="hidden" name="Id" value="@Model.CommissionId" />
+            <input type="hidden" asp-for="CommissionId" name="CommissionId" value="@Model.CommissionId" />
             <input type="hidden" name="ArtistId" value="@Model.ArtistId" />
             <input type="hidden" name="CommissionerId" value="@Model.CommissionerId" />
 
@@ -95,7 +95,7 @@
 
             <!-- Price Field -->
             <div class="mb-6">
-                <label class="block text-sm font-medium mb-2 text-white" for="Price">Price ($)</label>
+                <label class="block text-sm font-medium mb-2 text-white" for="Price">Price</label>
                 <input name="Price"
                        id="Price"
                        type="number"
@@ -122,8 +122,9 @@
             <!-- End Date Field -->
             <div class="mb-6">
                 <label class="block text-sm font-medium mb-2 text-white" for="EndDate">End Date</label>
-                <input name="EndDate"
-                       id="EndDate"
+                <input asp-for="DueDate"
+                       name="DueDate"
+                       id="DueDate"
                        type="datetime-local"
                        value="@Model.DueDate.ToString("yyyy-MM-ddTHH:mm")"
                        min="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")"
@@ -165,11 +166,11 @@
         const price = formData.get('Price');
         const endDate = formData.get('EndDate');
 
-        if (!description || !price || !endDate) {
+        if (!description || !price || !DueDate) {
             alert('Missing required fields:\n' +
                 (!description ? '- Description\n' : '') +
                 (!price ? '- Price\n' : '') +
-                (!endDate ? '- End Date\n' : ''));
+                (!DueDate ? '- Due Date\n' : ''));
             event.preventDefault();
             return false;
         }
