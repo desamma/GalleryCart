@@ -66,8 +66,14 @@
                                     <!-- Artist Navigation -->
                                     @*<a href="#" class="rounded-md bg-gray-900 px-3 py-2 text-sm font-medium text-white" aria-current="page">Artist Dashboard</a>*@
                                     <a asp-area="Artist" asp-action="ArtistProfile" asp-controller="Artist" class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">My Artworks</a>
-                                    <a href="@Url.Action("CommissionManagement", "Commission", new { area = "Artist"})" class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">Your Commissions</a>
+                                    <a href="@Url.Action("CommissionManagement", "Commission", new { area = "Artist" })" class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">Your Commissions</a>
                                     <a asp-area="Artist" asp-action="Create" asp-controller="Post" class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">Upload post</a>
+                                    <a asp-area="Artist"
+                                       asp-controller="Artist"
+                                       asp-action="Index"
+                                       class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">
+                                        ⭐ Your Favourite
+                                    </a>
                                 }
                                 else
                                 {
@@ -75,9 +81,14 @@
                                     <a href="#" class="rounded-md bg-gray-900 px-3 py-2 text-sm font-medium text-white" aria-current="page">Browse Gallery</a>
                                     <!-- Change this line to use Razor Pages link for Cart -->
                                     <a asp-area="Customer" asp-page="/Cart/Index" class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">My Cart</a>
-                                    <a href="@Url.Action("CommissionManagement", "Commission", new { area = "Customer"})" class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">My Commissions</a>
-                                    <a asp-area="Customer" asp-action="Index" asp-controller="Customer" class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">Favorites</a>
-                                    <a href="@Url.Action("AllArtist","Home", new {area = "Customer"})" class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">Artists</a>
+                                    <a href="@Url.Action("CommissionManagement", "Commission", new { area = "Customer" })" class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">My Commissions</a>
+                                    <a href="@Url.Action("AllArtist", "Home", new { area = "Customer" })" class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">Artists</a>
+                                    <a asp-area="Customer"
+                                       asp-controller="Customer"
+                                       asp-action="Index"
+                                       class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">
+                                        ⭐ Your Favourite
+                                    </a>
                                 }
 
                                 @if (isAdmin)
@@ -173,7 +184,7 @@
     }
     else if (currentUser != null && isAdmin)
     {
-         <nav class="bg-gray-800">
+        <nav class="bg-gray-800">
             <div class="mx-auto max-w-7xl px-2 sm:px-6 lg:px-8">
                 <div class="relative flex h-16 items-center justify-between">
                     <div class="absolute inset-y-0 left-0 flex items-center sm:hidden">
@@ -243,7 +254,7 @@
                             <span class="absolute -inset-1.5"></span>
                             <span class="sr-only">View notifications</span>
                             <svg class="size-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true" data-slot="icon">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0" />
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0" />
                             </svg>
                         </button>
 
