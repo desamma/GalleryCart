@@ -15,15 +15,21 @@ namespace GalleryCart.Areas.Customer.Controllers
         private readonly IConfiguration _configuration;
         private readonly ICartRepository _cartRepository;
         private readonly IHistoryRepository _historyRepository;
+        private readonly ICommissionPaymentRepository _commissionPaymentRepository;
+        private readonly ICommissionRepository _commissionRepository;
 
         public PaymentController(
             IConfiguration configuration,
-            ICartRepository cartRepository,
-            IHistoryRepository historyRepository)
+            ApplicationDbContext db,
+            IHistoryRepository historyRepository,
+            ICommissionPaymentRepository commissionPaymentRepository,
+            ICommissionRepository commissionRepository)
         {
             _configuration = configuration;
             _cartRepository = cartRepository;
             _historyRepository = historyRepository;
+            _commissionPaymentRepository = commissionPaymentRepository;
+            _commissionRepository = commissionRepository;
         }
 
         [HttpPost]
@@ -48,6 +54,10 @@ namespace GalleryCart.Areas.Customer.Controllers
             pay.AddRequestData("vnp_ReturnUrl", urlCallBack);
             pay.AddRequestData("vnp_TxnRef", tick);
 
+            // Store in session with the transaction reference as key
+            HttpContext.Session.SetString($"OrderType_{tick}", model.OrderType);
+            HttpContext.Session.SetString($"CommissionId_{tick}", model.OrderDescription);
+
             var paymentUrl = pay.CreateRequestUrl(_configuration["Vnpay:BaseUrl"], _configuration["Vnpay:HashSecret"]);
             return Redirect(paymentUrl);
         }
@@ -60,36 +70,62 @@ namespace GalleryCart.Areas.Customer.Controllers
 
             if (response.Success)
             {
+                var txnRef = Request.Query["vnp_TxnRef"].ToString();
+                var orderType = HttpContext.Session.GetString($"OrderType_{txnRef}");
+                var commissionId = HttpContext.Session.GetString($"CommissionId_{txnRef}");
+
+                // Clean up session
+                HttpContext.Session.Remove($"OrderType_{txnRef}");
+                HttpContext.Session.Remove($"CommissionId_{txnRef}");
+
                 var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
                 if (userId != null)
                 {
                     var userGuid = Guid.Parse(userId);
-                    var cart = await _cartRepository.GetAsync(
-                        c => c.UserId == userGuid,
-                        include: q => q.Include(c => c.CartItems).ThenInclude(ci => ci.Post)
-                    );
-
-                    if (cart != null && cart.CartItems.Any())
+                    if (orderType == "CommissionPayment")
                     {
-                        foreach (var item in cart.CartItems)
+                        var amount = decimal.Parse(Request.Query["vnp_Amount"].ToString());
+                        var commission = await _commissionRepository.GetAsync(c => c.CommissionId.ToString() == commissionId);
+                        if (commissionId != null)
                         {
-                            var history = new History
+                            if ((amount/100) == commission.Price)
                             {
-                                UserId = userGuid,
-                                PostId = item.PostId,
-                                TotalPrice = item.Post.Price,
-                                PurchaseDate = DateTime.UtcNow,
-                                PaymentMethod = response.PaymentMethod,
-                                TransactionId = response.TransactionId,
-                                OrderId = response.OrderId,
-                            };
-                            await _historyRepository.AddAsync(history);
+                                var commissionPayment = new CommissionPayment
+                                {
+                                    Amount = commission.Price,
+                                    CommissionId = Guid.Parse(commissionId)
+                                };
+                                await _commissionPaymentRepository.AddAsync(commissionPayment);
+                            }
                         }
+                        return RedirectToAction("CommissionManagement", "Commission");
+                    }
+                    else
+                    {
+                        var cart = await _db.Carts
+                            .Include(c => c.CartItems)
+                            .ThenInclude(ci => ci.Post)
+                            .FirstOrDefaultAsync(c => c.UserId == userGuid);
 
-                      
-                        cart.CartItems.Clear();
-                        await _cartRepository.UpdateAsync(cart);
-
+                        if (cart != null && cart.CartItems.Any())
+                        {
+                            foreach (var item in cart.CartItems)
+                            {
+                                var history = new History
+                                {
+                                    UserId = userGuid,
+                                    PostId = item.PostId,
+                                    TotalPrice = item.Post.Price,
+                                    PurchaseDate = DateTime.UtcNow,
+                                    PaymentMethod = response.PaymentMethod,
+                                    TransactionId = response.TransactionId,
+                                    OrderId = response.OrderId,
+                                };
+                                await _historyRepository.AddAsync(history);
+                            }
+                            _db.CartItems.RemoveRange(cart.CartItems);
+                            await _db.SaveChangesAsync();
+                        }
                     }
                 }
 
